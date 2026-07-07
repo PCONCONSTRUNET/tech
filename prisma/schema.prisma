@@ -1,0 +1,139 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  password  String
+  role      String   @default("SELLER") // ADMIN, SELLER, TECHNICIAN, FINANCE
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Customer {
+  id        String   @id @default(cuid())
+  name      String
+  document  String?  // CPF/CNPJ
+  phone     String?
+  whatsapp  String?
+  address   String?
+  notes     String?
+  
+  serviceOrders ServiceOrder[]
+  sales         Sale[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ServiceOrder {
+  id          String   @id @default(cuid())
+  customerId  String
+  customer    Customer @relation(fields: [customerId], references: [id])
+  
+  device      String
+  brand       String
+  model       String
+  imei        String?
+  defect      String
+  diagnostic  String?
+  photos      String? // Could be JSON array of URLs
+  price       Float?
+  status      String  @default("RECEBIDO") // RECEBIDO, EM_ANALISE, AGUARDANDO_APROVACAO, AGUARDANDO_PECA, EM_CONSERTO, PRONTO, ENTREGUE, CANCELADO
+  warranty    String?
+  notes       String?
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Supplier {
+  id        String   @id @default(cuid())
+  name      String
+  document  String?
+  phone     String?
+  whatsapp  String?
+  address   String?
+  products  Product[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Product {
+  id            String    @id @default(cuid())
+  name          String
+  categoryId    String?
+  category      Category? @relation(fields: [categoryId], references: [id])
+  photoUrl      String?
+  costPrice     Float     @default(0)
+  salePrice     Float     @default(0)
+  stock         Int       @default(0)
+  minStock      Int       @default(5)
+  sku           String?   @unique
+  barcode       String?
+  active        Boolean   @default(true)
+  showOnVitrine Boolean   @default(true)
+  
+  supplierId    String?
+  supplier      Supplier? @relation(fields: [supplierId], references: [id])
+
+  saleItems     SaleItem[]
+
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model Category {
+  id        String    @id @default(cuid())
+  name      String
+  products  Product[]
+}
+
+model Sale {
+  id            String     @id @default(cuid())
+  customerId    String?
+  customer      Customer?  @relation(fields: [customerId], references: [id])
+  totalAmount   Float
+  discount      Float      @default(0)
+  paymentMethod String     // PIX, CREDIT, DEBIT, CASH
+  items         SaleItem[]
+  
+  createdAt     DateTime   @default(now())
+}
+
+model SaleItem {
+  id        String  @id @default(cuid())
+  saleId    String
+  sale      Sale    @relation(fields: [saleId], references: [id])
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+  quantity  Int
+  price     Float
+}
+
+model Transaction {
+  id          String   @id @default(cuid())
+  type        String   // INCOME, EXPENSE
+  amount      Float
+  description String
+  date        DateTime @default(now())
+  status      String   @default("PAID") // PAID, PENDING
+}
+
+model Settings {
+  id          String   @id @default(cuid())
+  storeName   String
+  logoUrl     String?
+  whatsapp    String?
+  address     String?
+  hours       String?
+  fiscalData  String?
+  warrantyTerm String?
+}
