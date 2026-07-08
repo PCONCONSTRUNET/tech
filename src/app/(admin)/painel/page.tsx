@@ -1,8 +1,10 @@
-import { TrendingUp, ShoppingBag, Wrench, DollarSign, MoreHorizontal } from 'lucide-react';
+import { TrendingUp, ShoppingBag, Wrench, DollarSign, MoreHorizontal, PackageOpen } from 'lucide-react';
 import DashboardOSList from './DashboardOSList';
 import prisma from '@/lib/prisma';
 
 export const dynamic = 'force-dynamic';
+
+const formatCurrency = (val: number) => `R$ ${val.toFixed(2).replace('.', ',')}`;
 
 export default async function AdminDashboard() {
   const allOS = await prisma.serviceOrder.findMany({
@@ -14,6 +16,62 @@ export default async function AdminDashboard() {
     ...os,
     number: index + 1
   })).reverse().slice(0, 5);
+
+  const startOfMonth = new Date();
+  startOfMonth.setDate(1);
+  startOfMonth.setHours(0, 0, 0, 0);
+
+  const sales = await prisma.sale.aggregate({
+    _sum: { totalAmount: true },
+    where: {
+      createdAt: { gte: startOfMonth },
+      status: 'CONCLUIDO'
+    }
+  });
+  const salesTotal = sales._sum.totalAmount || 0;
+
+  const osCompleted = await prisma.serviceOrder.count({
+    where: { status: 'ENTREGUE' }
+  });
+
+  const income = await prisma.transaction.aggregate({
+    _sum: { amount: true },
+    where: { type: 'RECEITA', status: 'PAGO' }
+  });
+  const expense = await prisma.transaction.aggregate({
+    _sum: { amount: true },
+    where: { type: 'DESPESA', status: 'PAGO' }
+  });
+  const grossProfit = (income._sum.amount || 0) - (expense._sum.amount || 0);
+
+  const toReceive = await prisma.payment.aggregate({
+    _sum: { amount: true },
+    where: { type: 'RECEBER', status: 'PENDENTE' }
+  });
+  const toReceiveTotal = toReceive._sum.amount || 0;
+
+  const topSold = await prisma.saleItem.groupBy({
+    by: ['productId'],
+    _sum: { quantity: true },
+    orderBy: { _sum: { quantity: 'desc' } },
+    take: 4
+  });
+
+  const productIds = topSold.map(t => t.productId);
+  const products = await prisma.product.findMany({
+    where: { id: { in: productIds } }
+  });
+
+  const topProductsFormatted = topSold.map(sold => {
+    const p = products.find(prod => prod.id === sold.productId);
+    return {
+      name: p?.name || 'Produto Excluído',
+      sales: `${sold._sum.quantity} un`,
+      price: formatCurrency(p?.salePrice || 0),
+      image: '📦'
+    }
+  });
+
   return (
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
@@ -26,10 +84,10 @@ export default async function AdminDashboard() {
 
       {/* Stats Cards */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '24px', marginBottom: '32px' }}>
-        <StatCard icon={<ShoppingBag size={24} color="#4f46e5" />} title="Vendas do Mês" value="R$ 15.430" trend="+12%" />
-        <StatCard icon={<Wrench size={24} color="#f59e0b" />} title="OS Concluídas" value="142" trend="+5%" />
-        <StatCard icon={<TrendingUp size={24} color="#10b981" />} title="Lucro Bruto" value="R$ 6.210" trend="+18%" />
-        <StatCard icon={<DollarSign size={24} color="#ef4444" />} title="A Receber" value="R$ 1.850" trend="-2%" />
+        <StatCard icon={<ShoppingBag size={24} color="#4f46e5" />} title="Vendas do Mês" value={formatCurrency(salesTotal)} trend="0%" />
+        <StatCard icon={<Wrench size={24} color="#f59e0b" />} title="OS Concluídas" value={String(osCompleted)} trend="0%" />
+        <StatCard icon={<TrendingUp size={24} color="#10b981" />} title="Lucro Bruto" value={formatCurrency(grossProfit)} trend="0%" />
+        <StatCard icon={<DollarSign size={24} color="#ef4444" />} title="A Receber" value={formatCurrency(toReceiveTotal)} trend="0%" />
       </div>
 
       <div className="grid-responsive-2-1" style={{ gap: '24px' }}>
@@ -43,10 +101,16 @@ export default async function AdminDashboard() {
             <button style={{ background: 'none', border: 'none', cursor: 'pointer' }}><MoreHorizontal size={20} color="var(--color-text-muted)" /></button>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            <ProductItem name="Película de Vidro 3D" sales="84 un" price="R$ 25,00" image="📱" />
-            <ProductItem name="Carregador Turbo 20W" sales="45 un" price="R$ 80,00" image="🔌" />
-            <ProductItem name="Capa Anti-Impacto" sales="32 un" price="R$ 45,00" image="🛡️" />
-            <ProductItem name="Fone Bluetooth TWS" sales="18 un" price="R$ 120,00" image="🎧" />
+            {topProductsFormatted.length > 0 ? (
+              topProductsFormatted.map((prod, idx) => (
+                <ProductItem key={idx} name={prod.name} sales={prod.sales} price={prod.price} image={prod.image} />
+              ))
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '32px 0', color: 'var(--color-text-muted)' }}>
+                <PackageOpen size={48} style={{ marginBottom: '12px', opacity: 0.5 }} />
+                <p>Nenhuma venda registrada</p>
+              </div>
+            )}
           </div>
         </div>
       </div>
