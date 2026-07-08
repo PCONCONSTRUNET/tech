@@ -50,7 +50,7 @@ export default function SettingsClient({ initialSettings }: { initialSettings: a
         </button>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
+      <div className="grid-responsive-2" style={{ gap: '24px' }}>
         <div className="card">
           <h2 style={{ fontSize: '1.125rem', fontWeight: '600', marginBottom: '24px' }}>Dados da Loja</h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
@@ -66,7 +66,7 @@ export default function SettingsClient({ initialSettings }: { initialSettings: a
               <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500' }}>WhatsApp (Atendimento)</label>
               <input type="text" className="input" placeholder="(00) 90000-0000" value={formData.whatsapp} onChange={e => handleChange('whatsapp', maskPhone(e.target.value))} />
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+            <div className="grid-responsive-2">
               <div>
                 <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500' }}>CEP</label>
                 <input type="text" className="input" placeholder="00000-000" value={formData.cep} onChange={e => handleChange('cep', maskCEP(e.target.value))} />
@@ -76,7 +76,7 @@ export default function SettingsClient({ initialSettings }: { initialSettings: a
                 <input type="text" className="input" value={formData.neighborhood} onChange={e => handleChange('neighborhood', e.target.value)} />
               </div>
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: '3fr 1fr', gap: '16px' }}>
+            <div className="grid-responsive-3-1">
               <div>
                 <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500' }}>Rua</label>
                 <input type="text" className="input" value={formData.street} onChange={e => handleChange('street', e.target.value)} />
@@ -86,7 +86,7 @@ export default function SettingsClient({ initialSettings }: { initialSettings: a
                 <input type="text" className="input" value={formData.number} onChange={e => handleChange('number', e.target.value)} />
               </div>
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '16px' }}>
+            <div className="grid-responsive-2-1">
               <div>
                 <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500' }}>Cidade</label>
                 <input type="text" className="input" value={formData.city} onChange={e => handleChange('city', e.target.value)} />

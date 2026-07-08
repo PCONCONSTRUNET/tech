@@ -237,7 +237,7 @@ export default function FinanceClient({ transactions, categories, customers = []
 
       {isModalOpen && (
         <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50 }}>
-          <div className="card" style={{ width: '400px', maxWidth: '90%' }}>
+          <div className="modal-content">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
               <h2 style={{ fontSize: '1.25rem', fontWeight: '600' }}>
                 Nova {transactionType === 'RECEITA' ? 'Receita' : 'Despesa'}
@@ -246,7 +246,7 @@ export default function FinanceClient({ transactions, categories, customers = []
             </div>
             
             <form action={handleAdd} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+              <div className="grid-responsive-2">
                 <div>
                   <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.875rem', fontWeight: '500' }}>Descrição *</label>
                   <input name="description" type="text" className="input" required defaultValue={isEditing ? selectedTransaction?.description : ''} placeholder="Ex: Pagamento de Luz" />
@@ -262,7 +262,7 @@ export default function FinanceClient({ transactions, categories, customers = []
                 </div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+              <div className="grid-responsive-2">
                 <div style={{ gridColumn: 'span 2' }}>
                   <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.875rem', fontWeight: '500' }}>Vincular a um Cliente (Opcional)</label>
                   <select name="customerId" className="input" defaultValue={isEditing ? (selectedTransaction?.customerId || '') : ''}>
@@ -324,7 +324,7 @@ export default function FinanceClient({ transactions, categories, customers = []
 
       {selectedTransaction && !isEditing && (
         <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50 }}>
-          <div className="card" style={{ width: '500px', maxWidth: '90%' }}>
+          <div className="modal-content">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
               <h2 style={{ fontSize: '1.25rem', fontWeight: '600' }}>Detalhes da Transação</h2>
               <div style={{ display: 'flex', gap: '8px' }}>
@@ -354,7 +354,7 @@ export default function FinanceClient({ transactions, categories, customers = []
                 <p style={{ fontWeight: '600', fontSize: '1.125rem' }}>{selectedTransaction.description}</p>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+              <div className="grid-responsive-2">
                 <div>
                   <p style={{ fontSize: '0.875rem', color: 'var(--color-text-muted)' }}>Valor</p>
                   <p style={{ fontWeight: '700', fontSize: '1.25rem', color: selectedTransaction.type === 'RECEITA' ? 'var(--color-success)' : 'var(--color-error)' }}>

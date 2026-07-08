@@ -46,7 +46,7 @@ export default function POSClient({ products }: { products: any[] }) {
   }
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '24px', height: 'calc(100vh - 120px)' }}>
+    <div className="grid-responsive-2-1" style={{ gap: '24px', height: 'calc(100vh - 120px)' }}>
       {/* Left side: Products */}
       <div className="card" style={{ display: 'flex', flexDirection: 'column' }}>
         <h2 style={{ fontSize: '1.25rem', fontWeight: '700', marginBottom: '16px' }}>Produtos em Estoque</h2>
@@ -125,7 +125,7 @@ export default function POSClient({ products }: { products: any[] }) {
             <span style={{ color: 'var(--color-primary)' }}>{new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(total)}</span>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '16px' }}>
+          <div className="grid-responsive-2" style={{ marginBottom: '16px' }}>
             <button 
               onClick={() => setPaymentMethod('CREDIT')}
               className={`btn ${paymentMethod === 'CREDIT' ? 'btn-primary' : 'btn-outline'}`} 

@@ -90,7 +90,7 @@ export default function CustomerClient({ customers }: { customers: any[] }) {
 
       {isModalOpen && (
         <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50 }}>
-          <div className="card" style={{ width: '400px', maxWidth: '90%' }}>
+          <div className="modal-content">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
               <h2 style={{ fontSize: '1.25rem', fontWeight: '600' }}>Novo Cliente</h2>
               <button onClick={() => setIsModalOpen(false)} style={{ background: 'none', border: 'none', cursor: 'pointer' }}><X size={20} /></button>
@@ -108,7 +108,7 @@ export default function CustomerClient({ customers }: { customers: any[] }) {
                 <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.875rem', fontWeight: '500' }}>CPF / CNPJ</label>
                 <input name="document" type="text" className="input" onChange={e => e.target.value = maskCPFOrCNPJ(e.target.value)} />
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+              <div className="grid-responsive-2" style={{ gap: "8px" }}>
                 <div>
                   <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.875rem', fontWeight: '500' }}>CEP</label>
                   <input name="cep" type="text" className="input" onChange={e => e.target.value = maskCEP(e.target.value)} />
@@ -118,7 +118,7 @@ export default function CustomerClient({ customers }: { customers: any[] }) {
                   <input name="neighborhood" type="text" className="input" />
                 </div>
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '3fr 1fr', gap: '8px' }}>
+              <div className="grid-responsive-3-1" style={{ gap: "8px" }}>
                 <div>
                   <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.875rem', fontWeight: '500' }}>Rua</label>
                   <input name="street" type="text" className="input" />
@@ -128,7 +128,7 @@ export default function CustomerClient({ customers }: { customers: any[] }) {
                   <input name="number" type="text" className="input" />
                 </div>
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '8px' }}>
+              <div className="grid-responsive-2-1" style={{ gap: "8px" }}>
                 <div>
                   <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.875rem', fontWeight: '500' }}>Cidade</label>
                   <input name="city" type="text" className="input" />

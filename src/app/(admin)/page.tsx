@@ -32,7 +32,7 @@ export default async function AdminDashboard() {
         <StatCard icon={<DollarSign size={24} color="#ef4444" />} title="A Receber" value="R$ 1.850" trend="-2%" />
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '24px' }}>
+      <div className="grid-responsive-2-1" style={{ gap: '24px' }}>
         {/* Recent OS */}
         <DashboardOSList osList={osListWithNumber} />
 

@@ -234,7 +234,7 @@ export default function QuotesClient({ quotes, customers, products }: { quotes: 
 
       {isModalOpen && (
         <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50, padding: '24px' }}>
-          <div className="card" style={{ width: '800px', maxWidth: '100%', maxHeight: '90vh', overflowY: 'auto' }}>
+          <div className="modal-content">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
               <h2 style={{ fontSize: '1.25rem', fontWeight: '600' }}>Novo Orçamento</h2>
               <button onClick={() => { setIsModalOpen(false); setSuccessQuote(null); }} style={{ background: 'none', border: 'none', cursor: 'pointer' }}><X size={20} /></button>
@@ -263,7 +263,7 @@ export default function QuotesClient({ quotes, customers, products }: { quotes: 
               </div>
             ) : (
               <form onSubmit={handleSaveQuote} style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '16px' }}>
+              <div className="grid-responsive-2-1">
                 <div>
                   <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.875rem', fontWeight: '500' }}>Cliente</label>
                   <select className="input" value={customerId} onChange={e => setCustomerId(e.target.value)}>
@@ -335,7 +335,7 @@ export default function QuotesClient({ quotes, customers, products }: { quotes: 
                 </table>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '16px' }}>
+              <div className="grid-responsive-2-1">
                 <div>
                   <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.875rem', fontWeight: '500' }}>Observações / Condições</label>
                   <textarea className="input" rows={3} value={notes} onChange={e => setNotes(e.target.value)} placeholder="Garantia, condições de pagamento, etc..."></textarea>

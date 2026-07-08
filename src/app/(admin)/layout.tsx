@@ -43,9 +43,11 @@ export default function AdminLayout({
   const pathname = usePathname();
   const [isNavigating, setIsNavigating] = useState(false);
   const [navOrder, setNavOrder] = useState<string[]>(defaultNavItems.map(item => item.id));
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   useEffect(() => {
     setIsNavigating(false);
+    setIsSidebarOpen(false); // Close sidebar on navigation in mobile
   }, [pathname]);
 
   useEffect(() => {
@@ -98,9 +100,15 @@ export default function AdminLayout({
 
   return (
     <div className="dashboard-layout">
+      {/* Sidebar Overlay for Mobile */}
+      <div 
+        className={`sidebar-overlay ${isSidebarOpen ? 'active' : ''}`} 
+        onClick={() => setIsSidebarOpen(false)}
+      />
+
       {/* Sidebar */}
-      <aside className="sidebar">
-        <div style={{ padding: '8px 24px', display: 'flex', justifyContent: 'center' }}>
+      <aside className={`sidebar ${isSidebarOpen ? 'mobile-open' : ''}`}>
+        <div style={{ padding: '8px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <img src="/logo.png" alt="Digital Tech" style={{ width: '100%', maxHeight: '120px', objectFit: 'contain' }} />
         </div>
         
@@ -149,8 +157,12 @@ export default function AdminLayout({
         {/* Header */}
         <header className="header">
           <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-            <Menu size={24} style={{ color: 'var(--color-text-muted)', cursor: 'pointer' }} />
-            <div style={{ position: 'relative', width: '300px' }}>
+            <Menu 
+              size={24} 
+              style={{ color: 'var(--color-text-muted)', cursor: 'pointer' }} 
+              onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+            />
+            <div style={{ position: 'relative', width: '300px' }} className="hide-on-mobile">
               <Search size={18} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--color-text-muted)' }} />
               <input type="text" placeholder="Buscar..." className="input" style={{ paddingLeft: '40px', borderRadius: 'var(--radius-full)', backgroundColor: 'var(--color-bg)', border: 'none' }} />
             </div>

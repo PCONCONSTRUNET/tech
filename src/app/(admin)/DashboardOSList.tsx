@@ -83,7 +83,7 @@ export default function DashboardOSList({ osList }: { osList: any[] }) {
 
       {selectedOs && (
         <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50 }}>
-          <div className="card" style={{ width: '400px', maxWidth: '90%', animation: 'fadeIn 0.2s ease-out' }}>
+          <div className="modal-content">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
               <h2 style={{ fontSize: '1.25rem', fontWeight: '600' }}>Detalhes da OS #{selectedOs.number.toString().padStart(3, '0')}</h2>
               <button onClick={() => setSelectedOs(null)} style={{ background: 'none', border: 'none', cursor: 'pointer' }}><X size={20} /></button>
@@ -95,7 +95,7 @@ export default function DashboardOSList({ osList }: { osList: any[] }) {
                 <p style={{ fontWeight: '500' }}>{formatDateTime(selectedOs.createdAt).date} às {formatDateTime(selectedOs.createdAt).time}</p>
               </div>
               
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+              <div className="grid-responsive-2">
                 <div>
                   <p style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', marginBottom: '4px' }}>Cliente</p>
                   <p style={{ fontWeight: '500' }}>{selectedOs.customer?.name}</p>
