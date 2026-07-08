@@ -190,6 +190,7 @@ body {
 .content-scrollable {
   flex: 1;
   overflow-y: auto;
+  overflow-x: hidden;
   padding: var(--spacing-6);
   -webkit-overflow-scrolling: touch;
 }
@@ -225,9 +226,10 @@ body {
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-lg);
   width: 600px;
-  max-width: 95%;
+  max-width: 95vw;
   max-height: 90vh;
   overflow-y: auto;
+  overflow-x: hidden;
   padding: var(--spacing-6);
   animation: fadeIn 0.2s ease-out;
 }
