@@ -165,6 +165,11 @@ export default function ProductClient({ products, categories }: { products: any[
                 </div>
               </div>
               
+              <div>
+                <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.875rem', fontWeight: '500' }}>Descrição do Produto</label>
+                <textarea name="description" className="input" rows={3} placeholder="Descreva os detalhes do produto, como cor, tamanho, armazenamento..." style={{ resize: 'vertical' }}></textarea>
+              </div>
+              
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px' }}>
                 <div>
                   <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.875rem', fontWeight: '500' }}>Código / SKU</label>

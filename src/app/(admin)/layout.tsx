@@ -1,6 +1,6 @@
 'use client';
 
-import { LayoutDashboard, Users, Wrench, Package, ShoppingCart, DollarSign, Settings, Bell, Search, Menu, Truck, CreditCard, FileText, Receipt } from 'lucide-react';
+import { LayoutDashboard, Users, Wrench, Package, ShoppingCart, DollarSign, Settings, Bell, Search, Menu, Truck, CreditCard, FileText, Receipt, Tag, ShoppingBag } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { useState, useEffect } from 'react';
@@ -15,20 +15,24 @@ const iconMap = {
   ShoppingCart: <ShoppingCart size={20} />,
   DollarSign: <DollarSign size={20} />,
   CreditCard: <CreditCard size={20} />,
-  Receipt: <Receipt size={20} />
+  Receipt: <Receipt size={20} />,
+  Tag: <Tag size={20} />,
+  ShoppingBag: <ShoppingBag size={20} />
 };
 
 const defaultNavItems = [
   { id: 'dashboard', href: '/', iconName: 'LayoutDashboard', label: 'Painel' },
+  { id: 'sales', href: '/sales', iconName: 'ShoppingBag', label: 'Vendas' },
+  { id: 'pos', href: '/pos', iconName: 'ShoppingCart', label: 'PDV Físico' },
+  { id: 'products', href: '/products', iconName: 'Package', label: 'Estoque' },
   { id: 'customers', href: '/customers', iconName: 'Users', label: 'Clientes' },
   { id: 'suppliers', href: '/suppliers', iconName: 'Truck', label: 'Fornecedores' },
   { id: 'os', href: '/os', iconName: 'Wrench', label: 'Ordens de Serviço' },
   { id: 'quotes', href: '/quotes', iconName: 'FileText', label: 'Orçamentos' },
-  { id: 'products', href: '/products', iconName: 'Package', label: 'Estoque' },
-  { id: 'pos', href: '/pos', iconName: 'ShoppingCart', label: 'PDV' },
   { id: 'finance', href: '/finance', iconName: 'DollarSign', label: 'Financeiro' },
   { id: 'payments', href: '/payments', iconName: 'CreditCard', label: 'Pagamentos' },
   { id: 'invoices', href: '/invoices', iconName: 'Receipt', label: 'Notas Fiscais' },
+  { id: 'coupons', href: '/coupons', iconName: 'Tag', label: 'Cupons' },
 ];
 
 export default function AdminLayout({
@@ -164,6 +168,16 @@ export default function AdminLayout({
                 <span style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>admin@digitaltech.com</span>
               </div>
             </div>
+            <button 
+              onClick={async () => {
+                const { logout } = await import('@/actions/auth');
+                await logout();
+              }}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-error)', display: 'flex', alignItems: 'center', gap: '4px' }}
+              title="Sair"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+            </button>
           </div>
         </header>
 

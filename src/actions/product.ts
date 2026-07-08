@@ -26,6 +26,7 @@ export async function createProduct(formData: FormData) {
   const categoryName = formData.get('category') as string
   const showOnVitrine = formData.get('showOnVitrine') === 'true'
   const photos = formData.get('photos') as string || null
+  const description = formData.get('description') as string || null
 
   if (!name) return { error: 'O nome do produto é obrigatório' }
 
@@ -46,6 +47,7 @@ export async function createProduct(formData: FormData) {
     await prisma.product.create({
       data: { 
         name, 
+        description,
         sku, 
         salePrice, 
         costPrice, 

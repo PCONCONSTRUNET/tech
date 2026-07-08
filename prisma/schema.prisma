@@ -3,8 +3,9 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 model User {
@@ -35,6 +36,7 @@ model Customer {
   sales         Sale[]
   transactions  Transaction[]
   quotes        Quote[]
+  payments      Payment[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -81,6 +83,7 @@ model Supplier {
 model Product {
   id            String    @id @default(cuid())
   name          String
+  description   String?
   categoryId    String?
   category      Category? @relation(fields: [categoryId], references: [id])
   photoUrl      String?
@@ -118,6 +121,8 @@ model Sale {
   totalAmount   Float
   discount      Float      @default(0)
   paymentMethod String     // PIX, CREDIT, DEBIT, CASH
+  status        String     @default("CONCLUIDO") // PENDENTE, PAGO, ENVIADO, CANCELADO, CONCLUIDO
+  origin        String     @default("PDV") // PDV, LOJA_VIRTUAL
   items         SaleItem[]
   
   createdAt     DateTime   @default(now())
@@ -195,4 +200,44 @@ model QuoteItem {
   name      String
   quantity  Int
   price     Float
+}
+
+model Coupon {
+  id        String   @id @default(cuid())
+  code      String   @unique
+  type      String   // PERCENTAGE, FIXED
+  value     Float
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Payment {
+  id            String    @id @default(cuid())
+  description   String
+  amount        Float
+  dueDate       DateTime
+  paymentDate   DateTime?
+  status        String    @default("PENDENTE") // PENDENTE, PAGO, CANCELADO, ATRASADO
+  type          String    // RECEBER, PAGAR
+  paymentMethod String?
+  customerId    String?
+  customer      Customer? @relation(fields: [customerId], references: [id])
+  
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model Invoice {
+  id            String    @id @default(cuid())
+  number        String
+  series        String?
+  accessKey     String?   // Chave de acesso NFe/NFCe
+  amount        Float
+  status        String    @default("EMITIDA") // EMITIDA, CANCELADA, REJEITADA
+  xmlUrl        String?
+  pdfUrl        String?
+  
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 }

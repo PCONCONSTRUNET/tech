@@ -47,18 +47,18 @@ export async function processCheckout(data: {
       })
     }
 
-    // Criar Orçamento (Quote) pendente
-    const quote = await prisma.quote.create({
+    // Criar Venda (Sale) pendente originada da Loja Virtual
+    const sale = await prisma.sale.create({
       data: {
         customerId: customer.id,
         totalAmount: totalAmount,
         discount: 0,
+        paymentMethod: 'A_COMBINAR',
         status: 'PENDENTE',
-        notes: 'Pedido gerado via Vitrine Online',
+        origin: 'LOJA_VIRTUAL',
         items: {
           create: items.map(item => ({
             productId: item.id,
-            name: item.name,
             quantity: item.quantity,
             price: item.price
           }))
@@ -68,7 +68,7 @@ export async function processCheckout(data: {
 
     return { 
       success: true, 
-      quoteId: quote.id,
+      saleId: sale.id,
       storeWhatsapp
     }
   } catch (error) {
