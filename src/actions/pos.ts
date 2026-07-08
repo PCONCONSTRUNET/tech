@@ -11,7 +11,7 @@ export async function createSale(cartItems: any[], paymentMethod: string, total:
       // 1. Create the sale
       const createdSale = await tx.sale.create({
         data: {
-          total,
+          totalAmount: total,
           paymentMethod,
           items: {
             create: cartItems.map(item => ({
