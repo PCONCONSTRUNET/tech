@@ -1,10 +1,11 @@
 'use client'
 
 import { useState } from 'react'
-import { Plus, Search, Edit, Trash2, X, Package } from 'lucide-react'
-import { createProduct, deleteProduct } from '@/actions/product'
+import { Plus, Search, Edit, Trash2, X, Package, Store } from 'lucide-react'
+import { createProduct, deleteProduct, toggleVitrineVisibility } from '@/actions/product'
+import ImageUploader from '@/components/ImageUploader'
 
-export default function ProductClient({ products }: { products: any[] }) {
+export default function ProductClient({ products, categories }: { products: any[], categories: any[] }) {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [search, setSearch] = useState('')
 
@@ -57,8 +58,10 @@ export default function ProductClient({ products }: { products: any[] }) {
               <tr>
                 <th>Produto</th>
                 <th>SKU</th>
+                <th>Categoria</th>
                 <th>Preço</th>
                 <th>Estoque</th>
+                <th>Vitrine Online</th>
                 <th>Status</th>
                 <th>Ações</th>
               </tr>
@@ -75,6 +78,13 @@ export default function ProductClient({ products }: { products: any[] }) {
                     </div>
                   </td>
                   <td style={{ color: 'var(--color-text-muted)' }}>{p.sku || '-'}</td>
+                  <td>
+                    {p.category ? (
+                      <span style={{ fontSize: '0.75rem', fontWeight: '500', color: '#475569', backgroundColor: '#f1f5f9', padding: '4px 8px', borderRadius: '4px' }}>
+                        {p.category.name}
+                      </span>
+                    ) : '-'}
+                  </td>
                   <td style={{ fontWeight: '500' }}>
                     {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(p.salePrice)}
                   </td>
@@ -82,6 +92,19 @@ export default function ProductClient({ products }: { products: any[] }) {
                     <span style={{ fontWeight: '600', color: p.stock <= p.minStock ? 'var(--color-error)' : 'inherit' }}>
                       {p.stock}
                     </span> un
+                  </td>
+                  <td>
+                    <label style={{ display: 'inline-flex', alignItems: 'center', cursor: 'pointer', gap: '8px' }}>
+                      <input 
+                        type="checkbox" 
+                        checked={p.showOnVitrine} 
+                        onChange={(e) => toggleVitrineVisibility(p.id, e.target.checked)}
+                        style={{ width: '16px', height: '16px', cursor: 'pointer', accentColor: 'var(--color-primary)' }}
+                      />
+                      <span style={{ fontSize: '0.75rem', fontWeight: '500', color: p.showOnVitrine ? 'var(--color-primary)' : 'var(--color-text-muted)' }}>
+                        {p.showOnVitrine ? 'Ativo' : 'Oculto'}
+                      </span>
+                    </label>
                   </td>
                   <td>
                     {p.active ? (
@@ -122,14 +145,34 @@ export default function ProductClient({ products }: { products: any[] }) {
             
             <form action={handleAdd} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               <div>
-                <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.875rem', fontWeight: '500' }}>Nome do Produto *</label>
-                <input name="name" type="text" className="input" required placeholder="Ex: Tela iPhone 11 Original" />
+                <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.875rem', fontWeight: '500' }}>Fotos do Produto</label>
+                <ImageUploader onChange={() => {}} />
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                <div>
+                  <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.875rem', fontWeight: '500' }}>Nome do Produto *</label>
+                  <input name="name" type="text" className="input" required placeholder="Ex: Tela iPhone 11 Original" />
+                </div>
+                <div>
+                  <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.875rem', fontWeight: '500' }}>Categoria</label>
+                  <input name="category" type="text" className="input" list="category-list" placeholder="Ex: Telas, Capinhas..." />
+                  <datalist id="category-list">
+                    {categories.map(c => (
+                      <option key={c.id} value={c.name} />
+                    ))}
+                  </datalist>
+                </div>
               </div>
               
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px' }}>
                 <div>
                   <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.875rem', fontWeight: '500' }}>Código / SKU</label>
                   <input name="sku" type="text" className="input" placeholder="Opcional" />
+                </div>
+                <div>
+                  <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.875rem', fontWeight: '500' }}>NCM</label>
+                  <input name="ncm" type="text" className="input" placeholder="Ex: 85177010" />
                 </div>
                 <div>
                   <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.875rem', fontWeight: '500' }}>Estoque Inicial</label>
@@ -145,6 +188,14 @@ export default function ProductClient({ products }: { products: any[] }) {
                 <div>
                   <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.875rem', fontWeight: '500' }}>Preço de Venda (R$)</label>
                   <input name="salePrice" type="number" step="0.01" className="input" defaultValue="0.00" />
+                </div>
+              </div>
+
+              <div style={{ backgroundColor: 'var(--color-bg)', padding: '16px', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <input type="checkbox" name="showOnVitrine" id="showOnVitrine" value="true" defaultChecked style={{ width: '18px', height: '18px', accentColor: 'var(--color-primary)' }} />
+                <div>
+                  <label htmlFor="showOnVitrine" style={{ display: 'block', fontWeight: '600', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}><Store size={16} /> Exibir na Vitrine Online</label>
+                  <span style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>O produto ficará visível e disponível para compra na loja pública.</span>
                 </div>
               </div>
 

@@ -7,9 +7,9 @@ export async function createSale(cartItems: any[], paymentMethod: string, total:
   if (cartItems.length === 0) return { error: 'Carrinho vazio' }
 
   try {
-    await prisma.$transaction(async (tx) => {
+    const sale = await prisma.$transaction(async (tx) => {
       // 1. Create the sale
-      const sale = await tx.sale.create({
+      const createdSale = await tx.sale.create({
         data: {
           total,
           paymentMethod,
@@ -17,8 +17,7 @@ export async function createSale(cartItems: any[], paymentMethod: string, total:
             create: cartItems.map(item => ({
               productId: item.id,
               quantity: item.quantity,
-              unitPrice: item.salePrice,
-              totalPrice: item.quantity * item.salePrice
+              price: item.salePrice
             }))
           }
         }
@@ -35,18 +34,20 @@ export async function createSale(cartItems: any[], paymentMethod: string, total:
       // 3. Create a financial transaction
       await tx.transaction.create({
         data: {
-          type: 'INCOME',
+          type: 'RECEITA',
           amount: total,
-          description: `Venda #${sale.id.slice(-6).toUpperCase()}`,
-          status: 'PAID'
+          description: `Venda #${createdSale.id.slice(-6).toUpperCase()}`,
+          status: 'PAGO'
         }
       })
+      
+      return createdSale;
     })
 
     revalidatePath('/pos')
     revalidatePath('/products')
     revalidatePath('/finance')
-    return { success: true }
+    return { success: true, saleId: sale.id }
   } catch (error) {
     return { error: 'Erro ao finalizar venda' }
   }

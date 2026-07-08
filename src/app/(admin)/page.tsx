@@ -1,10 +1,23 @@
 import { TrendingUp, ShoppingBag, Wrench, DollarSign, MoreHorizontal } from 'lucide-react';
+import DashboardOSList from './DashboardOSList';
+import prisma from '@/lib/prisma';
 
-export default function AdminDashboard() {
+export const dynamic = 'force-dynamic';
+
+export default async function AdminDashboard() {
+  const allOS = await prisma.serviceOrder.findMany({
+    include: { customer: true },
+    orderBy: { createdAt: 'asc' }
+  });
+
+  const osListWithNumber = allOS.map((os, index) => ({
+    ...os,
+    number: index + 1
+  })).reverse().slice(0, 5);
   return (
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-        <h1 style={{ fontSize: '1.5rem', fontWeight: '700' }}>Dashboard</h1>
+        <h1 style={{ fontSize: '1.5rem', fontWeight: '700' }}>Painel</h1>
         <div style={{ display: 'flex', gap: '12px' }}>
           <button className="btn btn-outline" style={{ backgroundColor: 'white' }}>Últimos 30 dias</button>
           <button className="btn btn-primary">+ Nova OS</button>
@@ -21,31 +34,7 @@ export default function AdminDashboard() {
 
       <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '24px' }}>
         {/* Recent OS */}
-        <div className="card">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-            <h2 style={{ fontSize: '1.125rem', fontWeight: '600' }}>Últimas Ordens de Serviço</h2>
-            <button style={{ background: 'none', border: 'none', cursor: 'pointer' }}><MoreHorizontal size={20} color="var(--color-text-muted)" /></button>
-          </div>
-          <div className="table-container">
-            <table className="table">
-              <thead>
-                <tr>
-                  <th>OS</th>
-                  <th>Cliente</th>
-                  <th>Aparelho</th>
-                  <th>Status</th>
-                  <th>Valor</th>
-                </tr>
-              </thead>
-              <tbody>
-                <TableRow os="#1042" customer="João Silva" device="iPhone 13 Pro" status="Pronto" statusColor="var(--color-success)" value="R$ 450,00" />
-                <TableRow os="#1043" customer="Maria Oliveira" device="Samsung S22" status="Em Conserto" statusColor="var(--color-warning)" value="R$ 280,00" />
-                <TableRow os="#1044" customer="Carlos Souza" device="Motorola Edge" status="Aguardando Peça" statusColor="var(--color-info)" value="R$ 150,00" />
-                <TableRow os="#1045" customer="Ana Paula" device="Xiaomi 12" status="Recebido" statusColor="var(--color-text-muted)" value="A orçar" />
-              </tbody>
-            </table>
-          </div>
-        </div>
+        <DashboardOSList osList={osListWithNumber} />
 
         {/* Top Products */}
         <div className="card">
@@ -85,21 +74,7 @@ function StatCard({ icon, title, value, trend }: { icon: React.ReactNode; title:
   );
 }
 
-function TableRow({ os, customer, device, status, statusColor, value }: { os: string, customer: string, device: string, status: string, statusColor: string, value: string }) {
-  return (
-    <tr>
-      <td style={{ fontWeight: '600' }}>{os}</td>
-      <td>{customer}</td>
-      <td style={{ color: 'var(--color-text-muted)' }}>{device}</td>
-      <td>
-        <span style={{ fontSize: '0.75rem', fontWeight: '600', color: statusColor, backgroundColor: `${statusColor}22`, padding: '4px 8px', borderRadius: '4px' }}>
-          {status}
-        </span>
-      </td>
-      <td style={{ fontWeight: '500' }}>{value}</td>
-    </tr>
-  );
-}
+
 
 function ProductItem({ name, sales, price, image }: { name: string, sales: string, price: string, image: string }) {
   return (

@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { Plus, Search, Edit, Trash2, X } from 'lucide-react'
 import { createCustomer, deleteCustomer } from '@/actions/customer'
+import { maskCPFOrCNPJ, maskCEP, maskPhone } from '@/lib/masks'
 
 export default function CustomerClient({ customers }: { customers: any[] }) {
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -65,7 +66,7 @@ export default function CustomerClient({ customers }: { customers: any[] }) {
                   <td style={{ fontWeight: '500' }}>{c.name}</td>
                   <td>{c.phone || '-'}</td>
                   <td>{c.document || '-'}</td>
-                  <td>{c.address || '-'}</td>
+                  <td>{c.city ? `${c.city} - ${c.state || ''}` : '-'}</td>
                   <td>
                     <div style={{ display: 'flex', gap: '8px' }}>
                       <button style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-error)' }} onClick={() => handleDelete(c.id)}>
@@ -101,15 +102,41 @@ export default function CustomerClient({ customers }: { customers: any[] }) {
               </div>
               <div>
                 <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.875rem', fontWeight: '500' }}>Telefone / WhatsApp</label>
-                <input name="phone" type="text" className="input" />
+                <input name="phone" type="text" className="input" onChange={e => e.target.value = maskPhone(e.target.value)} />
               </div>
               <div>
                 <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.875rem', fontWeight: '500' }}>CPF / CNPJ</label>
-                <input name="document" type="text" className="input" />
+                <input name="document" type="text" className="input" onChange={e => e.target.value = maskCPFOrCNPJ(e.target.value)} />
               </div>
-              <div>
-                <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.875rem', fontWeight: '500' }}>Endereço</label>
-                <input name="address" type="text" className="input" />
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                <div>
+                  <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.875rem', fontWeight: '500' }}>CEP</label>
+                  <input name="cep" type="text" className="input" onChange={e => e.target.value = maskCEP(e.target.value)} />
+                </div>
+                <div>
+                  <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.875rem', fontWeight: '500' }}>Bairro</label>
+                  <input name="neighborhood" type="text" className="input" />
+                </div>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '3fr 1fr', gap: '8px' }}>
+                <div>
+                  <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.875rem', fontWeight: '500' }}>Rua</label>
+                  <input name="street" type="text" className="input" />
+                </div>
+                <div>
+                  <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.875rem', fontWeight: '500' }}>Número</label>
+                  <input name="number" type="text" className="input" />
+                </div>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '8px' }}>
+                <div>
+                  <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.875rem', fontWeight: '500' }}>Cidade</label>
+                  <input name="city" type="text" className="input" />
+                </div>
+                <div>
+                  <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.875rem', fontWeight: '500' }}>Estado</label>
+                  <input name="state" type="text" className="input" />
+                </div>
               </div>
               <button type="submit" className="btn btn-primary" style={{ marginTop: '8px' }}>Salvar Cliente</button>
             </form>

@@ -12,7 +12,7 @@ model User {
   name      String
   email     String   @unique
   password  String
-  role      String   @default("SELLER") // ADMIN, SELLER, TECHNICIAN, FINANCE
+  role      String   @default("VENDEDOR") // ADMIN, VENDEDOR, TECNICO, FINANCEIRO
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -23,11 +23,18 @@ model Customer {
   document  String?  // CPF/CNPJ
   phone     String?
   whatsapp  String?
-  address   String?
+  cep       String?
+  street    String?
+  number    String?
+  neighborhood String?
+  city      String?
+  state     String?
   notes     String?
   
   serviceOrders ServiceOrder[]
   sales         Sale[]
+  transactions  Transaction[]
+  quotes        Quote[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -60,7 +67,12 @@ model Supplier {
   document  String?
   phone     String?
   whatsapp  String?
-  address   String?
+  cep       String?
+  street    String?
+  number    String?
+  neighborhood String?
+  city      String?
+  state     String?
   products  Product[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -72,12 +84,14 @@ model Product {
   categoryId    String?
   category      Category? @relation(fields: [categoryId], references: [id])
   photoUrl      String?
+  photos        String?   // JSON array de URLs das fotos
   costPrice     Float     @default(0)
   salePrice     Float     @default(0)
   stock         Int       @default(0)
   minStock      Int       @default(5)
   sku           String?   @unique
   barcode       String?
+  ncm           String?
   active        Boolean   @default(true)
   showOnVitrine Boolean   @default(true)
   
@@ -85,6 +99,7 @@ model Product {
   supplier      Supplier? @relation(fields: [supplierId], references: [id])
 
   saleItems     SaleItem[]
+  quoteItems    QuoteItem[]
 
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
@@ -118,13 +133,26 @@ model SaleItem {
   price     Float
 }
 
+model TransactionCategory {
+  id        String   @id @default(cuid())
+  name      String
+  type      String   // RECEITA, DESPESA
+  transactions Transaction[]
+}
+
 model Transaction {
   id          String   @id @default(cuid())
-  type        String   // INCOME, EXPENSE
+  type        String   // RECEITA, DESPESA
   amount      Float
   description String
   date        DateTime @default(now())
-  status      String   @default("PAID") // PAID, PENDING
+  status      String   @default("PAGO") // PAGO, PENDENTE
+  categoryId  String?
+  category    TransactionCategory? @relation(fields: [categoryId], references: [id])
+  paymentMethod String?
+  notes       String?
+  customerId  String?
+  customer    Customer? @relation(fields: [customerId], references: [id])
 }
 
 model Settings {
@@ -132,8 +160,39 @@ model Settings {
   storeName   String
   logoUrl     String?
   whatsapp    String?
-  address     String?
+  cep       String?
+  street    String?
+  number    String?
+  neighborhood String?
+  city      String?
+  state     String?
   hours       String?
   fiscalData  String?
   warrantyTerm String?
+}
+
+model Quote {
+  id          String   @id @default(cuid())
+  customerId  String?
+  customer    Customer? @relation(fields: [customerId], references: [id])
+  totalAmount Float
+  discount    Float    @default(0)
+  validity    Int      @default(7)
+  status      String   @default("PENDENTE") // PENDENTE, APROVADO, REJEITADO
+  notes       String?
+  items       QuoteItem[]
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model QuoteItem {
+  id        String   @id @default(cuid())
+  quoteId   String
+  quote     Quote    @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+  productId String?
+  product   Product? @relation(fields: [productId], references: [id])
+  name      String
+  quantity  Int
+  price     Float
 }

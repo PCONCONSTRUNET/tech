@@ -36,7 +36,9 @@ export default function POSClient({ products }: { products: any[] }) {
     if (cart.length === 0) return
     const res = await createSale(cart, paymentMethod, total)
     if (res?.success) {
-      alert('Venda finalizada com sucesso!')
+      if (confirm('Venda finalizada com sucesso! Deseja imprimir o recibo/nota?')) {
+        window.open(`/invoice/${res.saleId}`, '_blank')
+      }
       setCart([])
     } else {
       alert('Erro ao finalizar venda.')
@@ -127,23 +129,23 @@ export default function POSClient({ products }: { products: any[] }) {
             <button 
               onClick={() => setPaymentMethod('CREDIT')}
               className={`btn ${paymentMethod === 'CREDIT' ? 'btn-primary' : 'btn-outline'}`} 
-              style={{ display: 'flex', flexDirection: 'column', padding: '12px', gap: '8px' }}
+              style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '12px', gap: '8px' }}
             >
-              <CreditCard size={20} /> Crédito
+              <img src="/cartao.png" alt="Cartão" style={{ width: '24px', height: '24px', filter: paymentMethod === 'CREDIT' ? 'invert(1)' : 'none' }} /> Crédito
             </button>
             <button 
               onClick={() => setPaymentMethod('CASH')}
               className={`btn ${paymentMethod === 'CASH' ? 'btn-primary' : 'btn-outline'}`} 
-              style={{ display: 'flex', flexDirection: 'column', padding: '12px', gap: '8px' }}
+              style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '12px', gap: '8px' }}
             >
-              <Banknote size={20} /> Dinheiro
+              <img src="/dinheiro.png" alt="Dinheiro" style={{ width: '24px', height: '24px', filter: paymentMethod === 'CASH' ? 'invert(1)' : 'none' }} /> Dinheiro
             </button>
             <button 
               onClick={() => setPaymentMethod('PIX')}
               className={`btn ${paymentMethod === 'PIX' ? 'btn-primary' : 'btn-outline'}`} 
-              style={{ display: 'flex', flexDirection: 'column', padding: '12px', gap: '8px', gridColumn: 'span 2' }}
+              style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '12px', gap: '8px', gridColumn: 'span 2' }}
             >
-              <QrCode size={20} /> PIX
+              <img src="/pix.png" alt="PIX" style={{ width: '24px', height: '24px' }} /> PIX
             </button>
           </div>
           

@@ -1,16 +1,16 @@
 import { getTransactions, getTransactionCategories } from '@/actions/finance'
-import FinanceClient from './FinanceClient'
+import PaymentsClient from './PaymentsClient'
 import prisma from '@/lib/prisma'
 
 export const dynamic = 'force-dynamic'
 
-export default async function FinancePage() {
+export default async function PaymentsPage() {
   const transactions = await getTransactions()
   const categories = await getTransactionCategories()
   const customers = await prisma.customer.findMany({ orderBy: { name: 'asc' } })
 
   return (
-    <FinanceClient 
+    <PaymentsClient 
       transactions={transactions} 
       categories={categories} 
       customers={customers}

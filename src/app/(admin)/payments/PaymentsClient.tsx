@@ -1,36 +1,80 @@
 'use client'
 
 import { useState } from 'react'
-import { DollarSign, ArrowUpCircle, ArrowDownCircle, Download, X, Search, Trash2, Edit2 } from 'lucide-react'
+import { DollarSign, ArrowUpCircle, ArrowDownCircle, Download, X, Search, Trash2, Edit2, Filter, Calendar } from 'lucide-react'
 import { createTransaction, deleteTransaction, updateTransaction } from '@/actions/finance'
 
-export default function FinanceClient({ transactions, categories, customers = [] }: { transactions: any[], categories: any[], customers?: any[] }) {
+export default function PaymentsClient({ transactions, categories, customers = [] }: { transactions: any[], categories: any[], customers?: any[] }) {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [selectedTransaction, setSelectedTransaction] = useState<any>(null)
   const [isEditing, setIsEditing] = useState(false)
   const [transactionType, setTransactionType] = useState<'RECEITA' | 'DESPESA'>('RECEITA')
   const [paymentMethod, setPaymentMethod] = useState('PIX')
+  
+  // Filtros Avançados
   const [filterType, setFilterType] = useState<'ALL' | 'RECEITA' | 'DESPESA'>('ALL')
   const [filterCategory, setFilterCategory] = useState<string>('ALL')
+  const [filterCustomer, setFilterCustomer] = useState<string>('ALL')
+  const [filterPaymentMethod, setFilterPaymentMethod] = useState<string>('ALL')
   const [search, setSearch] = useState('')
+  const [dateFrom, setDateFrom] = useState('')
+  const [dateTo, setDateTo] = useState('')
+  const [showFilters, setShowFilters] = useState(false)
+
+  function setQuickFilter(type: 'HOJE' | 'SEMANA' | 'MES' | 'TUDO') {
+    if (type === 'TUDO') {
+      setDateFrom('')
+      setDateTo('')
+      return
+    }
+    const today = new Date()
+    let from = new Date()
+    let to = new Date()
+    
+    if (type === 'HOJE') {
+      // both today
+    } else if (type === 'SEMANA') {
+      from.setDate(today.getDate() - 7)
+    } else if (type === 'MES') {
+      from = new Date(today.getFullYear(), today.getMonth(), 1)
+      to = new Date(today.getFullYear(), today.getMonth() + 1, 0)
+    }
+    
+    setDateFrom(from.toISOString().split('T')[0])
+    setDateTo(to.toISOString().split('T')[0])
+  }
 
   const filteredTransactions = transactions.filter(t => {
     if (filterType !== 'ALL' && t.type !== filterType) return false;
     if (filterCategory !== 'ALL') {
       if (!t.category || t.category.id !== filterCategory) return false;
     }
+    if (filterCustomer !== 'ALL') {
+      if (t.customerId !== filterCustomer) return false;
+    }
+    if (filterPaymentMethod !== 'ALL') {
+      if (t.paymentMethod !== filterPaymentMethod) return false;
+    }
+    if (dateFrom) {
+      if (new Date(t.date) < new Date(dateFrom + 'T00:00:00')) return false;
+    }
+    if (dateTo) {
+      if (new Date(t.date) > new Date(dateTo + 'T23:59:59')) return false;
+    }
     if (search) {
       const s = search.toLowerCase();
       const matchDesc = t.description.toLowerCase().includes(s);
-      const matchCat = t.category?.name.toLowerCase().includes(s);
-      if (!matchDesc && !matchCat) return false;
+      const matchCat = t.category?.name?.toLowerCase().includes(s);
+      const matchCust = t.customer?.name?.toLowerCase().includes(s);
+      if (!matchDesc && !matchCat && !matchCust) return false;
     }
     return true;
   })
 
-  const totalIncome = transactions.filter(t => t.type === 'RECEITA').reduce((acc, t) => acc + t.amount, 0)
-  const totalExpense = transactions.filter(t => t.type === 'DESPESA').reduce((acc, t) => acc + t.amount, 0)
-  const balance = totalIncome - totalExpense
+  const totalReceitas = filteredTransactions.filter(t => t.type === 'RECEITA').reduce((acc, t) => acc + t.amount, 0)
+  const totalDespesas = filteredTransactions.filter(t => t.type === 'DESPESA').reduce((acc, t) => acc + t.amount, 0)
+  const saldo = totalReceitas - totalDespesas
+  const maxVal = Math.max(totalReceitas, totalDespesas, 1)
 
   async function handleAdd(formData: FormData) {
     formData.append('type', transactionType)
@@ -66,173 +110,200 @@ export default function FinanceClient({ transactions, categories, customers = []
     <>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
         <div>
-          <h1 style={{ fontSize: '1.5rem', fontWeight: '700' }}>Financeiro</h1>
-          <p style={{ color: 'var(--color-text-muted)' }}>Controle de caixa, receitas e despesas.</p>
+          <h1 style={{ fontSize: '1.5rem', fontWeight: '700' }}>Pagamentos</h1>
+          <p style={{ color: 'var(--color-text-muted)' }}>Análise detalhada do extrato e movimentações.</p>
         </div>
         <button className="btn btn-outline" style={{ gap: '8px' }} onClick={() => window.print()}>
-          <Download size={18} /> Exportar Relatório
+          <Download size={18} /> Exportar
         </button>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '24px', marginBottom: '32px' }}>
-        <div className="card" style={{ padding: '24px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
-            <div style={{ backgroundColor: 'rgba(16, 185, 129, 0.1)', color: 'var(--color-success)', padding: '12px', borderRadius: '12px' }}>
-              <ArrowUpCircle size={24} />
+      <div className="card" style={{ marginBottom: '24px' }}>
+        <div style={{ display: 'flex', gap: '24px', alignItems: 'center' }}>
+          
+          {/* Gráfico Simplificado */}
+          <div style={{ width: '200px', height: '120px', display: 'flex', alignItems: 'flex-end', justifyContent: 'center', gap: '16px', padding: '8px', borderRight: '1px solid var(--color-border)' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-end', gap: '4px', height: '100%' }}>
+              <span style={{ fontSize: '0.7rem', fontWeight: '600', color: 'var(--color-success)' }}>
+                {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 }).format(totalReceitas)}
+              </span>
+              <div style={{ width: '32px', backgroundColor: 'var(--color-success)', height: `${(totalReceitas / maxVal) * 80}%`, borderRadius: '4px 4px 0 0', minHeight: '4px', transition: 'height 0.3s ease' }}></div>
+              <span style={{ fontSize: '0.65rem', color: 'var(--color-text-muted)' }}>Entradas</span>
             </div>
-            <span style={{ fontWeight: '600', color: 'var(--color-text-muted)' }}>Receitas Totais</span>
-          </div>
-          <div style={{ fontSize: '2rem', fontWeight: '700' }}>
-            {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(totalIncome)}
-          </div>
-        </div>
-        
-        <div className="card" style={{ padding: '24px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
-            <div style={{ backgroundColor: 'rgba(239, 68, 68, 0.1)', color: 'var(--color-error)', padding: '12px', borderRadius: '12px' }}>
-              <ArrowDownCircle size={24} />
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-end', gap: '4px', height: '100%' }}>
+              <span style={{ fontSize: '0.7rem', fontWeight: '600', color: 'var(--color-error)' }}>
+                {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 }).format(totalDespesas)}
+              </span>
+              <div style={{ width: '32px', backgroundColor: 'var(--color-error)', height: `${(totalDespesas / maxVal) * 80}%`, borderRadius: '4px 4px 0 0', minHeight: '4px', transition: 'height 0.3s ease' }}></div>
+              <span style={{ fontSize: '0.65rem', color: 'var(--color-text-muted)' }}>Saídas</span>
             </div>
-            <span style={{ fontWeight: '600', color: 'var(--color-text-muted)' }}>Despesas Totais</span>
           </div>
-          <div style={{ fontSize: '2rem', fontWeight: '700' }}>
-            {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(totalExpense)}
-          </div>
-        </div>
 
-        <div className="card" style={{ padding: '24px', backgroundColor: 'var(--color-primary)', color: 'white' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
-            <div style={{ backgroundColor: 'rgba(255, 255, 255, 0.2)', padding: '12px', borderRadius: '12px' }}>
-              <DollarSign size={24} />
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+            <h3 style={{ fontSize: '0.875rem', color: 'var(--color-text-muted)', marginBottom: '8px' }}>Saldo do Período</h3>
+            <p style={{ fontSize: '1.75rem', fontWeight: '700', color: saldo >= 0 ? 'var(--color-success)' : 'var(--color-error)' }}>
+              {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(saldo)}
+            </p>
+            <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
+              <button onClick={() => setQuickFilter('TUDO')} className="btn btn-outline" style={{ fontSize: '0.75rem', padding: '4px 8px' }}>Tudo</button>
+              <button onClick={() => setQuickFilter('HOJE')} className="btn btn-outline" style={{ fontSize: '0.75rem', padding: '4px 8px' }}>Hoje</button>
+              <button onClick={() => setQuickFilter('SEMANA')} className="btn btn-outline" style={{ fontSize: '0.75rem', padding: '4px 8px' }}>Últimos 7 dias</button>
+              <button onClick={() => setQuickFilter('MES')} className="btn btn-outline" style={{ fontSize: '0.75rem', padding: '4px 8px' }}>Este Mês</button>
             </div>
-            <span style={{ fontWeight: '600', color: 'rgba(255,255,255,0.8)' }}>Saldo Atual</span>
           </div>
-          <div style={{ fontSize: '2rem', fontWeight: '700' }}>
-            {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(balance)}
-          </div>
+          
         </div>
       </div>
 
-      <div className="card">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '16px' }}>
-          <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
-            <h2 style={{ fontSize: '1.25rem', fontWeight: '700', marginRight: '8px' }}>Transações</h2>
-            <div style={{ position: 'relative' }}>
+      <div className="card" style={{ marginBottom: '24px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px', marginBottom: showFilters ? '16px' : '0' }}>
+          <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap', flex: 1 }}>
+            <div style={{ position: 'relative', width: '300px', maxWidth: '100%' }}>
               <Search size={18} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--color-text-muted)' }} />
               <input 
                 type="text" 
-                placeholder="Buscar descrição ou categoria..." 
+                placeholder="Buscar por descrição, categoria ou cliente..." 
                 className="input" 
-                style={{ paddingLeft: '40px', width: '260px' }} 
+                style={{ paddingLeft: '40px', width: '100%' }} 
                 value={search}
                 onChange={e => setSearch(e.target.value)}
               />
             </div>
-            <select 
-              className="input" 
-              value={filterType} 
-              onChange={e => {
-                setFilterType(e.target.value as any)
-                setFilterCategory('ALL') // Reset category when changing type
-              }}
-              style={{ width: '160px' }}
+            <button 
+              className={`btn ${showFilters ? 'btn-primary' : 'btn-outline'}`}
+              onClick={() => setShowFilters(!showFilters)}
+              style={{ gap: '8px' }}
             >
-              <option value="ALL">Todos os Tipos</option>
-              <option value="RECEITA">Apenas Receitas</option>
-              <option value="DESPESA">Apenas Despesas</option>
-            </select>
-            <select 
-              className="input" 
-              value={filterCategory} 
-              onChange={e => setFilterCategory(e.target.value)}
-              style={{ width: '180px' }}
-            >
-              <option value="ALL">Todas as Categorias</option>
-              {categories
-                .filter(c => filterType === 'ALL' || c.type === filterType)
-                .map(c => (
-                <option key={c.id} value={c.id}>
-                  {c.name} {filterType === 'ALL' ? (c.type === 'RECEITA' ? '(+)' : '(-)') : ''}
-                </option>
-              ))}
-            </select>
+              <Filter size={18} /> Filtros Avançados
+            </button>
           </div>
+          
           <div style={{ display: 'flex', gap: '12px' }}>
             <button 
               className="btn btn-outline" 
               style={{ borderColor: 'var(--color-success)', color: 'var(--color-success)' }}
               onClick={() => { setTransactionType('RECEITA'); setIsEditing(false); setIsModalOpen(true); }}
             >
-              + Nova Receita
+              + Nova Entrada
             </button>
             <button 
               className="btn btn-outline" 
               style={{ borderColor: 'var(--color-error)', color: 'var(--color-error)' }}
               onClick={() => { setTransactionType('DESPESA'); setIsEditing(false); setIsModalOpen(true); }}
             >
-              - Nova Despesa
+              - Nova Saída
             </button>
           </div>
         </div>
 
-        <div className="table-container">
-          <table className="table">
-            <thead>
-              <tr>
-                <th>Data</th>
-                <th>Descrição</th>
-                <th>Categoria</th>
-                <th>Pagto</th>
-                <th>Tipo</th>
-                <th>Valor</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredTransactions.map(t => (
-                <tr key={t.id} onClick={() => setSelectedTransaction(t)} style={{ cursor: 'pointer' }} className="hover:bg-gray-50">
-                  <td>{new Date(t.date).toLocaleDateString('pt-BR')}</td>
-                  <td style={{ fontWeight: '500' }}>{t.description}</td>
-                  <td>
-                    {t.category ? (
-                      <span style={{ fontSize: '0.75rem', fontWeight: '500', color: '#475569', backgroundColor: '#f1f5f9', padding: '4px 8px', borderRadius: '4px' }}>
-                        {t.category.name}
-                      </span>
-                    ) : '-'}
-                  </td>
-                  <td>
-                    {t.paymentMethod === 'PIX' && <img src="/pix.png" alt="Pix" style={{ width: '24px', height: '24px' }} title="Pix" />}
-                    {t.paymentMethod === 'CARTAO' && <img src="/cartao.png" alt="Cartão" style={{ width: '24px', height: '24px' }} title="Cartão" />}
-                    {t.paymentMethod === 'DINHEIRO' && <img src="/dinheiro.png" alt="Dinheiro" style={{ width: '24px', height: '24px' }} title="Dinheiro" />}
-                    {!t.paymentMethod && '-'}
-                  </td>
-                  <td>
-                    {t.type === 'RECEITA' ? (
-                      <span style={{ fontSize: '0.75rem', color: 'var(--color-success)', backgroundColor: 'rgba(16, 185, 129, 0.1)', padding: '4px 8px', borderRadius: '4px', fontWeight: '600' }}>Entrada</span>
-                    ) : (
-                      <span style={{ fontSize: '0.75rem', color: 'var(--color-error)', backgroundColor: 'rgba(239, 68, 68, 0.1)', padding: '4px 8px', borderRadius: '4px', fontWeight: '600' }}>Saída</span>
-                    )}
-                  </td>
-                  <td style={{ fontWeight: '600' }}>
-                    {t.type === 'DESPESA' ? '-' : ''}
-                    {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(t.amount)}
-                  </td>
-                  <td>
-                    <span style={{ fontSize: '0.75rem', color: '#3b82f6', backgroundColor: '#eff6ff', padding: '4px 8px', borderRadius: '4px', fontWeight: '600' }}>
-                      {t.status || 'Pago'}
+        {/* Painel de Filtros Avançados */}
+        {showFilters && (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '16px', padding: '16px', backgroundColor: 'var(--color-bg)', borderRadius: '8px' }}>
+            <div>
+              <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: '600', marginBottom: '4px', color: 'var(--color-text-muted)' }}>Tipo</label>
+              <select className="input" value={filterType} onChange={e => { setFilterType(e.target.value as any); setFilterCategory('ALL'); }}>
+                <option value="ALL">Todos os Tipos</option>
+                <option value="RECEITA">Entradas (+)</option>
+                <option value="DESPESA">Saídas (-)</option>
+              </select>
+            </div>
+            <div>
+              <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: '600', marginBottom: '4px', color: 'var(--color-text-muted)' }}>Data Inicial</label>
+              <input type="date" className="input" value={dateFrom} onChange={e => setDateFrom(e.target.value)} />
+            </div>
+            <div>
+              <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: '600', marginBottom: '4px', color: 'var(--color-text-muted)' }}>Data Final</label>
+              <input type="date" className="input" value={dateTo} onChange={e => setDateTo(e.target.value)} />
+            </div>
+            <div>
+              <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: '600', marginBottom: '4px', color: 'var(--color-text-muted)' }}>Cliente</label>
+              <select className="input" value={filterCustomer} onChange={e => setFilterCustomer(e.target.value)}>
+                <option value="ALL">Todos os Clientes</option>
+                {customers.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+              </select>
+            </div>
+            <div>
+              <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: '600', marginBottom: '4px', color: 'var(--color-text-muted)' }}>Categoria</label>
+              <select className="input" value={filterCategory} onChange={e => setFilterCategory(e.target.value)}>
+                <option value="ALL">Todas as Categorias</option>
+                {categories.filter(c => filterType === 'ALL' || c.type === filterType).map(c => (
+                  <option key={c.id} value={c.id}>{c.name}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: '600', marginBottom: '4px', color: 'var(--color-text-muted)' }}>Forma de Pagto</label>
+              <select className="input" value={filterPaymentMethod} onChange={e => setFilterPaymentMethod(e.target.value)}>
+                <option value="ALL">Todas</option>
+                <option value="PIX">Pix</option>
+                <option value="CARTAO">Cartão</option>
+                <option value="DINHEIRO">Dinheiro</option>
+              </select>
+            </div>
+          </div>
+        )}
+      </div>
+
+      <div className="card table-container">
+        <table className="table">
+          <thead>
+            <tr>
+              <th>Data</th>
+              <th>Descrição</th>
+              <th>Cliente</th>
+              <th>Categoria</th>
+              <th>Pagto</th>
+              <th>Tipo</th>
+              <th>Valor</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredTransactions.map(t => (
+              <tr key={t.id} onClick={() => setSelectedTransaction(t)} style={{ cursor: 'pointer' }} className="hover:bg-gray-50">
+                <td>{new Date(t.date).toLocaleDateString('pt-BR')}</td>
+                <td style={{ fontWeight: '500' }}>{t.description}</td>
+                <td>{t.customer?.name ? <span style={{ fontSize: '0.85rem' }}>{t.customer.name}</span> : '-'}</td>
+                <td>
+                  {t.category ? (
+                    <span style={{ fontSize: '0.75rem', fontWeight: '500', color: '#475569', backgroundColor: '#f1f5f9', padding: '4px 8px', borderRadius: '4px' }}>
+                      {t.category.name}
                     </span>
-                  </td>
-                </tr>
-              ))}
-              {filteredTransactions.length === 0 && (
-                <tr>
-                  <td colSpan={7} style={{ textAlign: 'center', padding: '24px', color: 'var(--color-text-muted)' }}>
-                    Nenhuma transação encontrada.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+                  ) : '-'}
+                </td>
+                <td>
+                  {t.paymentMethod === 'PIX' && <img src="/pix.png" alt="Pix" style={{ width: '24px', height: '24px' }} title="Pix" />}
+                  {t.paymentMethod === 'CARTAO' && <img src="/cartao.png" alt="Cartão" style={{ width: '24px', height: '24px' }} title="Cartão" />}
+                  {t.paymentMethod === 'DINHEIRO' && <img src="/dinheiro.png" alt="Dinheiro" style={{ width: '24px', height: '24px' }} title="Dinheiro" />}
+                  {!t.paymentMethod && '-'}
+                </td>
+                <td>
+                  {t.type === 'RECEITA' ? (
+                    <span style={{ fontSize: '0.75rem', color: 'var(--color-success)', backgroundColor: 'rgba(16, 185, 129, 0.1)', padding: '4px 8px', borderRadius: '4px', fontWeight: '600' }}>Entrada</span>
+                  ) : (
+                    <span style={{ fontSize: '0.75rem', color: 'var(--color-error)', backgroundColor: 'rgba(239, 68, 68, 0.1)', padding: '4px 8px', borderRadius: '4px', fontWeight: '600' }}>Saída</span>
+                  )}
+                </td>
+                <td style={{ fontWeight: '600' }}>
+                  {t.type === 'DESPESA' ? '-' : ''}
+                  {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(t.amount)}
+                </td>
+                <td>
+                  <span style={{ fontSize: '0.75rem', color: '#3b82f6', backgroundColor: '#eff6ff', padding: '4px 8px', borderRadius: '4px', fontWeight: '600' }}>
+                    {t.status || 'Pago'}
+                  </span>
+                </td>
+              </tr>
+            ))}
+            {filteredTransactions.length === 0 && (
+              <tr>
+                <td colSpan={8} style={{ textAlign: 'center', padding: '32px', color: 'var(--color-text-muted)' }}>
+                  Nenhuma movimentação encontrada para estes filtros.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
       </div>
 
       {isModalOpen && (
@@ -240,7 +311,7 @@ export default function FinanceClient({ transactions, categories, customers = []
           <div className="card" style={{ width: '400px', maxWidth: '90%' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
               <h2 style={{ fontSize: '1.25rem', fontWeight: '600' }}>
-                Nova {transactionType === 'RECEITA' ? 'Receita' : 'Despesa'}
+                {isEditing ? 'Editar Transação' : `Nova ${transactionType === 'RECEITA' ? 'Receita' : 'Despesa'}`}
               </h2>
               <button onClick={() => setIsModalOpen(false)} style={{ background: 'none', border: 'none', cursor: 'pointer' }}><X size={20} /></button>
             </div>
@@ -326,7 +397,7 @@ export default function FinanceClient({ transactions, categories, customers = []
         <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50 }}>
           <div className="card" style={{ width: '500px', maxWidth: '90%' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-              <h2 style={{ fontSize: '1.25rem', fontWeight: '600' }}>Detalhes da Transação</h2>
+              <h2 style={{ fontSize: '1.25rem', fontWeight: '600' }}>Detalhes da Movimentação</h2>
               <div style={{ display: 'flex', gap: '8px' }}>
                 <button 
                   onClick={() => openEditModal(selectedTransaction)} 
@@ -392,10 +463,6 @@ export default function FinanceClient({ transactions, categories, customers = []
                   <p style={{ fontWeight: '500', whiteSpace: 'pre-wrap' }}>{selectedTransaction.notes}</p>
                 </div>
               )}
-            </div>
-            
-            <div style={{ marginTop: '24px', display: 'flex', justifyContent: 'flex-end' }}>
-              <button className="btn btn-outline" onClick={() => setSelectedTransaction(null)}>Fechar</button>
             </div>
           </div>
         </div>
