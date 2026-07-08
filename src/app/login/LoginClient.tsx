@@ -3,10 +3,12 @@
 import { useState } from 'react'
 import { LogIn, Lock, Mail } from 'lucide-react'
 import { login } from '@/actions/auth'
+import { useRouter } from 'next/navigation'
 
 export default function LoginClient() {
   const [loading, setLoading] = useState(false)
   const [errorMsg, setErrorMsg] = useState('')
+  const router = useRouter()
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -14,13 +16,20 @@ export default function LoginClient() {
     setErrorMsg('')
     
     const formData = new FormData(e.currentTarget)
-    const result = await login(formData)
     
-    if (result?.error) {
-      setErrorMsg(result.error)
+    try {
+      const result = await login(formData)
+      
+      if (result?.error) {
+        setErrorMsg(result.error)
+        setLoading(false)
+      } else if (result?.success) {
+        router.push('/painel')
+      }
+    } catch (e) {
+      setErrorMsg('Erro inesperado ao logar.')
       setLoading(false)
     }
-    // se der sucesso o server action faz o redirect, então não precisa tratar aqui
   }
 
   return (

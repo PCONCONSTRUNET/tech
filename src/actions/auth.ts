@@ -20,7 +20,7 @@ export async function login(formData: FormData) {
   }
 
   revalidatePath('/painel', 'layout')
-  redirect('/painel')
+  return { success: true }
 }
 
 export async function logout() {
