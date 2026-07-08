@@ -21,18 +21,18 @@ const iconMap = {
 };
 
 const defaultNavItems = [
-  { id: 'dashboard', href: '/', iconName: 'LayoutDashboard', label: 'Painel' },
-  { id: 'sales', href: '/sales', iconName: 'ShoppingBag', label: 'Vendas' },
-  { id: 'pos', href: '/pos', iconName: 'ShoppingCart', label: 'PDV Físico' },
-  { id: 'products', href: '/products', iconName: 'Package', label: 'Estoque' },
-  { id: 'customers', href: '/customers', iconName: 'Users', label: 'Clientes' },
-  { id: 'suppliers', href: '/suppliers', iconName: 'Truck', label: 'Fornecedores' },
-  { id: 'os', href: '/os', iconName: 'Wrench', label: 'Ordens de Serviço' },
-  { id: 'quotes', href: '/quotes', iconName: 'FileText', label: 'Orçamentos' },
-  { id: 'finance', href: '/finance', iconName: 'DollarSign', label: 'Financeiro' },
-  { id: 'payments', href: '/payments', iconName: 'CreditCard', label: 'Pagamentos' },
-  { id: 'invoices', href: '/invoices', iconName: 'Receipt', label: 'Notas Fiscais' },
-  { id: 'coupons', href: '/coupons', iconName: 'Tag', label: 'Cupons' },
+  { id: 'dashboard', href: '/painel', iconName: 'LayoutDashboard', label: 'Painel' },
+  { id: 'sales', href: '/painel/sales', iconName: 'ShoppingBag', label: 'Vendas' },
+  { id: 'pos', href: '/painel/pos', iconName: 'ShoppingCart', label: 'PDV Físico' },
+  { id: 'products', href: '/painel/products', iconName: 'Package', label: 'Estoque' },
+  { id: 'customers', href: '/painel/customers', iconName: 'Users', label: 'Clientes' },
+  { id: 'suppliers', href: '/painel/suppliers', iconName: 'Truck', label: 'Fornecedores' },
+  { id: 'os', href: '/painel/os', iconName: 'Wrench', label: 'Ordens de Serviço' },
+  { id: 'quotes', href: '/painel/quotes', iconName: 'FileText', label: 'Orçamentos' },
+  { id: 'finance', href: '/painel/finance', iconName: 'DollarSign', label: 'Financeiro' },
+  { id: 'payments', href: '/painel/payments', iconName: 'CreditCard', label: 'Pagamentos' },
+  { id: 'invoices', href: '/painel/invoices', iconName: 'Receipt', label: 'Notas Fiscais' },
+  { id: 'coupons', href: '/painel/coupons', iconName: 'Tag', label: 'Cupons' },
 ];
 
 export default function AdminLayout({

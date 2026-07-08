@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Search, MoreVertical, ShoppingBag, Plus, Minus, ArrowLeft } from 'lucide-react';
+import { Search, MoreVertical, ShoppingBag, Plus, Minus, ArrowLeft, LayoutDashboard } from 'lucide-react';
 import Link from 'next/link';
 import { useCart } from '@/components/loja/CartContext';
 
@@ -70,6 +70,9 @@ export default function LojaClient({ initialProducts, initialSettings }: { initi
           </div>
         </div>
         <div style={{ display: 'flex', gap: 16, paddingBottom: 12 }}>
+          <Link href="/painel" title="Painel Administrativo" style={{ color: '#ccc', display: 'flex', alignItems: 'center' }}>
+            <LayoutDashboard size={22} />
+          </Link>
           <Search size={22} color="#ccc" />
           <MoreVertical size={22} color="#ccc" />
         </div>

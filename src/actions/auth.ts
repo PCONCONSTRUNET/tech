@@ -19,8 +19,8 @@ export async function login(formData: FormData) {
     return { error: 'E-mail ou senha incorretos' }
   }
 
-  revalidatePath('/', 'layout')
-  redirect('/')
+  revalidatePath('/painel', 'layout')
+  redirect('/painel')
 }
 
 export async function logout() {
