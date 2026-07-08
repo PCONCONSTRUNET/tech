@@ -26,8 +26,8 @@ export default function LoginClient() {
       } else if (result?.success) {
         router.push('/painel')
       }
-    } catch (e) {
-      setErrorMsg('Erro inesperado ao logar.')
+    } catch (e: any) {
+      setErrorMsg('Erro cliente: ' + (e?.message || String(e)))
       setLoading(false)
     }
   }
