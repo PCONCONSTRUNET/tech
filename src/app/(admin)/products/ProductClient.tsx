@@ -199,7 +199,7 @@ export default function ProductClient({ products, categories }: { products: any[
               <div style={{ backgroundColor: 'var(--color-bg)', padding: '16px', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '12px' }}>
                 <input type="checkbox" name="showOnVitrine" id="showOnVitrine" value="true" defaultChecked style={{ width: '18px', height: '18px', accentColor: 'var(--color-primary)' }} />
                 <div>
-                  <label htmlFor="showOnVitrine" style={{ display: 'block', fontWeight: '600', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}><Store size={16} /> Exibir na Vitrine Online</label>
+                  <label htmlFor="showOnVitrine" style={{ fontWeight: '600', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}><Store size={16} /> Exibir na Vitrine Online</label>
                   <span style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>O produto ficará visível e disponível para compra na loja pública.</span>
                 </div>
               </div>

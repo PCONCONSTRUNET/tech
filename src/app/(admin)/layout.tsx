@@ -2,7 +2,7 @@
 
 import { LayoutDashboard, Users, Wrench, Package, ShoppingCart, DollarSign, Settings, Bell, Search, Menu, Truck, CreditCard, FileText, Receipt, Tag, ShoppingBag } from 'lucide-react';
 import Link from 'next/link';
-import { usePathname, useSearchParams } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import { useState, useEffect } from 'react';
 
 const iconMap = {
@@ -41,13 +41,12 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
-  const searchParams = useSearchParams();
   const [isNavigating, setIsNavigating] = useState(false);
   const [navOrder, setNavOrder] = useState<string[]>(defaultNavItems.map(item => item.id));
 
   useEffect(() => {
     setIsNavigating(false);
-  }, [pathname, searchParams]);
+  }, [pathname]);
 
   useEffect(() => {
     const saved = localStorage.getItem('sidebarOrder');
@@ -70,11 +69,11 @@ export default function AdminLayout({
 
   const handleDragStart = (e: React.DragEvent, id: string) => {
     e.dataTransfer.setData('text/plain', id);
-    e.currentTarget.style.opacity = '0.5';
+    (e.currentTarget as HTMLElement).style.opacity = '0.5';
   };
 
   const handleDragEnd = (e: React.DragEvent) => {
-    e.currentTarget.style.opacity = '1';
+    (e.currentTarget as HTMLElement).style.opacity = '1';
   };
 
   const handleDragOver = (e: React.DragEvent) => {
