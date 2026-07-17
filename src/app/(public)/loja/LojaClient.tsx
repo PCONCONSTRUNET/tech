@@ -6,10 +6,12 @@ import Link from 'next/link';
 import { useCart } from '@/components/loja/CartContext';
 
 export default function LojaClient({ initialProducts, initialSettings }: { initialProducts: any[], initialSettings: any }) {
-  const { addItem } = useCart();
+  const { addItem, items, setSidebarOpen } = useCart();
   const [activeCategory, setActiveCategory] = useState('Todos');
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
   const [quantity, setQuantity] = useState(1);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isSearching, setIsSearching] = useState(false);
 
   const CATEGORIAS = ['Todos', 'Barbeadores', 'Carregador Powerbank', 'Cabo Auxiliar'];
   const CNPJ = "58.645.937/0001-02";
@@ -32,11 +34,6 @@ export default function LojaClient({ initialProducts, initialSettings }: { initi
     return fallback;
   };
 
-  // Mock services since they are not in the db query yet
-  const displayServices = [
-    { id: 1, name: 'Reconfiguração de Câmera nos Bairro Santana', price: 60.00, photoUrl: 'https://images.unsplash.com/photo-1581092160562-40aa08e78837?w=500&q=80' },
-    { id: 2, name: 'Reconfiguração de Câmera nos Paraisolândia', price: 30.00, photoUrl: 'https://images.unsplash.com/photo-1581092160562-40aa08e78837?w=500&q=80' }
-  ];
 
   const MOCK_PRODUCTS = [
     { id: 'm1', name: 'Smartphone DigiTech X Pro', price: 1599.99, oldPrice: 1999.99, discount: '-20%', photoUrl: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=500&q=80', description: 'Cor: Preto\nArmazenamento: 256GB\nAcompanha carregador turbo e capa.' },
@@ -46,7 +43,17 @@ export default function LojaClient({ initialProducts, initialSettings }: { initi
     { id: 'm5', name: 'Smartwatch Esportivo 5', price: 450.00, oldPrice: 500.00, discount: '-10%', photoUrl: 'https://images.unsplash.com/photo-1546868871-7041f2a55e12?w=500&q=80' },
   ];
 
-  const displayProducts = initialProducts && initialProducts.length > 0 ? initialProducts : MOCK_PRODUCTS;
+  const baseProducts = initialProducts && initialProducts.length > 0 ? initialProducts : MOCK_PRODUCTS;
+
+  const displayProducts = baseProducts.filter((p: any) => {
+    const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                          (p.description && p.description.toLowerCase().includes(searchQuery.toLowerCase()));
+    
+    // Se o produto tiver categoria, filtra. Se não tiver, ignora o filtro de categoria por enquanto
+    const matchesCategory = activeCategory === 'Todos' || !p.category || p.category === activeCategory;
+    
+    return matchesSearch && matchesCategory;
+  });
 
   return (
     <div style={{ minHeight: '100vh', backgroundColor: '#141414', color: '#fff', fontFamily: 'sans-serif', paddingBottom: 100 }}>
@@ -73,10 +80,63 @@ export default function LojaClient({ initialProducts, initialSettings }: { initi
           <Link href="/painel" title="Painel Administrativo" style={{ color: '#ccc', display: 'flex', alignItems: 'center' }}>
             <LayoutDashboard size={22} />
           </Link>
-          <Search size={22} color="#ccc" />
-          <MoreVertical size={22} color="#ccc" />
+          <div onClick={() => setIsSearching(!isSearching)} style={{ cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
+            <Search size={22} color={isSearching ? "#fff" : "#ccc"} />
+          </div>
+          <div 
+            style={{ position: 'relative', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
+            onClick={() => setSidebarOpen(true)}
+          >
+            <ShoppingBag size={22} color="#ccc" />
+            {items.length > 0 && (
+              <div style={{
+                position: 'absolute', top: '-6px', right: '-8px',
+                backgroundColor: 'var(--color-primary)', color: 'white',
+                borderRadius: '50%', width: '16px', height: '16px',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontSize: '10px', fontWeight: 'bold'
+              }}>
+                {items.reduce((acc, item) => acc + item.quantity, 0)}
+              </div>
+            )}
+          </div>
         </div>
       </div>
+
+      {/* Barra de Pesquisa */}
+      {isSearching && (
+        <div style={{ padding: '16px', backgroundColor: '#1a1a1a', animation: 'fadeIn 0.2s ease-out' }}>
+          <div style={{ position: 'relative', maxWidth: '600px', margin: '0 auto' }}>
+            <Search size={18} color="#999" style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)' }} />
+            <input
+              type="text"
+              autoFocus
+              placeholder="O que você está procurando?"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              style={{
+                width: '100%',
+                padding: '12px 16px 12px 48px',
+                borderRadius: '24px',
+                border: '1px solid #333',
+                backgroundColor: '#222',
+                color: '#fff',
+                fontSize: '0.95rem',
+                outline: 'none',
+                boxSizing: 'border-box'
+              }}
+            />
+            {searchQuery && (
+              <button 
+                onClick={() => setSearchQuery('')}
+                style={{ position: 'absolute', right: 16, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: '#999', cursor: 'pointer' }}
+              >
+                ✕
+              </button>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* CNPJ */}
       <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '8px 16px', backgroundColor: '#1a1a1a', marginTop: 16, borderTop: '1px solid #333', borderBottom: '1px solid #333', fontSize: '0.75rem', color: '#999', paddingRight: '5%' }}>
@@ -219,35 +279,6 @@ export default function LojaClient({ initialProducts, initialSettings }: { initi
             </div>
           </div>
 
-          {/* Serviços */}
-          {displayServices.length > 0 && (
-            <div style={{ marginTop: 24, padding: '0 5%' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-                <h2 style={{ fontSize: '1rem', fontWeight: 'bold', margin: 0 }}>Serviços</h2>
-                <Link href="#" style={{ fontSize: '0.75rem', color: '#ccc', textDecoration: 'none', padding: '6px 12px', backgroundColor: '#222', borderRadius: 20 }}>Ver mais →</Link>
-              </div>
-              
-              <div style={{ overflowX: 'auto', whiteSpace: 'nowrap', WebkitOverflowScrolling: 'touch' }}>
-                <div style={{ display: 'flex', gap: 16, paddingBottom: 8 }}>
-                  {displayServices.map((srv) => (
-                    <div key={srv.id} style={{ width: 280, flexShrink: 0 }}>
-                      <div style={{ height: 160, backgroundColor: '#222', borderRadius: 12, overflow: 'hidden', marginBottom: 12 }}>
-                        <img src={srv.photoUrl} alt={srv.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                      </div>
-                      <div style={{ whiteSpace: 'normal' }}>
-                        <h3 style={{ fontSize: '0.85rem', color: '#eee', margin: '0 0 4px 0', lineHeight: 1.3, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
-                          {srv.name}
-                        </h3>
-                        <p style={{ fontSize: '0.9rem', fontWeight: 'bold', color: '#fff', margin: 0 }}>
-                          R$ {srv.price.toFixed(2).replace('.', ',')}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          )}
 
           {/* Produtos */}
           <div style={{ marginTop: 32, padding: '0 5%' }}>

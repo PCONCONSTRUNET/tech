@@ -18,6 +18,7 @@ export async function updateSettings(data: {
   city: string
   state: string
   warrantyTerm: string
+  hours?: string
 }) {
   try {
     const existing = await prisma.settings.findFirst()
@@ -33,8 +34,8 @@ export async function updateSettings(data: {
       })
     }
     
-    revalidatePath('/settings')
-    revalidatePath('/quotes')
+    revalidatePath('/painel/settings')
+    revalidatePath('/painel/quotes')
     return { success: true }
   } catch (error: any) {
     console.error('Settings update error:', error)

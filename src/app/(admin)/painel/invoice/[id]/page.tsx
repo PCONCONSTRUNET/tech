@@ -23,6 +23,10 @@ export default async function InvoicePage({ params }: { params: { id: string } }
   return (
     <div style={{ padding: '40px', maxWidth: '800px', margin: '0 auto', backgroundColor: 'white', color: 'black', minHeight: '100vh', fontFamily: 'monospace' }}>
       <div style={{ textAlign: 'center', borderBottom: '2px dashed #000', paddingBottom: '20px', marginBottom: '20px' }}>
+        {/* Logo adicionada conforme pedido (fundo preto) */}
+        <div style={{ display: 'inline-block', backgroundColor: '#000', padding: '12px', borderRadius: '8px', marginBottom: '12px' }}>
+          <img src="/logo.png" alt="Logo" style={{ height: '40px', objectFit: 'contain' }} />
+        </div>
         <h1 style={{ fontSize: '24px', fontWeight: 'bold', margin: '0 0 10px 0' }}>{settings?.storeName || 'MINHA LOJA'}</h1>
         <p style={{ margin: '4px 0' }}>{settings?.street || 'Rua'}, {settings?.number || 'S/N'} - {settings?.city || 'Cidade'} / {settings?.state || 'UF'}</p>
         <p style={{ margin: '4px 0' }}>CNPJ: {settings?.fiscalData || '00.000.000/0001-00'}</p>

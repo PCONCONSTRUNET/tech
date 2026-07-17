@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Plus, Search, Edit, Trash2, X, Package, Store, Copy, ExternalLink, Check } from 'lucide-react'
+import { Plus, Search, Edit, Trash2, X, Package, Store } from 'lucide-react'
 import { createProduct, deleteProduct, toggleVitrineVisibility } from '@/actions/product'
 import ImageUploader from '@/components/ImageUploader'
 
@@ -41,24 +41,6 @@ export default function ProductClient({
         <div>
           <h1 style={{ fontSize: '1.25rem', fontWeight: '700', color: 'var(--color-text)' }}>{title}</h1>
           <p style={{ color: 'var(--color-text-muted)', fontSize: '0.85rem' }}>Gerencie o catálogo e estoque.</p>
-          {type === 'PRODUCT' && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '12px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', backgroundColor: 'var(--color-bg)', padding: '6px 12px', borderRadius: '6px', fontSize: '0.8rem', color: 'var(--color-text-muted)', border: '1px solid var(--color-border)' }}>
-                <Store size={14} />
-                <span>https://digitalltech.vercel.app/loja</span>
-              </div>
-              <button 
-                className="btn btn-outline" 
-                style={{ padding: '6px 12px', fontSize: '0.8rem', gap: '6px', height: 'auto' }}
-                onClick={() => {
-                  navigator.clipboard.writeText('https://digitalltech.vercel.app/loja')
-                  alert('Link da loja copiado!')
-                }}
-              >
-                <Copy size={14} /> Copiar Link
-              </button>
-            </div>
-          )}
         </div>
         <button className="btn btn-primary" style={{ gap: '8px' }} onClick={() => setIsModalOpen(true)}>
           <Plus size={18} /> Novo Produto
@@ -99,12 +81,8 @@ export default function ProductClient({
                 <tr key={p.id}>
                   <td>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                      <div style={{ width: '40px', height: '40px', backgroundColor: 'var(--color-bg)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-primary)', overflow: 'hidden' }}>
-                        {p.photoUrl ? (
-                          <img src={p.photoUrl} alt={p.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                        ) : (
-                          <Package size={20} />
-                        )}
+                      <div style={{ width: '40px', height: '40px', backgroundColor: 'var(--color-bg)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-primary)' }}>
+                        <Package size={20} />
                       </div>
                       <span style={{ fontWeight: '500' }}>{p.name}</span>
                     </div>

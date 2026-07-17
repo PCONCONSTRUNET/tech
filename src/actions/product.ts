@@ -3,8 +3,10 @@
 import prisma from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
 
-export async function getProducts() {
+export async function getProducts(type?: string) {
+  const whereClause = type ? { type } : {}
   return prisma.product.findMany({
+    where: whereClause,
     orderBy: { createdAt: 'desc' },
     include: { category: true }
   })
@@ -25,6 +27,7 @@ export async function createProduct(formData: FormData) {
   const ncm = formData.get('ncm') as string || null
   const categoryName = formData.get('category') as string
   const showOnVitrine = formData.get('showOnVitrine') === 'true'
+  const type = formData.get('type') as string || 'PRODUCT'
   const photos = formData.get('photos') as string || null
   const description = formData.get('description') as string || null
 
@@ -55,6 +58,7 @@ export async function createProduct(formData: FormData) {
         ncm,
         categoryId,
         showOnVitrine,
+        type,
         photos
       }
     })

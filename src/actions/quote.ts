@@ -33,7 +33,18 @@ export async function createQuote(data: {
   discount?: number,
   validity?: number,
   notes?: string,
-  items: Array<{ productId?: string | null, name: string, quantity: number, price: number }>
+  items: Array<{ productId?: string | null, name: string, quantity: number, price: number }>,
+  
+  // OS Fields (serialized to notes due to db push constraints)
+  device?: string,
+  brand?: string,
+  model?: string,
+  imei?: string,
+  defect?: string,
+  diagnostic?: string,
+  password?: string,
+  accessories?: string,
+  physicalCondition?: string
 }) {
   try {
     const quote = await prisma.quote.create({
@@ -42,7 +53,18 @@ export async function createQuote(data: {
         totalAmount: data.totalAmount,
         discount: data.discount || 0,
         validity: data.validity || 7,
-        notes: data.notes,
+        notes: JSON.stringify({
+          originalNotes: data.notes,
+          device: data.device,
+          brand: data.brand,
+          model: data.model,
+          imei: data.imei,
+          defect: data.defect,
+          diagnostic: data.diagnostic,
+          password: data.password,
+          accessories: data.accessories,
+          physicalCondition: data.physicalCondition
+        }),
         items: {
           create: data.items.map(item => ({
             productId: item.productId || null,

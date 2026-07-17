@@ -1,12 +1,14 @@
 'use client';
 
-import { LayoutDashboard, Users, Wrench, Package, ShoppingCart, DollarSign, Settings, Bell, Search, Menu, Truck, CreditCard, FileText, Receipt, Tag, ShoppingBag } from 'lucide-react';
+import { LayoutDashboard, Users, Wrench, Package, ShoppingCart, DollarSign, Settings, Bell, Search, Menu, Truck, CreditCard, FileText, Receipt, Tag, ShoppingBag, Columns2, Landmark, ChevronLeft, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState, useEffect } from 'react';
+import NotificationDropdown from './NotificationDropdown';
 
 const iconMap = {
   LayoutDashboard: <LayoutDashboard size={20} />,
+  Columns2: <Columns2 size={20} />,
   Users: <Users size={20} />,
   Truck: <Truck size={20} />,
   Wrench: <Wrench size={20} />,
@@ -17,22 +19,27 @@ const iconMap = {
   CreditCard: <CreditCard size={20} />,
   Receipt: <Receipt size={20} />,
   Tag: <Tag size={20} />,
-  ShoppingBag: <ShoppingBag size={20} />
+  ShoppingBag: <ShoppingBag size={20} />,
+  Landmark: <Landmark size={20} />
 };
 
 const defaultNavItems = [
   { id: 'dashboard', href: '/painel', iconName: 'LayoutDashboard', label: 'Painel' },
+  { id: 'mesa', href: '/painel/mesa', iconName: 'Columns2', label: 'Mesa / Fluxo' },
   { id: 'sales', href: '/painel/sales', iconName: 'ShoppingBag', label: 'Vendas' },
   { id: 'pos', href: '/painel/pos', iconName: 'ShoppingCart', label: 'PDV Físico' },
-  { id: 'products', href: '/painel/products', iconName: 'Package', label: 'Estoque' },
+  { id: 'caixa', href: '/painel/caixa', iconName: 'Landmark', label: 'Caixa' },
+  { id: 'parts', href: '/painel/parts', iconName: 'Package', label: 'Peças' },
+  { id: 'products', href: '/painel/products', iconName: 'ShoppingBag', label: 'Produtos' },
   { id: 'customers', href: '/painel/customers', iconName: 'Users', label: 'Clientes' },
   { id: 'suppliers', href: '/painel/suppliers', iconName: 'Truck', label: 'Fornecedores' },
   { id: 'os', href: '/painel/os', iconName: 'Wrench', label: 'Ordens de Serviço' },
   { id: 'quotes', href: '/painel/quotes', iconName: 'FileText', label: 'Orçamentos' },
   { id: 'finance', href: '/painel/finance', iconName: 'DollarSign', label: 'Financeiro' },
   { id: 'payments', href: '/painel/payments', iconName: 'CreditCard', label: 'Pagamentos' },
-  { id: 'invoices', href: '/painel/invoices', iconName: 'Receipt', label: 'Notas Fiscais' },
+  // { id: 'invoices', href: '/painel/invoices', iconName: 'Receipt', label: 'Notas Fiscais' },
   { id: 'coupons', href: '/painel/coupons', iconName: 'Tag', label: 'Cupons' },
+  { id: 'integrations', href: '/painel/integrations', iconName: 'Settings', label: 'Integrações' },
 ];
 
 export default function AdminLayout({
@@ -41,13 +48,12 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
-  const [isNavigating, setIsNavigating] = useState(false);
   const [navOrder, setNavOrder] = useState<string[]>(defaultNavItems.map(item => item.id));
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
   useEffect(() => {
-    setIsNavigating(false);
-    setIsSidebarOpen(false); // Close sidebar on navigation in mobile
+    setIsSidebarOpen(false);
   }, [pathname]);
 
   useEffect(() => {
@@ -107,22 +113,36 @@ export default function AdminLayout({
       />
 
       {/* Sidebar */}
-      <aside className={`sidebar ${isSidebarOpen ? 'mobile-open' : ''}`}>
-        <div style={{ padding: '8px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <img src="/logo.png" alt="Digital Tech" style={{ width: '100%', maxHeight: '120px', objectFit: 'contain' }} />
+      <aside className={`sidebar ${isSidebarOpen ? 'mobile-open' : ''} ${isSidebarCollapsed ? 'collapsed' : ''}`}>
+        <div style={{ padding: isSidebarCollapsed ? '16px' : '16px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', minHeight: '80px' }}>
+          {!isSidebarCollapsed && (
+            <img src="/logo.png" alt="Digital Tech" className="sidebar-logo" style={{ width: '100%', maxHeight: '60px', objectFit: 'contain' }} />
+          )}
+          {isSidebarCollapsed && (
+            <div className="sidebar-logo-small">DT</div>
+          )}
+          <button 
+            className="hide-on-mobile"
+            onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+            style={{ 
+              background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-text-muted)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              padding: isSidebarCollapsed ? '0' : '4px',
+              marginLeft: isSidebarCollapsed ? 'auto' : '8px',
+              marginRight: isSidebarCollapsed ? 'auto' : '0'
+            }}
+          >
+            {isSidebarCollapsed ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
+          </button>
         </div>
         
-        <nav style={{ padding: '0 12px', flex: 1, display: 'flex', flexDirection: 'column', gap: '4px' }}>
+        <nav style={{ padding: '0 12px', flex: 1, display: 'flex', flexDirection: 'column', gap: '4px', overflowY: 'auto' }}>
           {navOrder.map(id => {
             const item = defaultNavItems.find(i => i.id === id);
             if (!item) return null;
             
             const isActive = item.href === '/' ? pathname === '/' : pathname.startsWith(item.href);
-            const handleClick = () => {
-              if (item.href === '/' ? pathname !== '/' : !pathname.startsWith(item.href)) {
-                setIsNavigating(true);
-              }
-            };
+            const handleClick = () => {};
 
             return (
               <div 
@@ -148,7 +168,7 @@ export default function AdminLayout({
         </nav>
 
         <div style={{ padding: '24px 12px' }}>
-          <NavItem href="/settings" icon={<Settings size={20} />} label="Configurações" active={pathname.startsWith('/settings')} onClick={() => { if (!pathname.startsWith('/settings')) setIsNavigating(true) }} />
+          <NavItem href="/painel/settings" icon={<Settings size={20} />} label="Configurações" active={pathname.startsWith('/painel/settings')} />
         </div>
       </aside>
 
@@ -168,10 +188,7 @@ export default function AdminLayout({
             </div>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
-            <div style={{ position: 'relative', cursor: 'pointer' }}>
-              <Bell size={20} style={{ color: 'var(--color-text-muted)' }} />
-              <span style={{ position: 'absolute', top: '-4px', right: '-4px', backgroundColor: 'var(--color-error)', color: 'white', fontSize: '10px', fontWeight: 'bold', width: '16px', height: '16px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>3</span>
-            </div>
+            <NotificationDropdown />
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer' }}>
               <div style={{ width: '36px', height: '36px', borderRadius: '50%', backgroundColor: 'var(--color-primary)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold' }}>AD</div>
               <div style={{ display: 'flex', flexDirection: 'column' }}>
@@ -195,40 +212,7 @@ export default function AdminLayout({
         {/* Page Content */}
         <div className="content-scrollable">
           <div className="container" style={{ maxWidth: '1400px' }}>
-            {isNavigating ? (
-              <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '400px', width: '100%' }}>
-                <div className="custom-loader" />
-                <style>{`
-                  .custom-loader {
-                    display: block;
-                    --height-of-loader: 4px;
-                    --loader-color: var(--color-primary, #4f46e5);
-                    width: 130px;
-                    height: var(--height-of-loader);
-                    border-radius: 30px;
-                    background-color: rgba(0,0,0,0.1);
-                    position: relative;
-                  }
-                  .custom-loader::before {
-                    content: "";
-                    position: absolute;
-                    background: var(--loader-color);
-                    top: 0;
-                    left: 0;
-                    width: 0%;
-                    height: 100%;
-                    border-radius: 30px;
-                    animation: moving 1s ease-in-out infinite;
-                  }
-                  @keyframes moving {
-                    50% { width: 100%; }
-                    100% { width: 0; right: 0; left: unset; }
-                  }
-                `}</style>
-              </div>
-            ) : (
-              children
-            )}
+            {children}
           </div>
         </div>
       </main>
@@ -248,10 +232,13 @@ function NavItem({ href, icon, label, active = false, onClick }: { href: string;
       color: active ? 'var(--color-primary)' : 'var(--color-text-muted)',
       backgroundColor: active ? 'rgba(79, 70, 229, 0.1)' : 'transparent',
       fontWeight: active ? '600' : '500',
-      transition: 'all 0.2s'
+      transition: 'all 0.2s',
+      justifyContent: 'flex-start'
     }}>
-      {icon}
-      <span>{label}</span>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minWidth: '24px' }}>
+        {icon}
+      </div>
+      <span className="nav-item-label">{label}</span>
     </Link>
   );
 }

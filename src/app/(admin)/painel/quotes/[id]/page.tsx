@@ -9,6 +9,18 @@ export default async function QuotePrintPage({ params }: { params: { id: string 
 
   const settings = await prisma.settings.findFirst()
 
+  let parsedNotes: any = null
+  let plainNotes: string | null = quote.notes
+
+  if (quote.notes && quote.notes.startsWith('{')) {
+    try {
+      parsedNotes = JSON.parse(quote.notes)
+      plainNotes = parsedNotes.originalNotes || null
+    } catch (e) {
+      // not a json string
+    }
+  }
+
   return (
     <div style={{ padding: '40px', maxWidth: '800px', margin: '0 auto', backgroundColor: 'white', color: 'black' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '2px solid #eee', paddingBottom: '20px', marginBottom: '20px' }}>
@@ -19,6 +31,9 @@ export default async function QuotePrintPage({ params }: { params: { id: string 
           <p>Validade: {quote.validity} dias</p>
         </div>
         <div style={{ textAlign: 'right' }}>
+          <div style={{ display: 'inline-block', backgroundColor: '#000', padding: '10px', borderRadius: '8px', marginBottom: '12px' }}>
+            <img src="/logo.png" alt="Logo" style={{ height: '32px', objectFit: 'contain' }} />
+          </div>
           <h2 style={{ fontSize: '20px', fontWeight: 'bold' }}>{settings?.storeName || 'Digital Tech'}</h2>
           {settings?.fiscalData && <p style={{ fontSize: '14px', color: '#4b5563' }}>CNPJ: {settings.fiscalData}</p>}
           {settings?.whatsapp && <p style={{ fontSize: '14px', color: '#4b5563' }}>WhatsApp: {settings.whatsapp}</p>}
@@ -49,6 +64,16 @@ export default async function QuotePrintPage({ params }: { params: { id: string 
           <p>Consumidor Final</p>
         )}
       </div>
+
+      {parsedNotes && (parsedNotes.device || parsedNotes.brand || parsedNotes.model) && (
+        <div style={{ marginBottom: '30px' }}>
+          <h3 style={{ fontSize: '18px', fontWeight: 'bold', borderBottom: '1px solid #eee', paddingBottom: '8px', marginBottom: '10px' }}>Dados do Aparelho</h3>
+          <p><strong>Aparelho:</strong> {parsedNotes.device || ''} {parsedNotes.brand || ''} {parsedNotes.model || ''}</p>
+          {parsedNotes.imei && <p><strong>IMEI:</strong> {parsedNotes.imei}</p>}
+          {parsedNotes.defect && <p><strong>Problema Relatado:</strong> {parsedNotes.defect}</p>}
+          {parsedNotes.diagnostic && <p><strong>Laudo / Diagnóstico:</strong> {parsedNotes.diagnostic}</p>}
+        </div>
+      )}
 
       <div style={{ marginBottom: '30px' }}>
         <h3 style={{ fontSize: '18px', fontWeight: 'bold', borderBottom: '1px solid #eee', paddingBottom: '8px', marginBottom: '10px' }}>Itens do Orçamento</h3>
@@ -93,10 +118,10 @@ export default async function QuotePrintPage({ params }: { params: { id: string 
         </div>
       </div>
 
-      {quote.notes && (
+      {plainNotes && (
         <div style={{ marginBottom: '40px' }}>
           <h3 style={{ fontSize: '14px', fontWeight: 'bold', marginBottom: '8px' }}>Observações:</h3>
-          <p style={{ fontSize: '14px', whiteSpace: 'pre-wrap' }}>{quote.notes}</p>
+          <p style={{ fontSize: '14px', whiteSpace: 'pre-wrap' }}>{plainNotes}</p>
         </div>
       )}
 

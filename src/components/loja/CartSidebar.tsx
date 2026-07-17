@@ -1,6 +1,6 @@
 'use client'
 
-import { ShoppingBag, X, Plus, Minus, ArrowRight, MessageCircle } from 'lucide-react'
+import { ShoppingBag, X, Plus, Minus, ArrowRight, MessageCircle, Trash2 } from 'lucide-react'
 import { useCart } from './CartContext'
 import { useState } from 'react'
 import { processCheckout } from '@/actions/checkout'
@@ -95,53 +95,6 @@ export default function CartSidebar() {
 
   return (
     <>
-      {/* Botão Flutuante */}
-      <button 
-        onClick={() => setSidebarOpen(true)}
-        style={{
-          position: 'fixed',
-          bottom: '24px',
-          right: '24px',
-          backgroundColor: 'var(--color-primary)',
-          color: 'white',
-          border: 'none',
-          borderRadius: '50%',
-          width: '64px',
-          height: '64px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          boxShadow: '0 10px 25px -5px rgba(79, 70, 229, 0.4), 0 8px 10px -6px rgba(79, 70, 229, 0.2)',
-          cursor: 'pointer',
-          zIndex: 40,
-          transition: 'transform 0.2s',
-        }}
-        onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
-        onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
-      >
-        <ShoppingBag size={28} />
-        {items.length > 0 && (
-          <div style={{
-            position: 'absolute',
-            top: '-5px',
-            right: '-5px',
-            backgroundColor: 'var(--color-error)',
-            color: 'white',
-            borderRadius: '99px',
-            width: '24px',
-            height: '24px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: '12px',
-            fontWeight: 'bold',
-            border: '2px solid white'
-          }}>
-            {items.reduce((acc, item) => acc + item.quantity, 0)}
-          </div>
-        )}
-      </button>
-
       {/* Overlay Escuro */}
       {isSidebarOpen && (
         <div 
@@ -242,10 +195,15 @@ export default function CartSidebar() {
                     {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(item.price)}
                   </div>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', backgroundColor: '#222', padding: '4px 8px', borderRadius: '8px' }}>
-                  <button onClick={() => updateQuantity(item.id, item.quantity - 1)} style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', color: '#fff' }}><Minus size={14} /></button>
-                  <span style={{ fontSize: '0.875rem', fontWeight: '600', color: '#fff' }}>{item.quantity}</span>
-                  <button onClick={() => updateQuantity(item.id, item.quantity + 1)} style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', color: '#fff' }}><Plus size={14} /></button>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px', backgroundColor: '#222', padding: '4px 8px', borderRadius: '8px' }}>
+                    <button onClick={() => updateQuantity(item.id, item.quantity - 1)} style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', color: '#fff' }}><Minus size={14} /></button>
+                    <span style={{ fontSize: '0.875rem', fontWeight: '600', color: '#fff' }}>{item.quantity}</span>
+                    <button onClick={() => updateQuantity(item.id, item.quantity + 1)} style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', color: '#fff' }}><Plus size={14} /></button>
+                  </div>
+                  <button onClick={() => removeItem(item.id)} style={{ background: '#2a1111', border: 'none', cursor: 'pointer', display: 'flex', color: '#ef4444', padding: '8px', borderRadius: '8px', transition: 'all 0.2s' }} title="Remover item">
+                    <Trash2 size={16} />
+                  </button>
                 </div>
               </div>
             ))

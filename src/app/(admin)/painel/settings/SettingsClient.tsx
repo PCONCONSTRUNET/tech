@@ -1,7 +1,8 @@
+
 'use client'
 
 import { useState } from 'react'
-import { Save } from 'lucide-react'
+import { Save, Copy, Check } from 'lucide-react'
 import { maskCPFOrCNPJ, maskCEP, maskPhone } from '@/lib/masks'
 import { updateSettings } from '@/actions/settings'
 import { useRouter } from 'next/navigation'
@@ -9,6 +10,7 @@ import { useRouter } from 'next/navigation'
 export default function SettingsClient({ initialSettings }: { initialSettings: any }) {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
+  const [copied, setCopied] = useState(false)
   const [formData, setFormData] = useState({
     storeName: initialSettings?.storeName || 'Digital Tech',
     fiscalData: initialSettings?.fiscalData || '',
@@ -19,7 +21,8 @@ export default function SettingsClient({ initialSettings }: { initialSettings: a
     number: initialSettings?.number || '',
     city: initialSettings?.city || '',
     state: initialSettings?.state || '',
-    warrantyTerm: initialSettings?.warrantyTerm || 'Garantia de 90 dias para serviços executados...'
+    warrantyTerm: initialSettings?.warrantyTerm || 'Garantia de 90 dias para serviços executados...',
+    hours: initialSettings?.hours || ''
   })
 
   function handleChange(field: string, value: string) {
@@ -36,6 +39,12 @@ export default function SettingsClient({ initialSettings }: { initialSettings: a
       alert('Configurações salvas com sucesso!')
       router.refresh()
     }
+  }
+
+  function handleCopyLink() {
+    navigator.clipboard.writeText('https://digitalltech.vercel.app/loja')
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
   }
 
   return (
@@ -105,6 +114,20 @@ export default function SettingsClient({ initialSettings }: { initialSettings: a
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
               <input type="checkbox" id="showVitrine" defaultChecked style={{ width: '20px', height: '20px' }} />
               <label htmlFor="showVitrine" style={{ fontWeight: '500' }}>Habilitar Vitrine Online</label>
+            </div>
+            <div>
+              <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500' }}>Link da Loja (Para clientes)</label>
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <input type="text" className="input" value="https://digitalltech.vercel.app/loja" readOnly style={{ flex: 1, backgroundColor: '#f9fafb', color: '#6b7280' }} />
+                <button 
+                  type="button"
+                  onClick={handleCopyLink}
+                  style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '0 16px', backgroundColor: '#e5e7eb', border: '1px solid #d1d5db', borderRadius: '8px', cursor: 'pointer', fontWeight: '600', color: '#374151' }}
+                >
+                  {copied ? <Check size={16} color="#10b981" /> : <Copy size={16} />}
+                  {copied ? 'Copiado!' : 'Copiar'}
+                </button>
+              </div>
             </div>
             <div>
               <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500' }}>Texto de Boas-vindas</label>
