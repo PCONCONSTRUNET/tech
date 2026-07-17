@@ -10,6 +10,13 @@ export async function getServiceOrders() {
   })
 }
 
+export async function getServiceOrder(id: string) {
+  return prisma.serviceOrder.findUnique({
+    where: { id },
+    include: { customer: true }
+  })
+}
+
 export async function createServiceOrder(formData: FormData) {
   const customerId = formData.get('customerId') as string
   const device = formData.get('device') as string
