@@ -178,13 +178,12 @@ export default function MesaBoard({ cards }: { cards: OSCard[] }) {
                   colCards.map((card) => (
                     <div
                       key={card.id}
-                      onClick={() => window.location.href = `/painel/os/${card.id}`}
                       style={{
                         backgroundColor: 'var(--color-bg)',
                         borderRadius: 'var(--radius-md)',
                         padding: '12px',
                         border: '1px solid var(--color-border)',
-                        cursor: 'pointer',
+                        cursor: 'default',
                         transition: 'all 0.15s',
                         position: 'relative'
                       }}

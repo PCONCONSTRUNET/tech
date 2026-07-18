@@ -1,4 +1,9 @@
-import { X, Edit2, CheckCircle, Calendar, Shield, Trash2, Phone, MessageCircle, Printer, User, Smartphone, Lock, Package, Check, Mail, FileText, Wrench, AlertCircle, Clock, ChevronDown, Plus, Search } from 'lucide-react'
+'use client'
+
+import { useState, useTransition } from 'react'
+import { X, Edit2, CheckCircle, Calendar, Shield, Trash2, Phone, MessageCircle, Printer, User, Smartphone, Lock, Package, Check, FileText, Wrench, Clock, Copy } from 'lucide-react'
+import { deleteServiceOrder } from '@/actions/os'
+import { useRouter } from 'next/navigation'
 
 const STATUS_LABEL: Record<string, string> = {
   RECEBIDO: 'Recebido',
@@ -22,12 +27,46 @@ const STATUS_COLOR: Record<string, { bg: string; color: string; border: string }
   CANCELADO:            { bg: 'rgba(239,68,68,0.1)',     color: '#dc2626', border: '#fecaca' },
 }
 
-const fmt = (val: number) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val)
+const fmt = (val: number) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val || 0)
 
 export default function OSDetailsModal({ os, osNumber, onClose, isQuote = false }: { os: any; osNumber: number; onClose: () => void; isQuote?: boolean }) {
+  const [isPending, startTransition] = useTransition();
+  const router = useRouter();
+
   if (!os) return null;
 
   const sc = STATUS_COLOR[os.status] || { bg: '#f1f5f9', color: '#475569', border: '#e2e8f0' }
+
+  let notesData: any = {}
+  try { notesData = JSON.parse(os.notes || '{}') } catch {}
+
+  const trackingUrl = typeof window !== 'undefined' ? `${window.location.origin}/loja/track/${os.id}` : ''
+
+  const handleCopyTrackLink = () => {
+    navigator.clipboard.writeText(trackingUrl)
+    alert('Link de acompanhamento copiado!')
+  }
+
+  const handleDelete = () => {
+    if (confirm('Tem certeza que deseja excluir esta Ordem de Serviço?')) {
+      startTransition(async () => {
+        const res = await deleteServiceOrder(os.id);
+        if (res?.error) alert(res.error);
+        else {
+          alert('Excluído com sucesso!');
+          onClose();
+        }
+      })
+    }
+  }
+
+  const customerPhoneClean = os.customer?.phone ? os.customer.phone.replace(/\D/g, '') : '';
+  const customerNameFirst = os.customer?.name ? os.customer.name.split(' ')[0] : 'Cliente';
+  const whatsappUrl = customerPhoneClean 
+    ? `https://wa.me/55${customerPhoneClean}?text=Olá ${customerNameFirst}, sobre a sua Ordem de Serviço #${osNumber}...`
+    : '#';
+
+  const apenasContatarUrl = customerPhoneClean ? `https://wa.me/55${customerPhoneClean}` : '#';
 
   return (
     <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(15, 23, 42, 0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 60, backdropFilter: 'blur(4px)', padding: '24px' }}>
@@ -44,9 +83,7 @@ export default function OSDetailsModal({ os, osNumber, onClose, isQuote = false 
             </div>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-            <button style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748b' }}>
-              <Edit2 size={18} />
-            </button>
+            {/* Omitindo botão edit pois editar seria outra tela inteira */}
             <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748b' }}>
               <X size={20} />
             </button>
@@ -93,11 +130,11 @@ export default function OSDetailsModal({ os, osNumber, onClose, isQuote = false 
                   <CheckCircle size={16} /> ENTRADA RECEBIDA
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', color: '#16a34a', marginBottom: '8px', borderBottom: '1px solid #dcfce7', paddingBottom: '8px' }}>
-                  <span>Pix</span>
+                  <span>Dinheiro / Pix / Cartão</span>
                   <span>{fmt(os.price)}</span>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem', color: '#16a34a', marginBottom: '4px' }}>
-                  <span>Já recebido:</span>
+                  <span>Já pago:</span>
                   <span style={{ fontWeight: '800' }}>{fmt(os.price)}</span>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem', color: '#16a34a' }}>
@@ -105,17 +142,19 @@ export default function OSDetailsModal({ os, osNumber, onClose, isQuote = false 
                   <span style={{ fontWeight: '800' }}>R$ 0,00</span>
                 </div>
                 <div style={{ textAlign: 'right', fontSize: '0.65rem', color: '#16a34a', marginTop: '4px', opacity: 0.8 }}>
-                  Pago em {new Date(os.createdAt).toLocaleDateString('pt-BR')}
+                  Atualizado em {new Date(os.updatedAt).toLocaleDateString('pt-BR')}
                 </div>
               </div>
             )}
             
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem', color: '#64748b', marginBottom: '16px' }}>
-              <div style={{ width: '16px', height: '16px', border: '1px solid #cbd5e1', borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <Check size={12} style={{ color: 'transparent' }} />
+            {!os.price && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem', color: '#64748b', marginBottom: '16px' }}>
+                <div style={{ width: '16px', height: '16px', border: '1px solid #cbd5e1', borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Check size={12} style={{ color: 'transparent' }} />
+                </div>
+                Pagamento pendente ou valor R$ 0,00
               </div>
-              Pagamento na retirada
-            </div>
+            )}
             
             <div style={{ border: '1px solid var(--color-border)', borderRadius: '12px', padding: '16px', backgroundColor: 'white', display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
               <Calendar size={18} style={{ color: '#3b82f6' }} />
@@ -129,7 +168,7 @@ export default function OSDetailsModal({ os, osNumber, onClose, isQuote = false 
                 </div>
                 <div>
                   <div style={{ fontWeight: '800', fontSize: '0.95rem', color: '#065f46' }}>90 dias</div>
-                  <div style={{ fontSize: '0.7rem', color: '#16a34a' }}>Garantia legal aplicável.</div>
+                  <div style={{ fontSize: '0.7rem', color: '#16a34a' }}>Garantia legal aplicável após finalização.</div>
                 </div>
               </div>
               <div style={{ width: '36px', height: '36px', borderRadius: '50%', backgroundColor: '#dcfce7', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.65rem', fontWeight: '800', color: '#16a34a' }}>
@@ -151,14 +190,13 @@ export default function OSDetailsModal({ os, osNumber, onClose, isQuote = false 
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '8px' }}>
               <div>
                 <div style={{ fontSize: '0.65rem', fontWeight: '800', letterSpacing: '0.05em', color: '#64748b', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <FileText size={12} /> LAUDO FINAL
+                  <FileText size={12} /> LAUDO FINAL / DIAGNÓSTICO
                 </div>
-                <div style={{ fontSize: '0.75rem', color: '#94a3b8', marginTop: '2px' }}>Preencha após análise técnica. Pode ser editado depois na OS.</div>
               </div>
-              <div style={{ fontSize: '0.65rem', fontWeight: '700', color: '#10b981', backgroundColor: '#d1fae5', padding: '2px 8px', borderRadius: '12px', border: '1px solid #a7f3d0' }}>REGISTRADO</div>
+              {os.diagnostic && <div style={{ fontSize: '0.65rem', fontWeight: '700', color: '#10b981', backgroundColor: '#d1fae5', padding: '2px 8px', borderRadius: '12px', border: '1px solid #a7f3d0' }}>REGISTRADO</div>}
             </div>
-            <div style={{ border: '1px solid var(--color-border)', borderRadius: '12px', padding: '16px', fontSize: '0.9rem', color: '#0f172a', minHeight: '60px' }}>
-              Aparelho reparado com sucesso. Tudo ok.
+            <div style={{ border: '1px solid var(--color-border)', borderRadius: '12px', padding: '16px', fontSize: '0.9rem', color: os.diagnostic ? '#0f172a' : '#94a3b8', minHeight: '60px', backgroundColor: os.diagnostic ? 'white' : '#f8fafc' }}>
+              {os.diagnostic || 'Nenhum laudo final ou diagnóstico registrado na OS ainda.'}
             </div>
           </div>
 
@@ -166,18 +204,18 @@ export default function OSDetailsModal({ os, osNumber, onClose, isQuote = false 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '24px' }}>
             <div>
               <div style={{ fontSize: '0.65rem', fontWeight: '800', letterSpacing: '0.05em', color: '#64748b', textTransform: 'uppercase', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <Lock size={12} /> SENHA DO APARELHO
+                <Lock size={12} /> SENHA / DESBLOQUEIO
               </div>
-              <div style={{ border: '1px solid var(--color-border)', borderRadius: '12px', padding: '16px', fontSize: '0.9rem', color: '#0f172a' }}>
-                Não informado
+              <div style={{ border: '1px solid var(--color-border)', borderRadius: '12px', padding: '16px', fontSize: '0.9rem', color: '#0f172a', fontFamily: notesData.password ? 'monospace' : 'inherit' }}>
+                {notesData.password || 'Não informado'}
               </div>
             </div>
             <div>
               <div style={{ fontSize: '0.65rem', fontWeight: '800', letterSpacing: '0.05em', color: '#64748b', textTransform: 'uppercase', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <Package size={12} /> ACESSÓRIOS RECEBIDOS
+                <Package size={12} /> ESTADO FÍSICO
               </div>
               <div style={{ border: '1px solid var(--color-border)', borderRadius: '12px', padding: '16px', fontSize: '0.9rem', color: '#0f172a' }}>
-                Nenhum acessório
+                {notesData.physicalCondition || 'Não informado'}
               </div>
             </div>
           </div>
@@ -208,16 +246,16 @@ export default function OSDetailsModal({ os, osNumber, onClose, isQuote = false 
               <div style={{ fontSize: '0.9rem', color: '#334155', marginBottom: '16px' }}>
                 Crie um link seguro para que o cliente acompanhe o status da OS em tempo real.
               </div>
-              <div style={{ fontSize: '0.7rem', color: '#94a3b8', marginBottom: '4px' }}>Exemplo de link gerado</div>
-              <div style={{ backgroundColor: '#f1f5f9', border: '1px solid #e2e8f0', borderRadius: '8px 8px 0 0', padding: '16px', fontSize: '0.85rem', color: '#2563eb', fontFamily: 'monospace' }}>
-                https://reparopro.com.br/og/track/abc123...
+              <div style={{ fontSize: '0.7rem', color: '#94a3b8', marginBottom: '4px' }}>Link gerado</div>
+              <div style={{ backgroundColor: '#f1f5f9', border: '1px solid #e2e8f0', borderRadius: '8px 8px 0 0', padding: '16px', fontSize: '0.85rem', color: '#2563eb', fontFamily: 'monospace', overflowX: 'auto', whiteSpace: 'nowrap' }}>
+                {trackingUrl}
               </div>
               <div style={{ backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', borderTop: 'none', borderRadius: '0 0 8px 8px', padding: '12px 16px', fontSize: '0.7rem', color: '#64748b', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <Shield size={12} style={{ color: '#f59e0b' }} /> Link privado e seguro para seus clientes.
+                <Shield size={12} style={{ color: '#10b981' }} /> Link privado e seguro para seus clientes.
               </div>
               
-              <button style={{ width: '100%', marginTop: '16px', backgroundColor: '#3b82f6', color: 'white', border: 'none', borderRadius: '8px', padding: '12px', fontSize: '0.9rem', fontWeight: '700', cursor: 'pointer', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px' }}>
-                Gerar link de acompanhamento
+              <button onClick={handleCopyTrackLink} style={{ width: '100%', marginTop: '16px', backgroundColor: '#3b82f6', color: 'white', border: 'none', borderRadius: '8px', padding: '12px', fontSize: '0.9rem', fontWeight: '700', cursor: 'pointer', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px' }}>
+                <Copy size={16} /> Copiar link de acompanhamento
               </button>
             </div>
           </div>
@@ -233,8 +271,21 @@ export default function OSDetailsModal({ os, osNumber, onClose, isQuote = false 
               
               <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', position: 'relative', zIndex: 1 }}>
                 
+                {/* Evento Atualizado (se mudou o status) */}
+                {os.status !== 'RECEBIDO' && (
+                  <div style={{ display: 'flex', gap: '16px' }}>
+                    <div style={{ width: '12px', height: '12px', borderRadius: '50%', backgroundColor: sc.color, border: '2px solid white', marginTop: '4px', flexShrink: 0 }} />
+                    <div>
+                      <div style={{ fontSize: '0.9rem', fontWeight: '700', color: '#0f172a' }}>Alterado para {STATUS_LABEL[os.status as keyof typeof STATUS_LABEL]}</div>
+                      <div style={{ fontSize: '0.8rem', color: '#64748b' }}>Status da OS atualizado.</div>
+                      <div style={{ fontSize: '0.75rem', color: '#94a3b8', marginTop: '2px' }}>{new Date(os.updatedAt).toLocaleString('pt-BR')}</div>
+                    </div>
+                  </div>
+                )}
+                
+                {/* Evento Criado */}
                 <div style={{ display: 'flex', gap: '16px' }}>
-                  <div style={{ width: '12px', height: '12px', borderRadius: '50%', backgroundColor: '#3b82f6', border: '2px solid white', marginTop: '4px', flexShrink: 0 }} />
+                  <div style={{ width: '12px', height: '12px', borderRadius: '50%', backgroundColor: '#94a3b8', border: '2px solid white', marginTop: '4px', flexShrink: 0 }} />
                   <div>
                     <div style={{ fontSize: '0.9rem', fontWeight: '700', color: '#0f172a' }}>Criado</div>
                     <div style={{ fontSize: '0.8rem', color: '#64748b' }}>OS aberta no sistema</div>
@@ -249,20 +300,34 @@ export default function OSDetailsModal({ os, osNumber, onClose, isQuote = false 
         </div>
 
         {/* Footer Actions */}
-        <div style={{ padding: '16px 24px', borderTop: '1px solid var(--color-border)', display: 'flex', gap: '12px', justifyContent: 'space-between', backgroundColor: '#f8fafc' }}>
-          <button onClick={() => { if(confirm('Excluir?')) {} }} style={{ padding: '10px 16px', backgroundColor: '#fef2f2', border: '1px solid #fecaca', borderRadius: '8px', color: '#ef4444', fontWeight: '600', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}>
+        <div style={{ padding: '16px 24px', borderTop: '1px solid var(--color-border)', display: 'flex', gap: '12px', justifyContent: 'space-between', backgroundColor: '#f8fafc', flexWrap: 'wrap' }}>
+          <button onClick={handleDelete} disabled={isPending} style={{ padding: '10px 16px', backgroundColor: '#fef2f2', border: '1px solid #fecaca', borderRadius: '8px', color: '#ef4444', fontWeight: '600', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '6px', cursor: isPending ? 'wait' : 'pointer', opacity: isPending ? 0.5 : 1 }}>
             <Trash2 size={16} /> Excluir
           </button>
           
-          <div style={{ display: 'flex', gap: '12px' }}>
-            <button style={{ padding: '10px 16px', backgroundColor: 'white', border: '1px solid var(--color-border)', borderRadius: '8px', color: '#475569', fontWeight: '600', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}>
-              <Phone size={16} /> Apenas Contatar
-            </button>
-            <button style={{ padding: '10px 16px', backgroundColor: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '8px', color: '#16a34a', fontWeight: '600', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}>
-              <MessageCircle size={16} /> WhatsApp
-            </button>
+          <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+            {customerPhoneClean ? (
+              <a href={apenasContatarUrl} target="_blank" style={{ textDecoration: 'none', padding: '10px 16px', backgroundColor: 'white', border: '1px solid var(--color-border)', borderRadius: '8px', color: '#475569', fontWeight: '600', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <Phone size={16} /> Apenas Contatar
+              </a>
+            ) : (
+              <button onClick={() => alert('Telefone do cliente não informado.')} style={{ padding: '10px 16px', backgroundColor: 'white', border: '1px solid var(--color-border)', borderRadius: '8px', color: '#94a3b8', fontWeight: '600', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '6px', cursor: 'not-allowed' }}>
+                <Phone size={16} /> Apenas Contatar
+              </button>
+            )}
+
+            {customerPhoneClean ? (
+              <a href={whatsappUrl} target="_blank" style={{ textDecoration: 'none', padding: '10px 16px', backgroundColor: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '8px', color: '#16a34a', fontWeight: '600', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <MessageCircle size={16} /> WhatsApp
+              </a>
+            ) : (
+              <button onClick={() => alert('Telefone do cliente não informado.')} style={{ padding: '10px 16px', backgroundColor: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '8px', color: '#94a3b8', fontWeight: '600', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '6px', cursor: 'not-allowed' }}>
+                <MessageCircle size={16} /> WhatsApp
+              </button>
+            )}
+
             <button 
-              onClick={() => window.open(isQuote ? `/painel/quotes/${os.id}` : `/painel/os/${os.id}`, '_blank')}
+              onClick={() => window.open(isQuote ? `/painel/quotes/${os.id}` : `/api/os/${os.id}/pdf`, '_blank')}
               style={{ padding: '10px 24px', backgroundColor: '#2563eb', border: 'none', borderRadius: '8px', color: 'white', fontWeight: '700', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}
             >
               <Printer size={16} /> Imprimir {isQuote ? 'Orçamento' : 'OS'}
