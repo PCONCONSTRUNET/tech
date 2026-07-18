@@ -1,4 +1,4 @@
-import { X, Edit2, CheckCircle, Calendar, Shield, Trash2, Phone, MessageCircle, Printer, User, Smartphone, Lock, Package, Check, Mail } from 'lucide-react'
+import { X, Edit2, CheckCircle, Calendar, Shield, Trash2, Phone, MessageCircle, Printer, User, Smartphone, Lock, Package, Check, Mail, FileText, Wrench, AlertCircle, Clock, ChevronDown, Plus, Search } from 'lucide-react'
 
 const STATUS_LABEL: Record<string, string> = {
   RECEBIDO: 'Recebido',

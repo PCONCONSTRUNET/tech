@@ -126,7 +126,7 @@ const PAGE_SIZE = 15
 
 type Tab = 'todas' | 'andamento' | 'finalizadas' | 'interrompidas'
 
-export default function QuotesClient({ quotes, customers }: { quotes: any[]; customers: any[] }) {
+export default function QuotesClient({ quotes, customers, products }: { quotes: any[]; customers: any[]; products: any[] }) {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [modalStep, setModalStep] = useState(1)
   const [search, setSearch] = useState('')
