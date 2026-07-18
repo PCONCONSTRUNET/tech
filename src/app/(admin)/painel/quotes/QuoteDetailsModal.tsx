@@ -1,5 +1,6 @@
 import { X, Edit2, CheckCircle, Calendar, Shield, Trash2, Phone, Printer, User, Smartphone, Lock, Package, Check, Mail, FileText, Wrench, AlertCircle, Clock, ChevronDown, Plus, Search } from 'lucide-react'
 import WhatsappIcon from '@/components/WhatsappIcon'
+import { sendOsPdfWhatsApp } from '@/actions/os'
 
 const STATUS_LABEL: Record<string, string> = {
   RECEBIDO: 'Recebido',
@@ -261,6 +262,27 @@ export default function QuoteDetailsModal({ quote, quoteNumber, onClose, isQuote
             </button>
             <button style={{ padding: '10px 16px', backgroundColor: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '8px', color: '#16a34a', fontWeight: '600', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}>
               <WhatsappIcon size={16} color="#25D366" /> WhatsApp
+            </button>
+            <button 
+              onClick={async () => {
+                const btn = document.activeElement as HTMLButtonElement
+                const oldText = btn.innerHTML
+                btn.innerHTML = 'Enviando...'
+                btn.disabled = true
+                try {
+                  const res = await sendOsPdfWhatsApp(quote.id, quote.customer?.phone || '')
+                  if (res?.error) alert('Erro: ' + res.error)
+                  else alert('PDF enviado com sucesso!')
+                } catch(e) {
+                  alert('Erro ao enviar o PDF via API.')
+                } finally {
+                  btn.innerHTML = oldText
+                  btn.disabled = false
+                }
+              }}
+              style={{ padding: '10px 16px', backgroundColor: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '8px', color: '#16a34a', fontWeight: '600', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}
+            >
+              <WhatsappIcon size={16} color="#25D366" /> Enviar PDF (API)
             </button>
             <button 
               onClick={() => window.open(isQuote ? `/painel/quotes/${quote.id}` : `/painel/quote/${quote.id}`, '_blank')}

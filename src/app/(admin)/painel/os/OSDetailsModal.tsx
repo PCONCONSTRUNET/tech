@@ -3,7 +3,7 @@
 import { useState, useTransition } from 'react'
 import { X, Edit2, CheckCircle, Calendar, Shield, Trash2, Phone, Printer, User, Smartphone, Lock, Package, Check, FileText, Wrench, Clock, Copy, AlertCircle } from 'lucide-react'
 import WhatsappIcon from '@/components/WhatsappIcon'
-import { deleteServiceOrder } from '@/actions/os'
+import { deleteServiceOrder, sendOsPdfWhatsApp } from '@/actions/os'
 import { useRouter } from 'next/navigation'
 
 const STATUS_LABEL: Record<string, string> = {
@@ -342,6 +342,32 @@ export default function OSDetailsModal({ os, osNumber, onClose, isQuote = false 
                 <WhatsappIcon size={16} color="#94a3b8" /> WhatsApp
               </button>
             )}
+
+            <button 
+              onClick={async () => {
+                if (!customerPhoneClean) {
+                  alert('Telefone do cliente não informado.')
+                  return
+                }
+                const btn = document.activeElement as HTMLButtonElement
+                const oldText = btn.innerHTML
+                btn.innerHTML = 'Enviando...'
+                btn.disabled = true
+                try {
+                  const res = await sendOsPdfWhatsApp(os.id, customerPhoneClean)
+                  if (res?.error) alert('Erro: ' + res.error)
+                  else alert('PDF enviado com sucesso!')
+                } catch(e) {
+                  alert('Erro ao enviar o PDF via API.')
+                } finally {
+                  btn.innerHTML = oldText
+                  btn.disabled = false
+                }
+              }}
+              style={{ padding: '10px 16px', backgroundColor: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '8px', color: '#16a34a', fontWeight: '600', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}
+            >
+              <WhatsappIcon size={16} color="#25D366" /> Enviar PDF (API)
+            </button>
 
             <button 
               onClick={() => window.open(isQuote ? `/painel/quotes/${os.id}` : `/api/os/${os.id}/pdf`, '_blank')}
