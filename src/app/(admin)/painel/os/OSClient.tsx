@@ -153,6 +153,7 @@ export default function OSClient({ serviceOrders, customers }: { serviceOrders: 
   const [lockType, setLockType] = useState<'padrao' | 'desenho'>('padrao')
   const [devicePassword, setDevicePassword] = useState('')
   const [isCreatingCustomer, setIsCreatingCustomer] = useState(false)
+  const [isPaid, setIsPaid] = useState(false)
 
   // Services State
   const [servicesList, setServicesList] = useState([
@@ -809,10 +810,14 @@ export default function OSClient({ serviceOrders, customers }: { serviceOrders: 
                       
                       <div className="card" style={{ padding: '16px' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                          <label style={{ fontSize: '0.8rem', fontWeight: '700', color: '#0f172a' }}>Pagamento ao Abrir</label>
-                          <div style={{ width: '36px', height: '20px', backgroundColor: '#e2e8f0', borderRadius: '10px', position: 'relative' }}>
-                            <div style={{ width: '16px', height: '16px', backgroundColor: 'white', borderRadius: '50%', position: 'absolute', top: '2px', left: '2px', boxShadow: '0 1px 2px rgba(0,0,0,0.2)' }} />
+                          <label style={{ fontSize: '0.8rem', fontWeight: '700', color: '#0f172a' }}>{isPaid ? 'Entrada Paga' : 'Pagamento Pendente / Na Retirada'}</label>
+                          <div 
+                            onClick={() => setIsPaid(!isPaid)}
+                            style={{ width: '36px', height: '20px', backgroundColor: isPaid ? '#10b981' : '#e2e8f0', borderRadius: '10px', position: 'relative', cursor: 'pointer', transition: 'background-color 0.2s' }}
+                          >
+                            <div style={{ width: '16px', height: '16px', backgroundColor: 'white', borderRadius: '50%', position: 'absolute', top: '2px', left: isPaid ? '18px' : '2px', boxShadow: '0 1px 2px rgba(0,0,0,0.2)', transition: 'left 0.2s' }} />
                           </div>
+                          <input type="hidden" name="paymentStatus" value={isPaid ? 'PAGO' : 'PENDENTE'} />
                         </div>
                       </div>
                       

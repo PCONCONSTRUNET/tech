@@ -29,11 +29,12 @@ export async function createServiceOrder(formData: FormData) {
   
   const password = formData.get('password') as string || ''
   const physicalCondition = formData.get('physicalCondition') as string || ''
+  const paymentStatus = formData.get('paymentStatus') as string || 'PENDENTE'
 
   if (!customerId || !device || !defect) return { error: 'Campos obrigatórios faltando' }
 
   try {
-    const notes = JSON.stringify({ password, physicalCondition })
+    const notes = JSON.stringify({ password, physicalCondition, paymentStatus })
 
     const created = await prisma.serviceOrder.create({
       data: { customerId, device, brand, model, imei, defect, price, status, notes },

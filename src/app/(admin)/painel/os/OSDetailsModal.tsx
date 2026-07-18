@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import { X, Edit2, CheckCircle, Calendar, Shield, Trash2, Phone, Printer, User, Smartphone, Lock, Package, Check, FileText, Wrench, Clock, Copy } from 'lucide-react'
+import { X, Edit2, CheckCircle, Calendar, Shield, Trash2, Phone, Printer, User, Smartphone, Lock, Package, Check, FileText, Wrench, Clock, Copy, AlertCircle } from 'lucide-react'
 import WhatsappIcon from '@/components/WhatsappIcon'
 import { deleteServiceOrder } from '@/actions/os'
 import { useRouter } from 'next/navigation'
@@ -125,7 +125,7 @@ export default function OSDetailsModal({ os, osNumber, onClose, isQuote = false 
             <div style={{ fontSize: '0.7rem', fontWeight: '800', letterSpacing: '0.05em', color: '#64748b', textTransform: 'uppercase', marginBottom: '4px' }}>VALOR TOTAL</div>
             <div style={{ fontSize: '2.2rem', fontWeight: '800', color: '#0f172a', marginBottom: '16px' }}>{os.price ? fmt(os.price) : 'R$ 0,00'}</div>
             
-            {os.price > 0 && (
+            {os.price > 0 && notesData.paymentStatus === 'PAGO' && (
               <div style={{ backgroundColor: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '12px', padding: '16px', marginBottom: '16px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.75rem', fontWeight: '800', color: '#16a34a', letterSpacing: '0.05em', textTransform: 'uppercase', marginBottom: '12px' }}>
                   <CheckCircle size={16} /> ENTRADA RECEBIDA
@@ -148,12 +148,28 @@ export default function OSDetailsModal({ os, osNumber, onClose, isQuote = false 
               </div>
             )}
             
+            {os.price > 0 && notesData.paymentStatus !== 'PAGO' && (
+              <div style={{ backgroundColor: '#fffbeb', border: '1px solid #fde68a', borderRadius: '12px', padding: '16px', marginBottom: '16px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.75rem', fontWeight: '800', color: '#d97706', letterSpacing: '0.05em', textTransform: 'uppercase', marginBottom: '12px' }}>
+                  <AlertCircle size={16} /> PAGAMENTO PENDENTE
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem', color: '#d97706', marginBottom: '4px' }}>
+                  <span>Já pago:</span>
+                  <span style={{ fontWeight: '800' }}>R$ 0,00</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem', color: '#d97706' }}>
+                  <span>Falta receber:</span>
+                  <span style={{ fontWeight: '800' }}>{fmt(os.price)}</span>
+                </div>
+              </div>
+            )}
+            
             {!os.price && (
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem', color: '#64748b', marginBottom: '16px' }}>
                 <div style={{ width: '16px', height: '16px', border: '1px solid #cbd5e1', borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <Check size={12} style={{ color: 'transparent' }} />
                 </div>
-                Pagamento pendente ou valor R$ 0,00
+                Nenhum valor lançado
               </div>
             )}
             
