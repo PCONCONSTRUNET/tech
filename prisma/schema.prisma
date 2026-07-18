@@ -254,3 +254,24 @@ model WhatsAppTemplate {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
+model CashSession {
+  id            String        @id @default(cuid())
+  operatorName  String
+  initialAmount Float         @default(0)
+  status        String        @default("ABERTO") // ABERTO, FECHADO
+  closedAt      DateTime?
+  movements     CashMovement[]
+  createdAt     DateTime      @default(now())
+}
+
+model CashMovement {
+  id          String      @id @default(cuid())
+  sessionId   String
+  session     CashSession @relation(fields: [sessionId], references: [id])
+  type        String      // ENTRADA, SAIDA, SANGRIA, SUPRIMENTO
+  amount      Float
+  method      String?
+  description String?
+  createdAt   DateTime    @default(now())
+}
