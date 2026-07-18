@@ -7,7 +7,7 @@ export const dynamic = 'force-dynamic'
 export default async function IntegrationsPage() {
   const settings = await getSettings()
   const templatesReq = await getTemplates()
-  const templates = templatesReq.data || []
+  const templates = 'data' in templatesReq ? (templatesReq.data ?? []) : []
   
-  return <IntegrationsClient initialSettings={settings?.data} initialTemplates={templates} />
+  return <IntegrationsClient initialSettings={settings} initialTemplates={templates} />
 }
