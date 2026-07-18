@@ -40,6 +40,20 @@ export async function createServiceOrder(formData: FormData) {
       data: { customerId, device, brand, model, imei, defect, price, status, notes },
       include: { customer: true }
     })
+
+    if (paymentStatus === 'PAGO' && price > 0) {
+      await prisma.transaction.create({
+        data: {
+          type: 'RECEITA',
+          amount: price,
+          description: `Pagamento de Entrada - OS #${created.id.slice(-6).toUpperCase()}`,
+          status: 'PAGO',
+          paymentMethod: 'Dinheiro', // default
+          customerId
+        }
+      })
+    }
+
     revalidatePath('/painel/os')
     return { success: true, os: created }
   } catch (error) {

@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import WhatsappIcon from './WhatsappIcon';
 import { sendOsPdfWhatsApp, deleteServiceOrder, updateServiceOrderStatus } from '@/actions/os';
+import ConfirmModal from './ConfirmModal';
 
 const STATUS_OPTIONS = [
   { key: 'RECEBIDO',             label: 'Entrada',           icon: FileText,    color: '#64748b', bg: '#f1f5f9' },
@@ -25,6 +26,13 @@ export default function MesaCardMenu({ card }: { card: any }) {
   const [showStatusSub, setShowStatusSub] = useState(false);
   const [isPending, startTransition] = useTransition();
   const [menuPos, setMenuPos] = useState({ top: 0, left: 0 });
+  const [confirmConfig, setConfirmConfig] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    isDestructive: boolean;
+    onConfirm: () => void;
+  }>({ isOpen: false, title: '', message: '', isDestructive: false, onConfirm: () => {} });
   const buttonRef = useRef<HTMLButtonElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -65,20 +73,35 @@ export default function MesaCardMenu({ card }: { card: any }) {
     e.stopPropagation(); e.preventDefault();
     setIsOpen(false);
     if (!card.customerPhone) { alert('Cliente não possui telefone cadastrado!'); return; }
-    if (!confirm(`Deseja enviar o PDF da OS #${card.number} para o WhatsApp do cliente?`)) return;
-    startTransition(async () => {
-      const res = await sendOsPdfWhatsApp(card.id, card.customerPhone);
-      if (res?.error) alert(res.error);
-      else alert('PDF enviado com sucesso para o WhatsApp!');
+    
+    setConfirmConfig({
+      isOpen: true,
+      title: 'Enviar PDF',
+      message: `Deseja enviar o PDF da OS #${card.number} para o WhatsApp do cliente?`,
+      isDestructive: false,
+      onConfirm: () => {
+        startTransition(async () => {
+          const res = await sendOsPdfWhatsApp(card.id, card.customerPhone);
+          if (res?.error) alert(res.error);
+          else alert('PDF enviado com sucesso para o WhatsApp!');
+        });
+      }
     });
   };
 
   const handleDelete = (e: React.MouseEvent) => {
     e.stopPropagation(); e.preventDefault();
     setIsOpen(false);
-    if (confirm('Tem certeza que deseja excluir esta OS?')) {
-      startTransition(async () => { await deleteServiceOrder(card.id); });
-    }
+    
+    setConfirmConfig({
+      isOpen: true,
+      title: 'Excluir OS',
+      message: 'Tem certeza que deseja excluir esta OS? Essa ação não pode ser desfeita.',
+      isDestructive: true,
+      onConfirm: () => {
+        startTransition(async () => { await deleteServiceOrder(card.id); });
+      }
+    });
   };
 
   const handleStatus = (e: React.MouseEvent, newStatus: string) => {
@@ -176,24 +199,34 @@ export default function MesaCardMenu({ card }: { card: any }) {
   ) : null;
 
   return (
-    <div style={{ position: 'absolute', top: '8px', right: '8px', zIndex: 10 }}>
-      <button
-        ref={buttonRef}
-        onClick={handleOpen}
-        disabled={isPending}
-        style={{
-          background: isOpen ? '#f1f5f9' : 'transparent', border: 'none',
-          padding: '4px', borderRadius: '8px', cursor: isPending ? 'not-allowed' : 'pointer',
-          color: '#64748b', display: 'flex', alignItems: 'center', justifyContent: 'center',
-          transition: 'background 0.2s', opacity: isPending ? 0.5 : 1,
-        }}
-        onMouseEnter={e => (e.currentTarget.style.background = '#f1f5f9')}
-        onMouseLeave={e => (e.currentTarget.style.background = isOpen ? '#f1f5f9' : 'transparent')}
-      >
-        <MoreVertical size={16} />
-      </button>
-      {menu}
-    </div>
+    <>
+      <div style={{ position: 'absolute', top: '8px', right: '8px', zIndex: 10 }}>
+        <button
+          ref={buttonRef}
+          onClick={handleOpen}
+          disabled={isPending}
+          style={{
+            background: isOpen ? '#f1f5f9' : 'transparent', border: 'none',
+            padding: '4px', borderRadius: '8px', cursor: isPending ? 'not-allowed' : 'pointer',
+            color: '#64748b', display: 'flex', alignItems: 'center', justifyContent: 'center',
+            transition: 'background 0.2s', opacity: isPending ? 0.5 : 1,
+          }}
+          onMouseEnter={e => (e.currentTarget.style.background = '#f1f5f9')}
+          onMouseLeave={e => (e.currentTarget.style.background = isOpen ? '#f1f5f9' : 'transparent')}
+        >
+          <MoreVertical size={16} />
+        </button>
+        {menu}
+      </div>
+      <ConfirmModal
+        isOpen={confirmConfig.isOpen}
+        title={confirmConfig.title}
+        message={confirmConfig.message}
+        isDestructive={confirmConfig.isDestructive}
+        onConfirm={confirmConfig.onConfirm}
+        onClose={() => setConfirmConfig(prev => ({ ...prev, isOpen: false }))}
+      />
+    </>
   );
 }
 

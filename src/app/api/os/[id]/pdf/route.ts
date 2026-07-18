@@ -17,7 +17,11 @@ export async function GET(
   if (!os) return NextResponse.json({ error: 'OS não encontrada' }, { status: 404 })
 
   const storeName = settings?.storeName || 'Digital Tech'
-  const logoUrl = settings?.logoUrl || null
+  let logoUrl = settings?.logoUrl || null
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.NEXTAUTH_URL || _req.nextUrl.origin
+  if (logoUrl && logoUrl.startsWith('/')) {
+    logoUrl = `${baseUrl}${logoUrl}`
+  }
 
   const fmt = (v?: number | null) =>
     new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v || 0)
@@ -45,7 +49,7 @@ export async function GET(
   }
 
   const logoHtml = logoUrl
-    ? `<img src="${logoUrl}" alt="${storeName}" style="height:60px;max-width:180px;object-fit:contain;mix-blend-mode:multiply;" />`
+    ? `<img src="${logoUrl}" alt="${storeName}" style="height:60px;max-width:180px;object-fit:contain;" />`
     : `<div style="font-size:1.4rem;font-weight:900;color:#6366f1">🔧 ${storeName}</div>`
 
   const physicalConditionHtml = notesData.physicalCondition
