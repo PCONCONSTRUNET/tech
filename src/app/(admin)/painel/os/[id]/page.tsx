@@ -4,8 +4,9 @@ import { notFound } from 'next/navigation'
 
 export const dynamic = 'force-dynamic'
 
-export default async function OSPrintPage({ params }: { params: { id: string } }) {
-  const os = await getServiceOrder(params.id)
+export default async function OSPrintPage({ params }: { params: Promise<{ id: string }> }) {
+  const resolvedParams = await params;
+  const os = await getServiceOrder(resolvedParams.id)
   if (!os) return notFound()
 
   const settings = await prisma.settings.findFirst()

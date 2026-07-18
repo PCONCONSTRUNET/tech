@@ -5,7 +5,7 @@ import { Plus, Search, Trash2, X, FileText, SlidersHorizontal, Clock, AlertCircl
 import { createQuote, deleteQuote, updateQuoteStatus } from '@/actions/quote'
 import { createCustomer } from '@/actions/customer'
 import QuoteDetailsModal from './QuoteDetailsModal'
-import OSFilterModal from './OSFilterModal'
+import OSFilterModal from '../os/OSFilterModal'
 
 const PatternLock = ({ onChange }: { onChange: (pattern: string) => void }) => {
   const [pattern, setPattern] = useState<number[]>([]);
