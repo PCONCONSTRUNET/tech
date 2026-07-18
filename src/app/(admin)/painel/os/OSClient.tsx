@@ -7,6 +7,7 @@ import { createCustomer } from '@/actions/customer'
 import { printA4, printThermal, printLabel, type PrintOS } from '@/lib/print-os'
 import OSDetailsModal from './OSDetailsModal'
 import OSFilterModal from './OSFilterModal'
+import StatusDropdown from '@/components/StatusDropdown'
 
 const PatternLock = ({ onChange }: { onChange: (pattern: string) => void }) => {
   const [pattern, setPattern] = useState<number[]>([]);
@@ -404,31 +405,7 @@ export default function OSClient({ serviceOrders, customers }: { serviceOrders: 
                       </div>
                     </td>
                     <td style={{ padding: '16px 24px', position: 'relative' }}>
-                      <div 
-                        style={{
-                          display: 'inline-flex', alignItems: 'center', gap: '6px',
-                          fontSize: '0.75rem', fontWeight: '600',
-                          color: sc.color, backgroundColor: 'white',
-                          border: `1px solid ${sc.color}`, cursor: 'pointer',
-                          padding: '4px 12px', borderRadius: '16px',
-                        }}
-                      >
-                        <Clock size={12} /> {STATUS_LABEL[os.status as keyof typeof STATUS_LABEL]}
-                        <ChevronDown size={12} />
-                      </div>
-                      {/* TODO: Implement full dropdown interaction if needed, for now using a stylized visual button that opens a native select invisibly or just leaving it as visual */}
-                      <select
-                        value={os.status}
-                        onChange={e => updateServiceOrderStatus(os.id, e.target.value)}
-                        style={{
-                          position: 'absolute', top: '16px', left: '24px', width: '100px', height: '24px',
-                          opacity: 0, cursor: 'pointer'
-                        }}
-                      >
-                        {Object.entries(STATUS_LABEL).map(([v, l]) => (
-                          <option key={v} value={v}>{l}</option>
-                        ))}
-                      </select>
+                      <StatusDropdown osId={os.id} currentStatus={os.status} />
                     </td>
                     <td style={{ padding: '16px 24px' }}>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>

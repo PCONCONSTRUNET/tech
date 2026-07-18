@@ -24,6 +24,7 @@ export default async function MesaPage() {
     id: o.id,
     number: numberMap[o.id] ?? 0,
     customerName: o.customer?.name ?? 'Sem cliente',
+    customerPhone: o.customer?.phone ?? '',
     device: o.device,
     brand: o.brand,
     model: o.model,

@@ -3,11 +3,13 @@
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
 import { Search, Archive, Plus, Smartphone } from 'lucide-react';
+import MesaCardMenu from '@/components/MesaCardMenu';
 
 type OSCard = {
   id: string;
   number: number;
   customerName: string;
+  customerPhone: string;
   device: string;
   brand: string;
   model: string;
@@ -174,52 +176,52 @@ export default function MesaBoard({ cards }: { cards: OSCard[] }) {
                   </div>
                 ) : (
                   colCards.map((card) => (
-                    <Link
+                    <div
                       key={card.id}
-                      href={`/painel/os/${card.id}`}
-                      style={{ textDecoration: 'none', color: 'inherit' }}
-                    >
-                      <div style={{
+                      onClick={() => window.location.href = `/painel/os/${card.id}`}
+                      style={{
                         backgroundColor: 'var(--color-bg)',
                         borderRadius: 'var(--radius-md)',
                         padding: '12px',
                         border: '1px solid var(--color-border)',
                         cursor: 'pointer',
                         transition: 'all 0.15s',
-                      }}>
-                        {/* OS Number + Date */}
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
-                          <div style={{ fontSize: '0.65rem', fontWeight: '800', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                            <span style={{ color: 'var(--color-text-muted)' }}>#{card.number}</span>
-                            {card.status === 'RECEBIDO' ? (
-                              <span style={{ backgroundColor: '#dcfce7', color: '#16a34a', padding: '2px 8px', borderRadius: '12px', border: '1px solid #bbf7d0' }}>Entrada</span>
-                            ) : (
-                              <span style={{ backgroundColor: col.bg, color: col.color, padding: '2px 8px', borderRadius: '12px' }}>{col.label}</span>
-                            )}
-                          </div>
-                          <span style={{ fontSize: '0.68rem', color: 'var(--color-text-muted)' }}>
-                            {formatDate(card.createdAt)}
-                          </span>
+                        position: 'relative'
+                      }}
+                    >
+                      <MesaCardMenu card={card} />
+                      {/* OS Number + Date */}
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px', paddingRight: '24px' }}>
+                        <div style={{ fontSize: '0.65rem', fontWeight: '800', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          <span style={{ color: 'var(--color-text-muted)' }}>#{card.number}</span>
+                          {card.status === 'RECEBIDO' ? (
+                            <span style={{ backgroundColor: '#dcfce7', color: '#16a34a', padding: '2px 8px', borderRadius: '12px', border: '1px solid #bbf7d0' }}>Entrada</span>
+                          ) : (
+                            <span style={{ backgroundColor: col.bg, color: col.color, padding: '2px 8px', borderRadius: '12px' }}>{col.label}</span>
+                          )}
                         </div>
-                        {/* Customer */}
-                        <div style={{ fontWeight: '700', fontSize: '0.82rem', marginBottom: '3px', color: 'var(--color-text)' }}>
-                          {card.customerName}
-                        </div>
-                        {/* Device */}
-                        <div style={{ fontSize: '0.76rem', color: 'var(--color-text-muted)' }}>
-                          {card.brand} {card.model}
-                        </div>
-                        {/* Defect */}
-                        <div style={{
-                          fontSize: '0.72rem', color: 'var(--color-text-muted)',
-                          marginTop: '6px', overflow: 'hidden',
-                          display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical',
-                          lineHeight: 1.4,
-                        }}>
-                          {card.defect}
-                        </div>
+                        <span style={{ fontSize: '0.68rem', color: 'var(--color-text-muted)' }}>
+                          {formatDate(card.createdAt)}
+                        </span>
                       </div>
-                    </Link>
+                      {/* Customer */}
+                      <div style={{ fontWeight: '700', fontSize: '0.82rem', marginBottom: '3px', color: 'var(--color-text)' }}>
+                        {card.customerName}
+                      </div>
+                      {/* Device */}
+                      <div style={{ fontSize: '0.76rem', color: 'var(--color-text-muted)' }}>
+                        {card.brand} {card.model}
+                      </div>
+                      {/* Defect */}
+                      <div style={{
+                        fontSize: '0.72rem', color: 'var(--color-text-muted)',
+                        marginTop: '6px', overflow: 'hidden',
+                        display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical',
+                        lineHeight: 1.4,
+                      }}>
+                        {card.defect}
+                      </div>
+                    </div>
                   ))
                 )}
               </div>
