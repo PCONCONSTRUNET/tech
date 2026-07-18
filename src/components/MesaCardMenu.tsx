@@ -1,159 +1,205 @@
 'use client';
 
 import { useState, useRef, useEffect, useTransition } from 'react';
-import { MoreVertical, Printer, MessageCircle, Phone, Edit, ArrowRight, XCircle, Trash2, Archive, Check } from 'lucide-react';
+import { createPortal } from 'react-dom';
+import {
+  MoreVertical, Printer, MessageCircle, Phone, Edit,
+  XCircle, Trash2, AlertCircle, Package, Wrench, CheckCircle, DollarSign, FileText, Clock
+} from 'lucide-react';
 import { sendOsPdfWhatsApp, deleteServiceOrder, updateServiceOrderStatus } from '@/actions/os';
-import { useRouter } from 'next/navigation';
+
+const STATUS_OPTIONS = [
+  { key: 'RECEBIDO',             label: 'Entrada',           icon: FileText,    color: '#64748b', bg: '#f1f5f9' },
+  { key: 'EM_ANALISE',           label: 'Em Análise',        icon: AlertCircle, color: '#2563eb', bg: '#eff6ff' },
+  { key: 'AGUARDANDO_APROVACAO', label: 'Aguard. Aprovação', icon: Clock,       color: '#d97706', bg: '#fffbeb' },
+  { key: 'AGUARDANDO_PECA',      label: 'Aguardando Peça',   icon: Package,     color: '#d97706', bg: '#fffbeb' },
+  { key: 'EM_CONSERTO',          label: 'Em Serviço',        icon: Wrench,      color: '#9333ea', bg: '#faf5ff' },
+  { key: 'PRONTO',               label: 'Concluído',         icon: CheckCircle, color: '#16a34a', bg: '#f0fdf4' },
+  { key: 'ENTREGUE',             label: 'Pago',              icon: DollarSign,  color: '#475569', bg: '#f1f5f9' },
+  { key: 'CANCELADO',            label: 'Interrompido',      icon: XCircle,     color: '#dc2626', bg: '#fef2f2' },
+];
 
 export default function MesaCardMenu({ card }: { card: any }) {
   const [isOpen, setIsOpen] = useState(false);
+  const [showStatusSub, setShowStatusSub] = useState(false);
   const [isPending, startTransition] = useTransition();
-  const ref = useRef<HTMLDivElement>(null);
-  const router = useRouter();
-  
+  const [menuPos, setMenuPos] = useState({ top: 0, left: 0 });
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (ref.current && !ref.current.contains(event.target as Node)) {
+      if (
+        menuRef.current && !menuRef.current.contains(event.target as Node) &&
+        buttonRef.current && !buttonRef.current.contains(event.target as Node)
+      ) {
         setIsOpen(false);
+        setShowStatusSub(false);
       }
     }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const handlePrint = (e: React.MouseEvent) => {
+  function handleOpen(e: React.MouseEvent) {
     e.stopPropagation();
     e.preventDefault();
+    if (!buttonRef.current) return;
+    const rect = buttonRef.current.getBoundingClientRect();
+    setMenuPos({
+      top: rect.bottom + window.scrollY + 4,
+      left: rect.right + window.scrollX - 200,
+    });
+    setIsOpen(prev => !prev);
+    setShowStatusSub(false);
+  }
+
+  const handlePrint = (e: React.MouseEvent) => {
+    e.stopPropagation(); e.preventDefault();
     setIsOpen(false);
     window.open(`/api/os/${card.id}/pdf`, '_blank');
   };
 
   const handleWhatsApp = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    e.preventDefault();
+    e.stopPropagation(); e.preventDefault();
     setIsOpen(false);
-    
-    if (!card.customerPhone) {
-      alert("Cliente não possui telefone cadastrado!");
-      return;
-    }
-    
-    const confirmSend = confirm(`Deseja enviar o PDF da OS #${card.number} para o WhatsApp do cliente?`);
-    if (!confirmSend) return;
-    
+    if (!card.customerPhone) { alert('Cliente não possui telefone cadastrado!'); return; }
+    if (!confirm(`Deseja enviar o PDF da OS #${card.number} para o WhatsApp do cliente?`)) return;
     startTransition(async () => {
       const res = await sendOsPdfWhatsApp(card.id, card.customerPhone);
-      if (res?.error) {
-        alert(res.error);
-      } else {
-        alert('PDF enviado com sucesso para o WhatsApp!');
-      }
+      if (res?.error) alert(res.error);
+      else alert('PDF enviado com sucesso para o WhatsApp!');
     });
   };
 
   const handleDelete = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    e.preventDefault();
+    e.stopPropagation(); e.preventDefault();
     setIsOpen(false);
     if (confirm('Tem certeza que deseja excluir esta OS?')) {
-      startTransition(async () => {
-        await deleteServiceOrder(card.id);
-      });
+      startTransition(async () => { await deleteServiceOrder(card.id); });
     }
   };
 
   const handleStatus = (e: React.MouseEvent, newStatus: string) => {
-    e.stopPropagation();
-    e.preventDefault();
+    e.stopPropagation(); e.preventDefault();
     setIsOpen(false);
-    startTransition(async () => {
-      await updateServiceOrderStatus(card.id, newStatus);
-    });
+    setShowStatusSub(false);
+    startTransition(async () => { await updateServiceOrderStatus(card.id, newStatus); });
   };
 
-  const handleEdit = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    e.preventDefault();
-    setIsOpen(false);
-    // Ideally opens a modal, but for now we can navigate to the OS page
-    // or just alert if edit from Mesa is not fully supported yet.
-    // The user might be fine navigating to the OS list for full edit.
-    alert("Para editar todos os campos, acesse a tela de Ordens de Serviço.");
-  };
+  const menu = isOpen && typeof document !== 'undefined' ? createPortal(
+    <div
+      ref={menuRef}
+      style={{
+        position: 'absolute',
+        top: menuPos.top,
+        left: Math.max(8, menuPos.left),
+        backgroundColor: 'white',
+        border: '1px solid #e2e8f0',
+        borderRadius: '12px',
+        boxShadow: '0 20px 40px -8px rgba(0,0,0,0.18)',
+        minWidth: '210px',
+        zIndex: 99999,
+        padding: '6px',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '2px',
+      }}
+    >
+      {/* Editar OS */}
+      <button onClick={(e) => { e.stopPropagation(); e.preventDefault(); setIsOpen(false); alert('Para editar, acesse a tela de OS.'); }} style={itemStyle}>
+        <Edit size={14} color="#64748b" /> Editar OS
+      </button>
+
+      {/* Imprimir */}
+      <button onClick={handlePrint} style={itemStyle}>
+        <Printer size={14} color="#64748b" /> Imprimir PDF
+      </button>
+
+      {/* WhatsApp PDF */}
+      <button onClick={handleWhatsApp} style={itemStyle}>
+        <MessageCircle size={14} color="#16a34a" /> Enviar PDF WhatsApp
+      </button>
+
+      {/* Contatar */}
+      <button onClick={(e) => { e.stopPropagation(); e.preventDefault(); }} style={itemStyle}>
+        <Phone size={14} color="#64748b" /> Apenas Contatar
+      </button>
+
+      <div style={{ height: '1px', background: '#e2e8f0', margin: '4px 0' }} />
+
+      {/* Seção STATUS */}
+      <div style={{ padding: '4px 10px 2px', fontSize: '0.63rem', fontWeight: '800', letterSpacing: '0.07em', color: '#94a3b8' }}>
+        ALTERAR STATUS
+      </div>
+
+      {STATUS_OPTIONS.map(opt => {
+        const Icon = opt.icon;
+        const isCurrent = card.status === opt.key;
+        return (
+          <button
+            key={opt.key}
+            onClick={(e) => handleStatus(e, opt.key)}
+            style={{
+              ...itemStyle,
+              background: isCurrent ? opt.bg : 'transparent',
+              color: isCurrent ? opt.color : '#334155',
+              fontWeight: isCurrent ? '600' : '500',
+            }}
+            onMouseEnter={e => { if (!isCurrent) e.currentTarget.style.background = '#f8fafc'; }}
+            onMouseLeave={e => { if (!isCurrent) e.currentTarget.style.background = 'transparent'; }}
+          >
+            <div style={{
+              width: '22px', height: '22px', borderRadius: '6px',
+              backgroundColor: opt.bg, color: opt.color,
+              display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0
+            }}>
+              <Icon size={13} />
+            </div>
+            {opt.label}
+            {isCurrent && (
+              <span style={{ marginLeft: 'auto', fontSize: '0.65rem', color: opt.color }}>✓ atual</span>
+            )}
+          </button>
+        );
+      })}
+
+      <div style={{ height: '1px', background: '#e2e8f0', margin: '4px 0' }} />
+
+      {/* Excluir */}
+      <button onClick={handleDelete} style={{ ...itemStyle, color: '#dc2626' }}>
+        <Trash2 size={14} color="#dc2626" /> Excluir OS
+      </button>
+    </div>,
+    document.body
+  ) : null;
 
   return (
-    <div ref={ref} style={{ position: 'absolute', top: '8px', right: '8px', zIndex: 10 }}>
+    <div style={{ position: 'absolute', top: '8px', right: '8px', zIndex: 10 }}>
       <button
-        onClick={(e) => { e.stopPropagation(); e.preventDefault(); setIsOpen(!isOpen); }}
+        ref={buttonRef}
+        onClick={handleOpen}
         disabled={isPending}
         style={{
           background: isOpen ? '#f1f5f9' : 'transparent', border: 'none',
           padding: '4px', borderRadius: '8px', cursor: isPending ? 'not-allowed' : 'pointer',
-          color: 'var(--color-text-muted)', display: 'flex', alignItems: 'center', justifyContent: 'center',
-          transition: 'background 0.2s', opacity: isPending ? 0.5 : 1
+          color: '#64748b', display: 'flex', alignItems: 'center', justifyContent: 'center',
+          transition: 'background 0.2s', opacity: isPending ? 0.5 : 1,
         }}
-        onMouseEnter={e => e.currentTarget.style.background = '#f1f5f9'}
-        onMouseLeave={e => e.currentTarget.style.background = isOpen ? '#f1f5f9' : 'transparent'}
+        onMouseEnter={e => (e.currentTarget.style.background = '#f1f5f9')}
+        onMouseLeave={e => (e.currentTarget.style.background = isOpen ? '#f1f5f9' : 'transparent')}
       >
         <MoreVertical size={16} />
       </button>
-
-      {isOpen && (
-        <div style={{
-          position: 'absolute', top: '100%', right: '0',
-          backgroundColor: 'white', border: '1px solid var(--color-border)',
-          borderRadius: '12px', boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.15)',
-          minWidth: '200px', padding: '6px',
-          display: 'flex', flexDirection: 'column', gap: '2px'
-        }}>
-          <button onClick={handleEdit} className="menu-item" style={menuItemStyle}>
-            <Edit size={14} color="#64748b" /> Editar OS
-          </button>
-          
-          <button onClick={handlePrint} className="menu-item" style={menuItemStyle}>
-            <Printer size={14} color="#64748b" /> Imprimir PDF
-          </button>
-          
-          <button onClick={handleWhatsApp} className="menu-item" style={menuItemStyle}>
-            <MessageCircle size={14} color="#16a34a" /> WhatsApp
-          </button>
-          
-          <button onClick={(e) => { e.stopPropagation(); e.preventDefault(); alert("Em breve: Contatar cliente!"); }} className="menu-item" style={menuItemStyle}>
-            <Phone size={14} color="#64748b" /> Apenas Contatar
-          </button>
-
-          <div style={{ height: '1px', background: 'var(--color-border)', margin: '6px 0' }} />
-          
-          <div style={{ padding: '4px 10px', fontSize: '0.65rem', fontWeight: '800', color: 'var(--color-text-muted)' }}>
-            STATUS
-          </div>
-          
-          <button onClick={(e) => handleStatus(e, 'EM_CONSERTO')} className="menu-item" style={menuItemStyle}>
-            <ArrowRight size={14} color="#3b82f6" /> Avançar Status
-          </button>
-          
-          <button onClick={(e) => handleStatus(e, 'CANCELADO')} className="menu-item" style={{...menuItemStyle, color: '#dc2626'}}>
-            <XCircle size={14} color="#dc2626" /> Interromper Reparo
-          </button>
-
-          <div style={{ height: '1px', background: 'var(--color-border)', margin: '6px 0' }} />
-          
-          <button onClick={handleDelete} className="menu-item" style={{...menuItemStyle, color: '#dc2626'}}>
-            <Trash2 size={14} color="#dc2626" /> Excluir
-          </button>
-          
-          <button onClick={(e) => { e.stopPropagation(); e.preventDefault(); }} className="menu-item" style={menuItemStyle}>
-            <Archive size={14} color="#64748b" /> Arquivar
-          </button>
-        </div>
-      )}
+      {menu}
     </div>
-  )
+  );
 }
 
-const menuItemStyle: React.CSSProperties = {
-  display: 'flex', alignItems: 'center', gap: '10px', width: '100%',
-  padding: '8px 10px', border: 'none', background: 'transparent',
+const itemStyle: React.CSSProperties = {
+  display: 'flex', alignItems: 'center', gap: '8px', width: '100%',
+  padding: '7px 10px', border: 'none', background: 'transparent',
   textAlign: 'left', cursor: 'pointer', borderRadius: '8px',
-  color: 'var(--color-text)', fontSize: '0.85rem', fontWeight: '500',
+  color: '#334155', fontSize: '0.83rem', fontWeight: '500',
+  transition: 'background 0.1s',
 };

@@ -54,13 +54,12 @@ export async function updateServiceOrderStatus(id: string, status: string) {
       include: { customer: true }
     })
     
-    // Trigger WhatsApp API if status changed to EM_CONSERTO
-    // Trigger WhatsApp API if status changed
+    // Trigger WhatsApp notification on status change
     const settings = await prisma.settings.findFirst()
     if (settings?.hours) {
       try {
         const apiConfig = JSON.parse(settings.hours)
-        if (apiConfig.serverUrl && apiConfig.instance && apiConfig.token) {
+        if (apiConfig.serverUrl && apiConfig.token) {
           let phone = os.customer.whatsapp || os.customer.phone
           
           if (phone) {
@@ -75,16 +74,19 @@ export async function updateServiceOrderStatus(id: string, status: string) {
             })
 
             if (template && template.isActive) {
-              const url = `${apiConfig.serverUrl.replace(/\/$/, '')}/message/sendText`
+              // BTZap API endpoint for text messages
+              const url = `${apiConfig.serverUrl.replace(/\/$/, '')}/message/sendText/${apiConfig.instance || ''}`
+              const urlFallback = `${apiConfig.serverUrl.replace(/\/$/, '')}/send/text`
               
               let message = template.message
               message = message.replace(/{nome}/g, os.customer.name.split(' ')[0])
               message = message.replace(/{aparelho}/g, os.device)
-              message = message.replace(/{numero_os}/g, os.id.slice(-6).toUpperCase()) // Usa os ultimos 6 chars como ID
+              message = message.replace(/{numero_os}/g, os.id.slice(-6).toUpperCase())
               message = message.replace(/{status}/g, status.replace(/_/g, ' '))
               message = message.replace(/{valor}/g, os.price ? `R$ ${os.price.toFixed(2).replace('.', ',')}` : '')
 
-              fetch(url, {
+              // Try BTZap format first
+              const sendMsg = async (endpoint: string) => fetch(endpoint, {
                 method: 'POST',
                 headers: { 
                   'Content-Type': 'application/json',
@@ -94,7 +96,16 @@ export async function updateServiceOrderStatus(id: string, status: string) {
                   number: phone,
                   text: message
                 })
-              }).catch(e => console.error("Erro ao enviar webhook:", e))
+              })
+
+              try {
+                const res = await sendMsg(urlFallback)
+                if (!res.ok) {
+                  await sendMsg(url)
+                }
+              } catch {
+                await sendMsg(url).catch(e => console.error("Erro ao enviar WhatsApp:", e))
+              }
             }
           }
         }
@@ -102,6 +113,7 @@ export async function updateServiceOrderStatus(id: string, status: string) {
         console.error("Failed to parse or execute WhatsApp API", e)
       }
     }
+
     
     revalidatePath('/painel/os')
     return { success: true }
