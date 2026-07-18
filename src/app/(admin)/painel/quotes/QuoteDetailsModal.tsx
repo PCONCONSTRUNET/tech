@@ -1,4 +1,5 @@
-import { X, Edit2, CheckCircle, Calendar, Shield, Trash2, Phone, MessageCircle, Printer, User, Smartphone, Lock, Package, Check, Mail, FileText, Wrench, AlertCircle, Clock, ChevronDown, Plus, Search } from 'lucide-react'
+import { X, Edit2, CheckCircle, Calendar, Shield, Trash2, Phone, Printer, User, Smartphone, Lock, Package, Check, Mail, FileText, Wrench, AlertCircle, Clock, ChevronDown, Plus, Search } from 'lucide-react'
+import WhatsappIcon from '@/components/WhatsappIcon'
 
 const STATUS_LABEL: Record<string, string> = {
   RECEBIDO: 'Recebido',
@@ -60,7 +61,7 @@ export default function QuoteDetailsModal({ quote, quoteNumber, onClose, isQuote
           <div style={{ marginBottom: '24px' }}>
             <div style={{ fontSize: '0.65rem', fontWeight: '800', letterSpacing: '0.05em', color: '#64748b', textTransform: 'uppercase', marginBottom: '8px' }}>CLIENTE</div>
             <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
-              <div style={{ color: '#94a3b8', marginTop: '2px' }}><User size={20} /></div>
+              <div style={{ color: '#3b82f6', marginTop: '2px' }}><User size={20} /></div>
               <div>
                 <div style={{ fontWeight: '800', fontSize: '1.05rem', color: '#0f172a' }}>{quote.customer?.name || 'Não informado'}</div>
                 {quote.customer?.phone && <div style={{ fontSize: '0.85rem', color: '#64748b', marginTop: '2px' }}>{quote.customer.phone}</div>}
@@ -151,7 +152,7 @@ export default function QuoteDetailsModal({ quote, quoteNumber, onClose, isQuote
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '8px' }}>
               <div>
                 <div style={{ fontSize: '0.65rem', fontWeight: '800', letterSpacing: '0.05em', color: '#64748b', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <FileText size={12} /> LAUDO FINAL
+                  <FileText size={12} color="#f43f5e" /> DESCRIÇÃO DO ORÇAMENTO
                 </div>
                 <div style={{ fontSize: '0.75rem', color: '#94a3b8', marginTop: '2px' }}>Preencha após análise técnica. Pode ser editado depois na quote.</div>
               </div>
@@ -166,7 +167,7 @@ export default function QuoteDetailsModal({ quote, quoteNumber, onClose, isQuote
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '24px' }}>
             <div>
               <div style={{ fontSize: '0.65rem', fontWeight: '800', letterSpacing: '0.05em', color: '#64748b', textTransform: 'uppercase', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <Lock size={12} /> SENHA DO APARELHO
+                <Lock size={12} color="#f59e0b" /> SENHA DO APARELHO
               </div>
               <div style={{ border: '1px solid var(--color-border)', borderRadius: '12px', padding: '16px', fontSize: '0.9rem', color: '#0f172a' }}>
                 Não informado
@@ -174,7 +175,7 @@ export default function QuoteDetailsModal({ quote, quoteNumber, onClose, isQuote
             </div>
             <div>
               <div style={{ fontSize: '0.65rem', fontWeight: '800', letterSpacing: '0.05em', color: '#64748b', textTransform: 'uppercase', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <Package size={12} /> ACESSÓRIOS RECEBIDOS
+                <Package size={12} color="#8b5cf6" /> ACESSÓRIOS RECEBIDOS
               </div>
               <div style={{ border: '1px solid var(--color-border)', borderRadius: '12px', padding: '16px', fontSize: '0.9rem', color: '#0f172a' }}>
                 Nenhum acessório
@@ -185,7 +186,7 @@ export default function QuoteDetailsModal({ quote, quoteNumber, onClose, isQuote
           {/* Serviçquote e Peças */}
           <div style={{ marginBottom: '24px' }}>
             <div style={{ fontSize: '0.65rem', fontWeight: '800', letterSpacing: '0.05em', color: '#64748b', textTransform: 'uppercase', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <Wrench size={12} /> SERVIÇquote E PEÇAS
+              <Wrench size={12} color="#10b981" /> SERVIÇOS E PEÇAS
             </div>
             <div style={{ border: '1px solid var(--color-border)', borderRadius: '12px', padding: '16px', marginBottom: '8px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem', color: '#0f172a' }}>
@@ -225,7 +226,7 @@ export default function QuoteDetailsModal({ quote, quoteNumber, onClose, isQuote
           {/* Histórico */}
           <div style={{ marginBottom: '40px' }}>
             <div style={{ fontSize: '0.65rem', fontWeight: '800', letterSpacing: '0.05em', color: '#64748b', textTransform: 'uppercase', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <Clock size={12} /> HISTÓRICO
+              <Clock size={12} color="#eab308" /> HISTÓRICO
             </div>
             
             <div style={{ display: 'flex', gap: '16px', position: 'relative' }}>
@@ -256,10 +257,10 @@ export default function QuoteDetailsModal({ quote, quoteNumber, onClose, isQuote
           
           <div style={{ display: 'flex', gap: '12px' }}>
             <button style={{ padding: '10px 16px', backgroundColor: 'white', border: '1px solid var(--color-border)', borderRadius: '8px', color: '#475569', fontWeight: '600', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}>
-              <Phone size={16} /> Apenas Contatar
+              <Phone size={16} color="#3b82f6" /> Apenas Contatar
             </button>
             <button style={{ padding: '10px 16px', backgroundColor: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '8px', color: '#16a34a', fontWeight: '600', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}>
-              <MessageCircle size={16} /> WhatsApp
+              <WhatsappIcon size={16} color="#25D366" /> WhatsApp
             </button>
             <button 
               onClick={() => window.open(isQuote ? `/painel/quotes/${quote.id}` : `/painel/quote/${quote.id}`, '_blank')}

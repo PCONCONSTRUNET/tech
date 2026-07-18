@@ -1,6 +1,7 @@
 'use client'
 
-import { ShoppingBag, X, Plus, Minus, ArrowRight, MessageCircle, Trash2 } from 'lucide-react'
+import { ShoppingBag, X, Plus, Minus, ArrowRight, Trash2 } from 'lucide-react'
+import WhatsappIcon from '@/components/WhatsappIcon'
 import { useCart } from './CartContext'
 import { useState } from 'react'
 import { processCheckout } from '@/actions/checkout'
@@ -268,7 +269,7 @@ export default function CartSidebar() {
                   style={{ flex: 2, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', backgroundColor: '#25d366', color: 'white', border: 'none', borderRadius: '30px', cursor: 'pointer', padding: '16px', fontWeight: 'bold' }}
                   disabled={isLoading}
                 >
-                  <MessageCircle size={18} />
+                  <WhatsappIcon size={18} color="#ffffff" />
                   {isLoading ? 'Enviando...' : 'Enviar Pedido'}
                 </button>
               </div>

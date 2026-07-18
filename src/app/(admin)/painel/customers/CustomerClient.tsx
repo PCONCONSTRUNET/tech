@@ -6,6 +6,7 @@ import {
   Upload, Smartphone, Tablet, Laptop, Gamepad2, Watch, LayoutGrid,
   MapPin, User, FileText, MessageCircle, TrendingUp,
 } from 'lucide-react'
+import WhatsappIcon from '@/components/WhatsappIcon'
 import { createCustomer, deleteCustomer } from '@/actions/customer'
 import { maskCPFOrCNPJ, maskCEP, maskPhone } from '@/lib/masks'
 
@@ -266,13 +267,8 @@ export default function CustomerClient({ customers }: { customers: any[] }) {
                     <td>
                       <div style={{ display: 'flex', gap: '6px' }}>
                         {(c.phone || c.whatsapp) && (
-                          <a
-                            href={`https://wa.me/55${(c.whatsapp || c.phone || '').replace(/\D/g,'')}`}
-                            target="_blank"
-                            title="WhatsApp"
-                            style={{ background: 'none', border: '1px solid var(--color-border)', borderRadius: '6px', padding: '5px 7px', color: '#10b981', display: 'inline-flex' }}
-                          >
-                            <MessageCircle size={15} />
+                          <a href={`https://wa.me/55${c.phone?.replace(/\D/g, '') || ''}?text=Olá ${c.name.split(' ')[0]}...`} target="_blank" style={{ textDecoration: 'none', backgroundColor: '#f0fdf4', color: '#16a34a', border: 'none', borderRadius: '6px', width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }} title="Chamar no WhatsApp">
+                            <WhatsappIcon size={15} color="#25D366" />
                           </a>
                         )}
                         <button

@@ -1,5 +1,6 @@
 import Link from 'next/link';
-import { ArrowRight, MessageCircle } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
+import WhatsappIcon from '@/components/WhatsappIcon';
 import prisma from '@/lib/prisma';
 import DashboardTabs from './DashboardTabs';
 

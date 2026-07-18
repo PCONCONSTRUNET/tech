@@ -3,9 +3,10 @@
 import { useState, useRef, useEffect, useTransition } from 'react';
 import { createPortal } from 'react-dom';
 import {
-  MoreVertical, Printer, MessageCircle, Phone, Edit,
+  MoreVertical, Printer, Phone, Edit,
   XCircle, Trash2, AlertCircle, Package, Wrench, CheckCircle, DollarSign, FileText, Clock
 } from 'lucide-react';
+import WhatsappIcon from './WhatsappIcon';
 import { sendOsPdfWhatsApp, deleteServiceOrder, updateServiceOrderStatus } from '@/actions/os';
 
 const STATUS_OPTIONS = [
@@ -118,7 +119,7 @@ export default function MesaCardMenu({ card }: { card: any }) {
 
       {/* WhatsApp PDF */}
       <button onClick={handleWhatsApp} style={itemStyle}>
-        <MessageCircle size={14} color="#16a34a" /> Enviar PDF WhatsApp
+        <WhatsappIcon size={14} color="#25D366" /> Enviar PDF WhatsApp
       </button>
 
       {/* Contatar */}

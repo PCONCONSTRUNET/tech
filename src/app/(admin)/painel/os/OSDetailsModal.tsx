@@ -1,7 +1,8 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import { X, Edit2, CheckCircle, Calendar, Shield, Trash2, Phone, MessageCircle, Printer, User, Smartphone, Lock, Package, Check, FileText, Wrench, Clock, Copy } from 'lucide-react'
+import { X, Edit2, CheckCircle, Calendar, Shield, Trash2, Phone, Printer, User, Smartphone, Lock, Package, Check, FileText, Wrench, Clock, Copy } from 'lucide-react'
+import WhatsappIcon from '@/components/WhatsappIcon'
 import { deleteServiceOrder } from '@/actions/os'
 import { useRouter } from 'next/navigation'
 
@@ -97,7 +98,7 @@ export default function OSDetailsModal({ os, osNumber, onClose, isQuote = false 
           <div style={{ marginBottom: '24px' }}>
             <div style={{ fontSize: '0.65rem', fontWeight: '800', letterSpacing: '0.05em', color: '#64748b', textTransform: 'uppercase', marginBottom: '8px' }}>CLIENTE</div>
             <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
-              <div style={{ color: '#94a3b8', marginTop: '2px' }}><User size={20} /></div>
+              <div style={{ color: '#3b82f6', marginTop: '2px' }}><User size={20} /></div>
               <div>
                 <div style={{ fontWeight: '800', fontSize: '1.05rem', color: '#0f172a' }}>{os.customer?.name || 'Não informado'}</div>
                 {os.customer?.phone && <div style={{ fontSize: '0.85rem', color: '#64748b', marginTop: '2px' }}>{os.customer.phone}</div>}
@@ -190,7 +191,7 @@ export default function OSDetailsModal({ os, osNumber, onClose, isQuote = false 
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '8px' }}>
               <div>
                 <div style={{ fontSize: '0.65rem', fontWeight: '800', letterSpacing: '0.05em', color: '#64748b', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <FileText size={12} /> LAUDO FINAL / DIAGNÓSTICO
+                <FileText size={12} color="#f43f5e" /> LAUDO FINAL / DIAGNÓSTICO
                 </div>
               </div>
               {os.diagnostic && <div style={{ fontSize: '0.65rem', fontWeight: '700', color: '#10b981', backgroundColor: '#d1fae5', padding: '2px 8px', borderRadius: '12px', border: '1px solid #a7f3d0' }}>REGISTRADO</div>}
@@ -204,7 +205,7 @@ export default function OSDetailsModal({ os, osNumber, onClose, isQuote = false 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '24px' }}>
             <div>
               <div style={{ fontSize: '0.65rem', fontWeight: '800', letterSpacing: '0.05em', color: '#64748b', textTransform: 'uppercase', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <Lock size={12} /> SENHA / DESBLOQUEIO
+                <Lock size={12} color="#f59e0b" /> SENHA / DESBLOQUEIO
               </div>
               <div style={{ border: '1px solid var(--color-border)', borderRadius: '12px', padding: '16px', fontSize: '0.9rem', color: '#0f172a', fontFamily: notesData.password ? 'monospace' : 'inherit' }}>
                 {notesData.password || 'Não informado'}
@@ -212,7 +213,7 @@ export default function OSDetailsModal({ os, osNumber, onClose, isQuote = false 
             </div>
             <div>
               <div style={{ fontSize: '0.65rem', fontWeight: '800', letterSpacing: '0.05em', color: '#64748b', textTransform: 'uppercase', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <Package size={12} /> ESTADO FÍSICO
+                <Package size={12} color="#8b5cf6" /> ESTADO FÍSICO
               </div>
               <div style={{ border: '1px solid var(--color-border)', borderRadius: '12px', padding: '16px', fontSize: '0.9rem', color: '#0f172a' }}>
                 {notesData.physicalCondition || 'Não informado'}
@@ -223,7 +224,7 @@ export default function OSDetailsModal({ os, osNumber, onClose, isQuote = false 
           {/* Serviços e Peças */}
           <div style={{ marginBottom: '24px' }}>
             <div style={{ fontSize: '0.65rem', fontWeight: '800', letterSpacing: '0.05em', color: '#64748b', textTransform: 'uppercase', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <Wrench size={12} /> SERVIÇOS E PEÇAS
+              <Wrench size={12} color="#10b981" /> SERVIÇOS E PEÇAS
             </div>
             <div style={{ border: '1px solid var(--color-border)', borderRadius: '12px', padding: '16px', marginBottom: '8px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem', color: '#0f172a' }}>
@@ -263,7 +264,7 @@ export default function OSDetailsModal({ os, osNumber, onClose, isQuote = false 
           {/* Histórico */}
           <div style={{ marginBottom: '40px' }}>
             <div style={{ fontSize: '0.65rem', fontWeight: '800', letterSpacing: '0.05em', color: '#64748b', textTransform: 'uppercase', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <Clock size={12} /> HISTÓRICO
+              <Clock size={12} color="#eab308" /> HISTÓRICO
             </div>
             
             <div style={{ display: 'flex', gap: '16px', position: 'relative' }}>
@@ -312,17 +313,17 @@ export default function OSDetailsModal({ os, osNumber, onClose, isQuote = false 
               </a>
             ) : (
               <button onClick={() => alert('Telefone do cliente não informado.')} style={{ padding: '10px 16px', backgroundColor: 'white', border: '1px solid var(--color-border)', borderRadius: '8px', color: '#94a3b8', fontWeight: '600', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '6px', cursor: 'not-allowed' }}>
-                <Phone size={16} /> Apenas Contatar
+                <Phone size={16} color="#3b82f6" /> Apenas Contatar
               </button>
             )}
 
             {customerPhoneClean ? (
               <a href={whatsappUrl} target="_blank" style={{ textDecoration: 'none', padding: '10px 16px', backgroundColor: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '8px', color: '#16a34a', fontWeight: '600', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <MessageCircle size={16} /> WhatsApp
+                <WhatsappIcon size={16} color="#25D366" /> WhatsApp
               </a>
             ) : (
               <button onClick={() => alert('Telefone do cliente não informado.')} style={{ padding: '10px 16px', backgroundColor: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '8px', color: '#94a3b8', fontWeight: '600', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '6px', cursor: 'not-allowed' }}>
-                <MessageCircle size={16} /> WhatsApp
+                <WhatsappIcon size={16} color="#94a3b8" /> WhatsApp
               </button>
             )}
 
