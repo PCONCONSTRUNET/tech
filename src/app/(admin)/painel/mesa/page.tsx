@@ -1,11 +1,38 @@
 import prisma from '@/lib/prisma';
 import MesaBoard from './MesaBoard';
 
+import { Suspense } from 'react';
+
 export const dynamic = 'force-dynamic';
 
 const MESA_STATUSES = ['RECEBIDO', 'EM_ANALISE', 'AGUARDANDO_PECA', 'EM_CONSERTO', 'PRONTO', 'ENTREGUE'];
 
-export default async function MesaPage() {
+export default function MesaPage() {
+  return (
+    <Suspense fallback={<MesaSkeleton />}>
+      <MesaData />
+    </Suspense>
+  );
+}
+
+function MesaSkeleton() {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', height: '100%' }}>
+      <div style={{ height: '50px', width: '300px', backgroundColor: 'var(--color-border)', borderRadius: '8px', opacity: 0.5, animation: 'pulse 1.5s infinite' }} />
+      <div style={{ display: 'flex', gap: '16px', overflowX: 'auto', flex: 1 }}>
+        {[1, 2, 3, 4, 5].map(i => (
+          <div key={i} style={{ minWidth: '280px', width: '280px', backgroundColor: 'rgba(30,41,59,0.3)', borderRadius: 'var(--radius-lg)', padding: '16px' }}>
+            <div style={{ height: '30px', backgroundColor: 'var(--color-border)', borderRadius: '8px', opacity: 0.5, marginBottom: '16px', animation: 'pulse 1.5s infinite' }} />
+            <div style={{ height: '100px', backgroundColor: 'var(--color-border)', borderRadius: '8px', opacity: 0.5, marginBottom: '8px', animation: 'pulse 1.5s infinite' }} />
+            <div style={{ height: '100px', backgroundColor: 'var(--color-border)', borderRadius: '8px', opacity: 0.5, animation: 'pulse 1.5s infinite' }} />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+async function MesaData() {
   const [orders, allOrders] = await Promise.all([
     prisma.serviceOrder.findMany({
       where: { status: { in: MESA_STATUSES } },

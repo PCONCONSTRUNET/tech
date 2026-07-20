@@ -4,6 +4,10 @@ import WhatsappIcon from '@/components/WhatsappIcon';
 import prisma from '@/lib/prisma';
 import DashboardTabs from './DashboardTabs';
 
+import { Suspense } from 'react';
+
+// ... (keep dynamic, formatting helpers, etc.)
+
 export const dynamic = 'force-dynamic';
 
 const formatCurrency = (val: number) => `R$ ${val.toFixed(2).replace('.', ',')}`;
@@ -18,8 +22,56 @@ function getMonthName(date: Date) {
   return months[date.getMonth()];
 }
 
-export default async function AdminDashboard() {
+export default function AdminDashboard() {
   const now = new Date();
+  const dateStr = `${getDayName(now)}, ${now.getDate()} de ${getMonthName(now)}`;
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+      {/* ── Header (Carrega Instantâneo) ── */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+        <div>
+          <h1 style={{ fontSize: '1.75rem', fontWeight: '700', color: 'var(--color-text)', lineHeight: 1.2 }}>
+            Visão Geral
+          </h1>
+          <p style={{ color: 'var(--color-text-muted)', fontSize: '0.875rem', marginTop: '4px' }}>
+            Resumo operacional de {dateStr}
+          </p>
+        </div>
+        <Link
+          href="/painel/os"
+          className="btn btn-primary btn-auto"
+        >
+          + Nova OS
+        </Link>
+      </div>
+
+      <Suspense fallback={<DashboardSkeleton />}>
+        <DashboardData now={now} />
+      </Suspense>
+    </div>
+  );
+}
+
+function DashboardSkeleton() {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+      {/* Faturamento Card Skeleton */}
+      <div style={{ height: '220px', backgroundColor: 'var(--color-border)', borderRadius: 'var(--radius-lg)', opacity: 0.5, animation: 'pulse 1.5s infinite' }} />
+      {/* OS Status Skeleton */}
+      <div className="grid-responsive-4">
+        {[1, 2, 3, 4].map(i => <div key={i} style={{ height: '140px', backgroundColor: 'var(--color-border)', borderRadius: 'var(--radius-lg)', opacity: 0.5, animation: 'pulse 1.5s infinite' }} />)}
+      </div>
+      {/* Bottom Skeleton */}
+      <div className="grid-responsive-2">
+        <div style={{ height: '300px', backgroundColor: 'var(--color-border)', borderRadius: 'var(--radius-lg)', opacity: 0.5, animation: 'pulse 1.5s infinite' }} />
+        <div style={{ height: '300px', backgroundColor: 'var(--color-border)', borderRadius: 'var(--radius-lg)', opacity: 0.5, animation: 'pulse 1.5s infinite' }} />
+      </div>
+    </div>
+  );
+}
+
+async function DashboardData({ now }: { now: Date }) {
   const startOfDay = new Date(now);
   startOfDay.setHours(0, 0, 0, 0);
   const endOfDay = new Date(now);
@@ -32,7 +84,6 @@ export default async function AdminDashboard() {
     recentQuotes,
     [rawReceive, rawPay]
   ] = await Promise.all([
-    // Today revenue & expense
     Promise.all([
       prisma.transaction.aggregate({
         _sum: { amount: true },
@@ -43,20 +94,17 @@ export default async function AdminDashboard() {
         where: { type: 'DESPESA', status: 'PAGO', date: { gte: startOfDay, lte: endOfDay } }
       })
     ]),
-    // OS status counts
     Promise.all([
       prisma.serviceOrder.count({ where: { status: 'EM_ANALISE' } }),
       prisma.serviceOrder.count({ where: { status: 'AGUARDANDO_PECA' } }),
       prisma.serviceOrder.count({ where: { status: 'EM_CONSERTO' } }),
       prisma.serviceOrder.count({ where: { status: { in: ['PRONTO', 'ENTREGUE'] } } })
     ]),
-    // Recent quotes
     prisma.quote.findMany({
       include: { customer: true },
       orderBy: { createdAt: 'desc' },
       take: 5,
     }),
-    // Pending payments
     Promise.all([
       prisma.payment.findMany({
         where: { type: 'RECEBER', status: 'PENDENTE' },
@@ -76,7 +124,6 @@ export default async function AdminDashboard() {
   const todayProfit = todayRevTotal - (todayExp._sum.amount || 0);
   const margin = todayRevTotal > 0 ? Math.round((todayProfit / todayRevTotal) * 100) : 0;
 
-  // Serialize for client component (no Date objects)
   const paymentsToReceive = rawReceive.map((p) => ({
     id: p.id,
     description: p.description,
@@ -92,33 +139,8 @@ export default async function AdminDashboard() {
     customerName: null,
   }));
 
-  const dayName = getDayName(now);
-  const monthName = getMonthName(now);
-  const dateStr = `${dayName}, ${now.getDate()} de ${monthName}`;
-
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-
-      {/* ── Header ── */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-        <div>
-          <h1 style={{ fontSize: '1.75rem', fontWeight: '700', color: 'var(--color-text)', lineHeight: 1.2 }}>
-            Visão Geral
-          </h1>
-          <p style={{ color: 'var(--color-text-muted)', fontSize: '0.875rem', marginTop: '4px' }}>
-            Resumo operacional de {dateStr}
-          </p>
-        </div>
-        <Link
-          href="/painel/os"
-          className="btn btn-primary btn-auto"
-        >
-          + Nova OS
-        </Link>
-      </div>
-
-
-
+    <>
       {/* ── Faturamento Card ── */}
       <div style={{
         background: 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)',
@@ -288,7 +310,7 @@ export default async function AdminDashboard() {
         {/* Lembretes e Pendências */}
         <DashboardTabs paymentsToReceive={paymentsToReceive} paymentsToPay={paymentsToPay} />
       </div>
-    </div>
+    </>
   );
 }
 
