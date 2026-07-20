@@ -105,12 +105,7 @@ export default async function AdminDashboard() {
         </div>
         <Link
           href="/painel/os"
-          style={{
-            display: 'inline-flex', alignItems: 'center', gap: '6px',
-            backgroundColor: 'var(--color-primary)', color: 'white',
-            padding: '10px 20px', borderRadius: 'var(--radius-md)',
-            fontWeight: '600', textDecoration: 'none', fontSize: '0.9rem',
-          }}
+          className="btn btn-primary btn-auto"
         >
           + Nova OS
         </Link>
@@ -186,7 +181,7 @@ export default async function AdminDashboard() {
       </div>
 
       {/* ── OS Status Cards ── */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px' }}>
+      <div className="grid-responsive-4">
         <OSStatusCard
           iconColor="#3b82f6"
           iconBg="rgba(59,130,246,0.1)"
@@ -222,7 +217,7 @@ export default async function AdminDashboard() {
       </div>
 
       {/* ── Bottom 2 cols ── */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+      <div className="grid-responsive-2">
 
         {/* Orçamentos Recentes */}
         <div className="card" style={{ padding: '20px' }}>

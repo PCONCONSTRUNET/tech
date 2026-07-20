@@ -123,6 +123,7 @@ export default function MesaCardMenu({ card }: { card: any }) {
         borderRadius: '12px',
         boxShadow: '0 20px 40px -8px rgba(0,0,0,0.18)',
         minWidth: '210px',
+        maxWidth: 'calc(100vw - 16px)',
         zIndex: 99999,
         padding: '6px',
         display: 'flex',
