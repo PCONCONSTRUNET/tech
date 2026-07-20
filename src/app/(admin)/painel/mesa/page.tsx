@@ -6,17 +6,17 @@ export const dynamic = 'force-dynamic';
 const MESA_STATUSES = ['RECEBIDO', 'EM_ANALISE', 'AGUARDANDO_PECA', 'EM_CONSERTO', 'PRONTO', 'ENTREGUE'];
 
 export default async function MesaPage() {
-  const orders = await prisma.serviceOrder.findMany({
-    where: { status: { in: MESA_STATUSES } },
-    include: { customer: true },
-    orderBy: { createdAt: 'asc' },
-  });
-
-  // Assign display numbers based on creation order
-  const allOrders = await prisma.serviceOrder.findMany({
-    orderBy: { createdAt: 'asc' },
-    select: { id: true },
-  });
+  const [orders, allOrders] = await Promise.all([
+    prisma.serviceOrder.findMany({
+      where: { status: { in: MESA_STATUSES } },
+      include: { customer: true },
+      orderBy: { createdAt: 'asc' },
+    }),
+    prisma.serviceOrder.findMany({
+      orderBy: { createdAt: 'asc' },
+      select: { id: true },
+    })
+  ]);
   const numberMap: Record<string, number> = {};
   allOrders.forEach((o, i) => { numberMap[o.id] = i + 1; });
 

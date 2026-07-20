@@ -25,50 +25,56 @@ export default async function AdminDashboard() {
   const endOfDay = new Date(now);
   endOfDay.setHours(23, 59, 59, 999);
 
-  // Today revenue & expense
-  const [todayRev, todayExp] = await Promise.all([
-    prisma.transaction.aggregate({
-      _sum: { amount: true },
-      where: { type: 'RECEITA', status: 'PAGO', date: { gte: startOfDay, lte: endOfDay } }
+  // Fetch all data concurrently
+  const [
+    [todayRev, todayExp],
+    [emAnalise, aguardPeca, emServico, concluidos],
+    recentQuotes,
+    [rawReceive, rawPay]
+  ] = await Promise.all([
+    // Today revenue & expense
+    Promise.all([
+      prisma.transaction.aggregate({
+        _sum: { amount: true },
+        where: { type: 'RECEITA', status: 'PAGO', date: { gte: startOfDay, lte: endOfDay } }
+      }),
+      prisma.transaction.aggregate({
+        _sum: { amount: true },
+        where: { type: 'DESPESA', status: 'PAGO', date: { gte: startOfDay, lte: endOfDay } }
+      })
+    ]),
+    // OS status counts
+    Promise.all([
+      prisma.serviceOrder.count({ where: { status: 'EM_ANALISE' } }),
+      prisma.serviceOrder.count({ where: { status: 'AGUARDANDO_PECA' } }),
+      prisma.serviceOrder.count({ where: { status: 'EM_CONSERTO' } }),
+      prisma.serviceOrder.count({ where: { status: { in: ['PRONTO', 'ENTREGUE'] } } })
+    ]),
+    // Recent quotes
+    prisma.quote.findMany({
+      include: { customer: true },
+      orderBy: { createdAt: 'desc' },
+      take: 5,
     }),
-    prisma.transaction.aggregate({
-      _sum: { amount: true },
-      where: { type: 'DESPESA', status: 'PAGO', date: { gte: startOfDay, lte: endOfDay } }
-    }),
+    // Pending payments
+    Promise.all([
+      prisma.payment.findMany({
+        where: { type: 'RECEBER', status: 'PENDENTE' },
+        orderBy: { dueDate: 'asc' },
+        take: 5,
+        include: { customer: true },
+      }),
+      prisma.payment.findMany({
+        where: { type: 'PAGAR', status: 'PENDENTE' },
+        orderBy: { dueDate: 'asc' },
+        take: 5,
+      })
+    ])
   ]);
+
   const todayRevTotal = todayRev._sum.amount || 0;
   const todayProfit = todayRevTotal - (todayExp._sum.amount || 0);
   const margin = todayRevTotal > 0 ? Math.round((todayProfit / todayRevTotal) * 100) : 0;
-
-  // OS status counts
-  const [emAnalise, aguardPeca, emServico, concluidos] = await Promise.all([
-    prisma.serviceOrder.count({ where: { status: 'EM_ANALISE' } }),
-    prisma.serviceOrder.count({ where: { status: 'AGUARDANDO_PECA' } }),
-    prisma.serviceOrder.count({ where: { status: 'EM_CONSERTO' } }),
-    prisma.serviceOrder.count({ where: { status: { in: ['PRONTO', 'ENTREGUE'] } } }),
-  ]);
-
-  // Recent quotes
-  const recentQuotes = await prisma.quote.findMany({
-    include: { customer: true },
-    orderBy: { createdAt: 'desc' },
-    take: 5,
-  });
-
-  // Pending payments
-  const [rawReceive, rawPay] = await Promise.all([
-    prisma.payment.findMany({
-      where: { type: 'RECEBER', status: 'PENDENTE' },
-      orderBy: { dueDate: 'asc' },
-      take: 5,
-      include: { customer: true },
-    }),
-    prisma.payment.findMany({
-      where: { type: 'PAGAR', status: 'PENDENTE' },
-      orderBy: { dueDate: 'asc' },
-      take: 5,
-    }),
-  ]);
 
   // Serialize for client component (no Date objects)
   const paymentsToReceive = rawReceive.map((p) => ({

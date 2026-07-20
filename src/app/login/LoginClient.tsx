@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { LogIn, Lock, Mail } from 'lucide-react'
 import { login } from '@/actions/auth'
 import { useRouter } from 'next/navigation'
@@ -9,6 +9,10 @@ export default function LoginClient() {
   const [loading, setLoading] = useState(false)
   const [errorMsg, setErrorMsg] = useState('')
   const router = useRouter()
+
+  useEffect(() => {
+    router.prefetch('/painel')
+  }, [router])
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
