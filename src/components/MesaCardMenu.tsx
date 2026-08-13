@@ -31,8 +31,9 @@ export default function MesaCardMenu({ card }: { card: any }) {
     title: string;
     message: string;
     isDestructive: boolean;
-    onConfirm: () => void;
-  }>({ isOpen: false, title: '', message: '', isDestructive: false, onConfirm: () => {} });
+    isAlert?: boolean;
+    onConfirm?: () => void;
+  }>({ isOpen: false, title: '', message: '', isDestructive: false });
   const buttonRef = useRef<HTMLButtonElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -82,8 +83,11 @@ export default function MesaCardMenu({ card }: { card: any }) {
       onConfirm: () => {
         startTransition(async () => {
           const res = await sendOsPdfWhatsApp(card.id, card.customerPhone);
-          if (res?.error) alert(res.error);
-          else alert('PDF enviado com sucesso para o WhatsApp!');
+          if (res?.error) {
+            setConfirmConfig({ isOpen: true, isAlert: true, title: 'Erro', message: res.error, isDestructive: true });
+          } else {
+            setConfirmConfig({ isOpen: true, isAlert: true, title: 'Sucesso', message: 'PDF enviado com sucesso para o WhatsApp!', isDestructive: false });
+          }
         });
       }
     });
@@ -102,7 +106,7 @@ export default function MesaCardMenu({ card }: { card: any }) {
         startTransition(async () => {
           const res = await deleteServiceOrder(card.id);
           if (res && res.error) {
-            alert(res.error);
+            setConfirmConfig({ isOpen: true, isAlert: true, title: 'Acesso Negado', message: res.error, isDestructive: true });
           }
         });
       }
@@ -116,7 +120,7 @@ export default function MesaCardMenu({ card }: { card: any }) {
     startTransition(async () => {
       const res = await updateServiceOrderStatus(card.id, newStatus);
       if (res && res.error) {
-        alert(res.error);
+        setConfirmConfig({ isOpen: true, isAlert: true, title: 'Erro', message: res.error, isDestructive: true });
       }
     });
   };
@@ -142,7 +146,7 @@ export default function MesaCardMenu({ card }: { card: any }) {
       }}
     >
       {/* Editar OS */}
-      <button onClick={(e) => { e.stopPropagation(); e.preventDefault(); setIsOpen(false); alert('Para editar, acesse a tela de OS.'); }} style={itemStyle}>
+      <button onClick={(e) => { e.stopPropagation(); e.preventDefault(); setIsOpen(false); setConfirmConfig({ isOpen: true, isAlert: true, title: 'Atenção', message: 'Para editar, acesse a tela de OS.', isDestructive: false }); }} style={itemStyle}>
         <Edit size={14} color="#64748b" /> Editar OS
       </button>
 
@@ -157,7 +161,7 @@ export default function MesaCardMenu({ card }: { card: any }) {
       </button>
 
       {/* Contatar */}
-      <button onClick={(e) => { e.stopPropagation(); e.preventDefault(); }} style={itemStyle}>
+      <button onClick={(e) => { e.stopPropagation(); e.preventDefault(); setIsOpen(false); setConfirmConfig({ isOpen: true, isAlert: true, title: 'Atenção', message: 'Funcionalidade em desenvolvimento.', isDestructive: false }); }} style={itemStyle}>
         <Phone size={14} color="#64748b" /> Apenas Contatar
       </button>
 
@@ -234,6 +238,7 @@ export default function MesaCardMenu({ card }: { card: any }) {
         title={confirmConfig.title}
         message={confirmConfig.message}
         isDestructive={confirmConfig.isDestructive}
+        isAlert={confirmConfig.isAlert}
         onConfirm={confirmConfig.onConfirm}
         onClose={() => setConfirmConfig(prev => ({ ...prev, isOpen: false }))}
       />

@@ -6,12 +6,13 @@ import { X, AlertCircle } from 'lucide-react';
 interface ConfirmModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onConfirm: () => void;
+  onConfirm?: () => void;
   title: string;
   message: string;
   confirmText?: string;
   cancelText?: string;
   isDestructive?: boolean;
+  isAlert?: boolean;
 }
 
 export default function ConfirmModal({
@@ -20,11 +21,14 @@ export default function ConfirmModal({
   onConfirm,
   title,
   message,
-  confirmText = 'Confirmar',
+  confirmText,
   cancelText = 'Cancelar',
-  isDestructive = false
+  isDestructive = false,
+  isAlert = false
 }: ConfirmModalProps) {
   if (!isOpen || typeof document === 'undefined') return null;
+
+  const finalConfirmText = confirmText || (isAlert ? 'OK' : 'Confirmar');
 
   return createPortal(
     <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(15, 23, 42, 0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999, backdropFilter: 'blur(4px)', padding: '24px' }}>
@@ -41,17 +45,19 @@ export default function ConfirmModal({
         </div>
         
         <div style={{ padding: '16px 24px', borderTop: '1px solid var(--color-border)', backgroundColor: '#f8fafc', display: 'flex', gap: '12px' }}>
+          {!isAlert && (
+            <button 
+              onClick={onClose} 
+              style={{ flex: 1, padding: '12px', backgroundColor: 'white', border: '1px solid var(--color-border)', borderRadius: '8px', color: '#475569', fontWeight: '600', fontSize: '0.9rem', cursor: 'pointer' }}
+            >
+              {cancelText}
+            </button>
+          )}
           <button 
-            onClick={onClose} 
-            style={{ flex: 1, padding: '12px', backgroundColor: 'white', border: '1px solid var(--color-border)', borderRadius: '8px', color: '#475569', fontWeight: '600', fontSize: '0.9rem', cursor: 'pointer' }}
-          >
-            {cancelText}
-          </button>
-          <button 
-            onClick={() => { onConfirm(); onClose(); }} 
+            onClick={() => { if (onConfirm) onConfirm(); onClose(); }} 
             style={{ flex: 1, padding: '12px', backgroundColor: isDestructive ? '#ef4444' : '#2563eb', border: 'none', borderRadius: '8px', color: 'white', fontWeight: '600', fontSize: '0.9rem', cursor: 'pointer' }}
           >
-            {confirmText}
+            {finalConfirmText}
           </button>
         </div>
       </div>
