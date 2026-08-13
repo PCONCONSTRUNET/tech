@@ -99,7 +99,12 @@ export default function MesaCardMenu({ card }: { card: any }) {
       message: 'Tem certeza que deseja excluir esta OS? Essa ação não pode ser desfeita.',
       isDestructive: true,
       onConfirm: () => {
-        startTransition(async () => { await deleteServiceOrder(card.id); });
+        startTransition(async () => {
+          const res = await deleteServiceOrder(card.id);
+          if (res && res.error) {
+            alert(res.error);
+          }
+        });
       }
     });
   };
@@ -108,7 +113,12 @@ export default function MesaCardMenu({ card }: { card: any }) {
     e.stopPropagation(); e.preventDefault();
     setIsOpen(false);
     setShowStatusSub(false);
-    startTransition(async () => { await updateServiceOrderStatus(card.id, newStatus); });
+    startTransition(async () => {
+      const res = await updateServiceOrderStatus(card.id, newStatus);
+      if (res && res.error) {
+        alert(res.error);
+      }
+    });
   };
 
   const menu = isOpen && typeof document !== 'undefined' ? createPortal(

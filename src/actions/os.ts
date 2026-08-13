@@ -158,7 +158,7 @@ export async function updateServiceOrderStatus(id: string, status: string) {
 
 export async function deleteServiceOrder(id: string) {
   try {
-    await requireRole(['ADMIN'])
+    await requireRole(['ADMIN', 'TECNICO', 'VENDEDOR'])
   } catch (e: any) {
     return { error: e.message }
   }
