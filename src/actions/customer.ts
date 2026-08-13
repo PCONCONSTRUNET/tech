@@ -29,7 +29,7 @@ export async function createCustomer(data: {
   if (!data.name) return { error: 'Nome é obrigatório' }
   try {
     const customer = await prisma.customer.create({ data })
-    revalidatePath('/painel/customers')
+    revalidatePath('/painel', 'layout')
     return { success: true, customer }
   } catch (error) {
     console.error(error)
@@ -40,7 +40,7 @@ export async function createCustomer(data: {
 export async function deleteCustomer(id: string) {
   try {
     await prisma.customer.delete({ where: { id } })
-    revalidatePath('/painel/customers')
+    revalidatePath('/painel', 'layout')
     return { success: true }
   } catch (error) {
     return { error: 'Erro ao excluir cliente' }

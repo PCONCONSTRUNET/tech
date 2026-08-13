@@ -62,9 +62,9 @@ export async function createSale(cartItems: any[], paymentMethod: string, total:
       return createdSale;
     })
 
-    revalidatePath('/pos')
-    revalidatePath('/products')
-    revalidatePath('/finance')
+    revalidatePath('/painel', 'layout')
+    revalidatePath('/painel', 'layout')
+    revalidatePath('/painel', 'layout')
     return { success: true, saleId: sale.id }
   } catch (error) {
     return { error: 'Erro ao finalizar venda' }

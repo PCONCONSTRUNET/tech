@@ -75,7 +75,7 @@ export async function createQuote(data: {
         }
       }
     })
-    revalidatePath('/quotes')
+    revalidatePath('/painel', 'layout')
     return { success: true, quote }
   } catch (error) {
     console.error("Erro ao criar orçamento:", error);
@@ -89,7 +89,7 @@ export async function updateQuoteStatus(id: string, status: string) {
       where: { id },
       data: { status }
     })
-    revalidatePath('/quotes')
+    revalidatePath('/painel', 'layout')
     return { success: true }
   } catch (error) {
     return { error: 'Erro ao atualizar status' }
@@ -99,7 +99,7 @@ export async function updateQuoteStatus(id: string, status: string) {
 export async function deleteQuote(id: string) {
   try {
     await prisma.quote.delete({ where: { id } })
-    revalidatePath('/quotes')
+    revalidatePath('/painel', 'layout')
     return { success: true }
   } catch (error) {
     return { error: 'Erro ao excluir orçamento' }

@@ -27,7 +27,7 @@ export async function openCashSession(operatorName: string, initialAmount: numbe
     const session = await prisma.cashSession.create({
       data: { operatorName, initialAmount, status: 'ABERTO' },
     })
-    revalidatePath('/painel/caixa')
+    revalidatePath('/painel', 'layout')
     return { success: true, session }
   } catch (e) {
     console.error(e)
@@ -41,7 +41,7 @@ export async function closeCashSession(id: string) {
       where: { id },
       data: { status: 'FECHADO', closedAt: new Date() },
     })
-    revalidatePath('/painel/caixa')
+    revalidatePath('/painel', 'layout')
     return { success: true }
   } catch { return { error: 'Erro ao fechar caixa' } }
 }
@@ -51,7 +51,7 @@ export async function addMovement(sessionId: string, type: string, amount: numbe
     await prisma.cashMovement.create({
       data: { sessionId, type, amount, method, description },
     })
-    revalidatePath('/painel/caixa')
+    revalidatePath('/painel', 'layout')
     return { success: true }
   } catch { return { error: 'Erro ao registrar movimentação' } }
 }

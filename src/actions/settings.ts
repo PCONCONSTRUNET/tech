@@ -34,8 +34,8 @@ export async function updateSettings(data: {
       })
     }
     
-    revalidatePath('/painel/settings')
-    revalidatePath('/painel/quotes')
+    revalidatePath('/painel', 'layout')
+    revalidatePath('/painel', 'layout')
     return { success: true }
   } catch (error: any) {
     console.error('Settings update error:', error)

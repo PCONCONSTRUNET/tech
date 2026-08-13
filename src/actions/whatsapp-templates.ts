@@ -34,7 +34,7 @@ export async function saveTemplate(status: string, message: string, isActive: bo
       update: { message, isActive },
       create: { status, message, isActive }
     })
-    revalidatePath('/painel/integrations')
+    revalidatePath('/painel', 'layout')
     return { data: template }
   } catch (error: any) {
     console.error("Error saving template", error)

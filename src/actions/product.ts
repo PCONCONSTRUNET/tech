@@ -86,7 +86,7 @@ export async function createProduct(formData: FormData) {
       })
     }
 
-    revalidatePath('/products')
+    revalidatePath('/painel', 'layout')
     return { success: true }
   } catch (error) {
     return { error: 'Erro ao cadastrar produto' }
@@ -102,7 +102,7 @@ export async function deleteProduct(id: string) {
 
   try {
     await prisma.product.delete({ where: { id } })
-    revalidatePath('/products')
+    revalidatePath('/painel', 'layout')
     return { success: true }
   } catch (error) {
     return { error: 'Erro ao excluir produto' }
@@ -115,8 +115,8 @@ export async function toggleVitrineVisibility(id: string, showOnVitrine: boolean
       where: { id },
       data: { showOnVitrine }
     })
-    revalidatePath('/products')
-    revalidatePath('/loja')
+    revalidatePath('/painel', 'layout')
+    revalidatePath('/painel', 'layout')
     return { success: true }
   } catch (error) {
     return { error: 'Erro ao atualizar visibilidade na vitrine' }

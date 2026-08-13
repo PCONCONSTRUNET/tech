@@ -36,7 +36,7 @@ export async function createSupplier(formData: FormData) {
         state
       }
     })
-    revalidatePath('/suppliers')
+    revalidatePath('/painel', 'layout')
     return { success: true }
   } catch (error) {
     return { error: 'Erro ao criar fornecedor' }
@@ -48,7 +48,7 @@ export async function deleteSupplier(id: string) {
     await prisma.supplier.delete({
       where: { id }
     })
-    revalidatePath('/suppliers')
+    revalidatePath('/painel', 'layout')
     return { success: true }
   } catch (error) {
     return { error: 'Erro ao excluir fornecedor (pode estar vinculado a produtos)' }

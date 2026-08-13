@@ -34,7 +34,7 @@ export async function createCoupon(data: { code: string; type: string; value: nu
       }
     })
     
-    revalidatePath('/(admin)/coupons', 'page')
+    revalidatePath('/painel', 'layout')/coupons', 'page')
     return { success: true, coupon }
   } catch (error) {
     console.error('Error creating coupon:', error)
@@ -49,7 +49,7 @@ export async function updateCoupon(id: string, data: { active?: boolean }) {
       data
     })
     
-    revalidatePath('/(admin)/coupons', 'page')
+    revalidatePath('/painel', 'layout')/coupons', 'page')
     return { success: true, coupon }
   } catch (error) {
     console.error('Error updating coupon:', error)
@@ -63,7 +63,7 @@ export async function deleteCoupon(id: string) {
       where: { id }
     })
     
-    revalidatePath('/(admin)/coupons', 'page')
+    revalidatePath('/painel', 'layout')/coupons', 'page')
     return { success: true }
   } catch (error) {
     console.error('Error deleting coupon:', error)

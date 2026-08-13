@@ -58,7 +58,7 @@ export async function createTransaction(formData: FormData) {
         customerId: finalCustomerId
       }
     })
-    revalidatePath('/finance')
+    revalidatePath('/painel', 'layout')
     return { success: true }
   } catch (error) {
     return { error: 'Erro ao registrar transação' }
@@ -68,7 +68,7 @@ export async function createTransaction(formData: FormData) {
 export async function deleteTransaction(id: string) {
   try {
     await prisma.transaction.delete({ where: { id } })
-    revalidatePath('/finance')
+    revalidatePath('/painel', 'layout')
     return { success: true }
   } catch (error) {
     return { error: 'Erro ao excluir transação' }
@@ -117,7 +117,7 @@ export async function updateTransaction(id: string, formData: FormData) {
         customerId: finalCustomerId
       }
     })
-    revalidatePath('/finance')
+    revalidatePath('/painel', 'layout')
     return { success: true }
   } catch (error) {
     return { error: 'Erro ao atualizar transação' }

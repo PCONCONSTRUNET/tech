@@ -31,7 +31,7 @@ export async function upsertGateway(
       update: data,
       create: { name, ...data }
     })
-    revalidatePath('/painel/integrations')
+    revalidatePath('/painel', 'layout')
     return { data: gateway }
   } catch (error) {
     return { error: 'Erro ao salvar configurações do gateway.' }

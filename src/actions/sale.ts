@@ -21,7 +21,7 @@ export async function updateSaleStatus(id: string, status: string) {
       where: { id },
       data: { status }
     })
-    revalidatePath('/sales')
+    revalidatePath('/painel', 'layout')
     return { success: true }
   } catch (error) {
     return { success: false, error: 'Erro ao atualizar status do pedido' }
