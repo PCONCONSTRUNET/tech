@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Save, Code2, QrCode, RefreshCw, MessageSquare, X, CreditCard, CheckCircle, AlertCircle, ChevronRight, Eye, EyeOff, Zap, Globe, Phone, Key, Smartphone, Activity, Plus, Trash2 } from 'lucide-react'
+import { Save, Code2, QrCode, PowerOff, RefreshCw, MessageSquare, X, CreditCard, CheckCircle, AlertCircle, ChevronRight, Eye, EyeOff, Zap, Globe, Phone, Key, Smartphone, Activity, Plus, Trash2 } from 'lucide-react'
 import { updateSettings } from '@/actions/settings'
 import { saveTemplate } from '@/actions/whatsapp-templates'
 import { getWhatsAppStatus, connectWhatsApp, disconnectWhatsApp } from '@/actions/whatsapp'
