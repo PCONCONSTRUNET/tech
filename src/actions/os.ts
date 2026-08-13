@@ -2,7 +2,7 @@
 
 import prisma from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
-import { requireAuth, requireRole } from '@/lib/auth-check'
+import { requireAuth, requireRole, getDbUser } from '@/lib/auth-check'
 
 export async function getServiceOrders() {
   return prisma.serviceOrder.findMany({
