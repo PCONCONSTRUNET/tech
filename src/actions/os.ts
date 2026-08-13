@@ -67,7 +67,7 @@ export async function createServiceOrder(formData: FormData) {
       })
     }
 
-    revalidatePath('/painel/os')
+    revalidatePath('/painel', 'layout')
     return { success: true, os: created }
   } catch (error) {
     return { error: 'Erro ao criar OS' }
@@ -149,7 +149,7 @@ export async function updateServiceOrderStatus(id: string, status: string) {
     }
 
     
-    revalidatePath('/painel/os')
+    revalidatePath('/painel', 'layout')
     return { success: true }
   } catch (error) {
     return { error: 'Erro ao atualizar OS' }
@@ -165,7 +165,7 @@ export async function deleteServiceOrder(id: string) {
 
   try {
     await prisma.serviceOrder.delete({ where: { id } })
-    revalidatePath('/painel/os')
+    revalidatePath('/painel', 'layout')
     return { success: true }
   } catch (error) {
     return { error: 'Erro ao excluir OS' }
@@ -266,7 +266,7 @@ export async function addPartToOS(osId: string, productId: string, quantity: num
       })
     })
 
-    revalidatePath('/painel/os')
+    revalidatePath('/painel', 'layout')
     return { success: true }
   } catch (error) {
     return { error: 'Erro ao adicionar peça à OS' }
