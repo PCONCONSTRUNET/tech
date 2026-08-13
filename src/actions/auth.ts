@@ -35,3 +35,13 @@ export async function logout() {
   revalidatePath('/', 'layout')
   redirect('/login')
 }
+
+export async function getCurrentUserEmail() {
+  try {
+    const supabase = await createClient()
+    const { data } = await supabase.auth.getUser()
+    return data?.user?.email || 'admin@digitaltech.com'
+  } catch (e) {
+    return 'admin@digitaltech.com'
+  }
+}

@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import NotificationDropdown from './NotificationDropdown';
+import { getCurrentUserEmail } from '@/actions/auth';
 
 const iconMap = {
   LayoutDashboard: <LayoutDashboard size={20} />,
@@ -51,10 +52,17 @@ export default function AdminLayout({
   const [navOrder, setNavOrder] = useState<string[]>(defaultNavItems.map(item => item.id));
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [userEmail, setUserEmail] = useState('admin@digitaltech.com');
 
   useEffect(() => {
     setIsSidebarOpen(false);
   }, [pathname]);
+
+  useEffect(() => {
+    getCurrentUserEmail().then(email => {
+      if (email) setUserEmail(email);
+    });
+  }, []);
 
   useEffect(() => {
     const saved = localStorage.getItem('sidebarOrder');
@@ -190,10 +198,12 @@ export default function AdminLayout({
           <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
             <NotificationDropdown />
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer' }}>
-              <div style={{ width: '36px', height: '36px', borderRadius: '50%', backgroundColor: 'var(--color-primary)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold' }}>AD</div>
+              <div style={{ width: '36px', height: '36px', borderRadius: '50%', backgroundColor: 'var(--color-primary)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold' }}>
+                {userEmail.substring(0, 2).toUpperCase()}
+              </div>
               <div className="hide-on-mobile" style={{ display: 'flex', flexDirection: 'column' }}>
                 <span style={{ fontSize: '0.875rem', fontWeight: '600' }}>Admin</span>
-                <span style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>admin@digitaltech.com</span>
+                <span style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>{userEmail}</span>
               </div>
             </div>
             <button 
@@ -222,7 +232,7 @@ export default function AdminLayout({
 
 function NavItem({ href, icon, label, active = false, onClick }: { href: string; icon: React.ReactNode; label: string; active?: boolean; onClick?: () => void }) {
   return (
-    <Link href={href} onClick={onClick} draggable={false} style={{
+    <Link href={href} prefetch={true} onClick={onClick} draggable={false} style={{
       display: 'flex',
       alignItems: 'center',
       gap: '12px',

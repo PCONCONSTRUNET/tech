@@ -3,9 +3,25 @@ import { useState } from 'react'
 
 export default function OSFilterModal({ onClose, onApply }: { onClose: () => void, onApply: (filters: any) => void }) {
   const [status, setStatus] = useState<string[]>([])
+  const [dateFrom, setDateFrom] = useState('')
+  const [dateTo, setDateTo] = useState('')
+  const [valMin, setValMin] = useState('')
+  const [valMax, setValMax] = useState('')
   
   const toggleStatus = (s: string) => {
     setStatus(prev => prev.includes(s) ? prev.filter(x => x !== s) : [...prev, s])
+  }
+
+  const handleClear = () => {
+    setStatus([])
+    setDateFrom('')
+    setDateTo('')
+    setValMin('')
+    setValMax('')
+  }
+
+  const handleApply = () => {
+    onApply({ status, dateFrom, dateTo, valMin, valMax })
   }
 
   return (
@@ -29,7 +45,7 @@ export default function OSFilterModal({ onClose, onApply }: { onClose: () => voi
           <div>
             <div style={{ fontSize: '0.65rem', fontWeight: '800', letterSpacing: '0.05em', color: '#64748b', textTransform: 'uppercase', marginBottom: '12px' }}>STATUS</div>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-              {['Em Análise', 'Aguardando Peça', 'Em Serviço', 'Concluído', 'Pago', 'Interrompido'].map(s => (
+              {['Recebido', 'Em Análise', 'Aguard. Aprovação', 'Aguard. Peça', 'Em Serviço', 'Pronto', 'Entregue', 'Cancelado'].map(s => (
                 <button
                   key={s}
                   onClick={() => toggleStatus(s)}
@@ -57,13 +73,11 @@ export default function OSFilterModal({ onClose, onApply }: { onClose: () => voi
             <div style={{ display: 'flex', gap: '12px' }}>
               <div style={{ position: 'relative', flex: 1 }}>
                 <div style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', fontSize: '0.75rem', fontWeight: '700', color: '#94a3b8' }}>DE</div>
-                <input type="text" placeholder="dd/mm/aaaa" style={{ width: '100%', padding: '10px 12px 10px 36px', borderRadius: '8px', border: '1px solid var(--color-border)', fontSize: '0.85rem' }} />
-                <Calendar size={14} style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
+                <input type="date" value={dateFrom} onChange={e => setDateFrom(e.target.value)} style={{ width: '100%', padding: '10px 12px 10px 36px', borderRadius: '8px', border: '1px solid var(--color-border)', fontSize: '0.85rem' }} />
               </div>
               <div style={{ position: 'relative', flex: 1 }}>
                 <div style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', fontSize: '0.75rem', fontWeight: '700', color: '#94a3b8' }}>ATÉ</div>
-                <input type="text" placeholder="dd/mm/aaaa" style={{ width: '100%', padding: '10px 12px 10px 42px', borderRadius: '8px', border: '1px solid var(--color-border)', fontSize: '0.85rem' }} />
-                <Calendar size={14} style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
+                <input type="date" value={dateTo} onChange={e => setDateTo(e.target.value)} style={{ width: '100%', padding: '10px 12px 10px 42px', borderRadius: '8px', border: '1px solid var(--color-border)', fontSize: '0.85rem' }} />
               </div>
             </div>
           </div>
@@ -72,9 +86,9 @@ export default function OSFilterModal({ onClose, onApply }: { onClose: () => voi
           <div>
             <div style={{ fontSize: '0.65rem', fontWeight: '800', letterSpacing: '0.05em', color: '#64748b', textTransform: 'uppercase', marginBottom: '12px' }}>VALOR (R$)</div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <input type="text" placeholder="Mín" style={{ flex: 1, padding: '10px 12px', borderRadius: '8px', border: '1px solid var(--color-border)', fontSize: '0.85rem' }} />
+              <input type="number" placeholder="Mín" value={valMin} onChange={e => setValMin(e.target.value)} style={{ flex: 1, padding: '10px 12px', borderRadius: '8px', border: '1px solid var(--color-border)', fontSize: '0.85rem' }} />
               <div style={{ color: '#94a3b8' }}>-</div>
-              <input type="text" placeholder="Máx" style={{ flex: 1, padding: '10px 12px', borderRadius: '8px', border: '1px solid var(--color-border)', fontSize: '0.85rem' }} />
+              <input type="number" placeholder="Máx" value={valMax} onChange={e => setValMax(e.target.value)} style={{ flex: 1, padding: '10px 12px', borderRadius: '8px', border: '1px solid var(--color-border)', fontSize: '0.85rem' }} />
             </div>
           </div>
           
@@ -97,11 +111,11 @@ export default function OSFilterModal({ onClose, onApply }: { onClose: () => voi
 
         {/* Footer Actions */}
         <div style={{ padding: '16px 24px', borderTop: '1px solid var(--color-border)', display: 'flex', gap: '12px', justifyContent: 'space-between', alignItems: 'center', backgroundColor: 'white' }}>
-          <button style={{ background: 'none', border: 'none', color: '#64748b', fontWeight: '700', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}>
+          <button onClick={handleClear} style={{ background: 'none', border: 'none', color: '#64748b', fontWeight: '700', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}>
             <RefreshCcw size={14} /> Limpar
           </button>
           
-          <button onClick={() => onApply({})} style={{ padding: '12px 24px', backgroundColor: '#2563eb', border: 'none', borderRadius: '8px', color: 'white', fontWeight: '700', fontSize: '0.9rem', cursor: 'pointer', width: '200px' }}>
+          <button onClick={handleApply} style={{ padding: '12px 24px', backgroundColor: '#2563eb', border: 'none', borderRadius: '8px', color: 'white', fontWeight: '700', fontSize: '0.9rem', cursor: 'pointer', width: '200px' }}>
             Aplicar Filtros
           </button>
         </div>

@@ -34,6 +34,14 @@ export default function SalesClient({ sales }: { sales: any[] }) {
 
   return (
     <div className="fade-in">
+      <style>{`
+        .mobile-cards { display: none; }
+        .desktop-table { display: block; overflow-x: auto; }
+        @media (max-width: 768px) {
+          .desktop-table { display: none !important; }
+          .mobile-cards { display: flex !important; flex-direction: column; gap: 16px; padding: 16px 0; }
+        }
+      `}</style>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
         <div>
           <h1 style={{ fontSize: '1.5rem', fontWeight: 'bold', margin: '0 0 4px 0', color: 'var(--color-text)' }}>Vendas & Pedidos</h1>
@@ -65,8 +73,8 @@ export default function SalesClient({ sales }: { sales: any[] }) {
           </div>
         </div>
 
-        <div style={{ overflowX: 'auto' }}>
-          <table className="table">
+        <div className="desktop-table">
+          <table className="table" style={{ minWidth: '800px' }}>
             <thead>
               <tr>
                 <th>Origem</th>
@@ -132,9 +140,6 @@ export default function SalesClient({ sales }: { sales: any[] }) {
                         <option value="CONCLUIDO">Concluído</option>
                         <option value="CANCELADO">Cancelado</option>
                       </select>
-                      <button className="icon-btn" title="Ver Detalhes">
-                        <Eye size={18} color="var(--color-text-muted)" />
-                      </button>
                     </div>
                   </td>
                 </tr>
@@ -148,6 +153,66 @@ export default function SalesClient({ sales }: { sales: any[] }) {
               )}
             </tbody>
           </table>
+        </div>
+
+        {/* Mobile View */}
+        <div className="mobile-cards" style={{ padding: '0 16px' }}>
+          {filteredSales.map((sale) => (
+            <div key={sale.id} style={{ border: '1px solid var(--color-border)', borderRadius: '12px', padding: '16px', backgroundColor: 'var(--color-surface)', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                <div>
+                  <div style={{ fontWeight: '700', fontSize: '1rem', color: 'var(--color-text)' }}>#{sale.id.slice(-6).toUpperCase()}</div>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', marginTop: '2px' }}>
+                    {new Date(sale.createdAt).toLocaleDateString('pt-BR')} às {new Date(sale.createdAt).toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'})}
+                  </div>
+                </div>
+                {sale.origin === 'LOJA_VIRTUAL' ? (
+                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', backgroundColor: 'rgba(79, 70, 229, 0.1)', color: 'var(--color-primary)', padding: '4px 8px', borderRadius: '6px', fontSize: '0.7rem', fontWeight: 'bold' }}>
+                    <Store size={12} /> Loja
+                  </div>
+                ) : (
+                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', backgroundColor: 'rgba(100, 116, 139, 0.1)', color: '#475569', padding: '4px 8px', borderRadius: '6px', fontSize: '0.7rem', fontWeight: 'bold' }}>
+                    <MonitorSmartphone size={12} /> PDV
+                  </div>
+                )}
+              </div>
+
+              <div>
+                <div style={{ fontSize: '0.875rem', fontWeight: '600', color: 'var(--color-text)' }}>{sale.customer?.name || 'Cliente Avulso'}</div>
+                <div style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', marginTop: '2px' }}>
+                  {sale.items.length} {sale.items.length === 1 ? 'item' : 'itens'} • {sale.paymentMethod}
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 0', borderTop: '1px solid var(--color-border)', borderBottom: '1px solid var(--color-border)' }}>
+                <span style={{ fontSize: '0.75rem', fontWeight: '700', color: 'var(--color-text-muted)', textTransform: 'uppercase' }}>Total</span>
+                <span style={{ fontSize: '1.1rem', fontWeight: '800', color: 'var(--color-text)' }}>
+                  {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(sale.totalAmount)}
+                </span>
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px' }}>
+                <div>{getStatusBadge(sale.status)}</div>
+                <select 
+                  className="input" 
+                  style={{ padding: '6px 8px', fontSize: '0.75rem', height: 'auto', flex: 1 }}
+                  value={sale.status}
+                  onChange={(e) => handleStatusChange(sale.id, e.target.value)}
+                >
+                  <option value="PENDENTE">Mudar para Pendente</option>
+                  <option value="PAGO">Mudar para Pago</option>
+                  <option value="ENVIADO">Mudar para Enviado</option>
+                  <option value="CONCLUIDO">Mudar para Concluído</option>
+                  <option value="CANCELADO">Mudar para Cancelado</option>
+                </select>
+              </div>
+            </div>
+          ))}
+          {filteredSales.length === 0 && (
+            <div style={{ textAlign: 'center', padding: '32px', color: 'var(--color-text-muted)', fontSize: '0.875rem' }}>
+              Nenhuma venda encontrada.
+            </div>
+          )}
         </div>
       </div>
     </div>

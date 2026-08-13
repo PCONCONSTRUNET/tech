@@ -2,10 +2,14 @@
 
 import prisma from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
+import { requireAuth, requireRole } from '@/lib/auth-check'
 
 export async function getServiceOrders() {
   return prisma.serviceOrder.findMany({
-    include: { customer: true },
+    include: { 
+      customer: true,
+      items: { include: { product: true } }
+    },
     orderBy: { createdAt: 'desc' }
   })
 }
@@ -13,11 +17,20 @@ export async function getServiceOrders() {
 export async function getServiceOrder(id: string) {
   return prisma.serviceOrder.findUnique({
     where: { id },
-    include: { customer: true }
+    include: { 
+      customer: true,
+      items: { include: { product: true } }
+    }
   })
 }
 
 export async function createServiceOrder(formData: FormData) {
+  try {
+    await requireAuth()
+  } catch (e: any) {
+    return { error: e.message }
+  }
+
   const customerId = formData.get('customerId') as string
   const device = formData.get('device') as string
   const brand = formData.get('brand') as string
@@ -62,6 +75,12 @@ export async function createServiceOrder(formData: FormData) {
 }
 
 export async function updateServiceOrderStatus(id: string, status: string) {
+  try {
+    await requireAuth()
+  } catch (e: any) {
+    return { error: e.message }
+  }
+
   try {
     const os = await prisma.serviceOrder.update({
       where: { id },
@@ -139,6 +158,12 @@ export async function updateServiceOrderStatus(id: string, status: string) {
 
 export async function deleteServiceOrder(id: string) {
   try {
+    await requireRole(['ADMIN'])
+  } catch (e: any) {
+    return { error: e.message }
+  }
+
+  try {
     await prisma.serviceOrder.delete({ where: { id } })
     revalidatePath('/painel/os')
     return { success: true }
@@ -190,5 +215,60 @@ export async function sendOsPdfWhatsApp(osId: string, phone: string) {
   } catch (e) {
     console.error('Erro ao enviar PDF via WhatsApp:', e)
     return { error: 'Falha ao enviar documento' }
+  }
+}
+
+export async function addPartToOS(osId: string, productId: string, quantity: number, price: number) {
+  let userId = undefined;
+  try {
+    const dbUser = await getDbUser()
+    if (dbUser) userId = dbUser.id
+    await requireRole(['ADMIN', 'TECNICO', 'VENDEDOR'])
+  } catch (e: any) {
+    return { error: e.message }
+  }
+
+  try {
+    await prisma.$transaction(async (tx) => {
+      // 1. Create the ServiceOrderItem
+      await tx.serviceOrderItem.create({
+        data: {
+          serviceOrderId: osId,
+          productId,
+          quantity,
+          price
+        }
+      })
+
+      // 2. Update OS Total Price
+      const os = await tx.serviceOrder.findUnique({ where: { id: osId } })
+      const newTotal = (os?.price || 0) + (price * quantity)
+      await tx.serviceOrder.update({
+        where: { id: osId },
+        data: { price: newTotal }
+      })
+
+      // 3. Deduct Stock & Register Movement
+      await tx.product.update({
+        where: { id: productId },
+        data: { stock: { decrement: quantity } }
+      })
+
+      await tx.stockMovement.create({
+        data: {
+          productId,
+          quantity,
+          type: 'SAIDA',
+          origin: 'OS',
+          userId: userId,
+          notes: `Peça adicionada na OS #${osId.slice(-6).toUpperCase()}`
+        }
+      })
+    })
+
+    revalidatePath('/painel/os')
+    return { success: true }
+  } catch (error) {
+    return { error: 'Erro ao adicionar peça à OS' }
   }
 }

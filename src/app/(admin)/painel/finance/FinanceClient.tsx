@@ -113,7 +113,7 @@ export default function FinanceClient({ transactions, categories, customers = []
     return (
       <div>
         {/* Big stats */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: '14px', marginBottom: '20px' }}>
+        <div className="stats-grid">
           <StatBox label="RECEITAS" value={totalIn} color="#10b981" />
           <StatBox label="DESPESAS" value={totalOut} color="#ef4444" />
           <StatBox label="SALDO LÍQUIDO" value={balance} color={balance >= 0 ? '#10b981' : '#ef4444'} dark />
@@ -121,14 +121,15 @@ export default function FinanceClient({ transactions, categories, customers = []
 
         {/* Transaction list */}
         <div style={{ border: '1px solid var(--color-border)', borderRadius: '10px', overflow: 'hidden' }}>
-          <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--color-border)', display: 'flex', gap: '10px', alignItems: 'center' }}>
+          <div className="search-filter-container" style={{ padding: '12px 16px', borderBottom: '1px solid var(--color-border)', display: 'flex', gap: '10px', alignItems: 'center' }}>
             <div style={{ position: 'relative', flex: 1 }}>
               <Search size={14} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: 'var(--color-text-muted)' }} />
               <input type="text" placeholder="Buscar por descrição ou categoria..." className="input"
-                style={{ paddingLeft: '30px', height: '36px', fontSize: '0.82rem' }}
+                style={{ paddingLeft: '30px', height: '36px', fontSize: '0.82rem', width: '100%', boxSizing: 'border-box' }}
                 value={search} onChange={e => setSearch(e.target.value)} />
             </div>
           </div>
+          <div className="desktop-table">
           <table className="table">
             <thead>
               <tr style={{ backgroundColor: 'var(--color-bg)' }}>
@@ -177,6 +178,41 @@ export default function FinanceClient({ transactions, categories, customers = []
               )}
             </tbody>
           </table>
+          </div>
+          {filtered.length > 0 && (
+            <div className="mobile-cards" style={{ padding: '0 16px' }}>
+              {filtered.map(t => {
+                const isRec = t.type === 'RECEITA'
+                const sc = t.status === 'PAGO'
+                  ? { bg: 'rgba(16,185,129,0.1)', color: '#10b981', label: 'Concluída' }
+                  : { bg: 'rgba(245,158,11,0.1)', color: '#d97706', label: 'Pendente' }
+                return (
+                  <div key={t.id} onClick={() => setDetailTx(t)} style={{ border: '1px solid var(--color-border)', borderRadius: '12px', padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px', backgroundColor: 'var(--color-surface)' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                      <div style={{ fontWeight: '700', fontSize: '0.95rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: isRec ? '#10b981' : '#ef4444', flexShrink: 0 }} />
+                        {t.description}
+                      </div>
+                      <div style={{ fontWeight: '800', color: isRec ? '#10b981' : '#ef4444', fontSize: '1rem' }}>
+                        {isRec ? '+' : '-'}{fmt(t.amount)}
+                      </div>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{ fontSize: '0.75rem', fontWeight: '600', backgroundColor: 'rgba(100,116,139,0.1)', color: '#475569', padding: '4px 8px', borderRadius: '6px' }}>{t.category?.name || '—'}</span>
+                      <span style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)' }}>{new Date(t.date).toLocaleDateString('pt-BR')}</span>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{ fontSize: '0.75rem', fontWeight: '700', backgroundColor: sc.bg, color: sc.color, padding: '4px 10px', borderRadius: '9999px' }}>{sc.label}</span>
+                      <div style={{ display: 'flex', gap: '6px' }} onClick={e => e.stopPropagation()}>
+                        <button onClick={() => openEdit(t)} style={{ background: '#f1f5f9', border: 'none', borderRadius: '6px', width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#475569', cursor: 'pointer' }}><Edit2 size={16} /></button>
+                        <button onClick={() => handleDelete(t.id)} style={{ background: '#fef2f2', border: 'none', borderRadius: '6px', width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ef4444', cursor: 'pointer' }}><Trash2 size={16} /></button>
+                      </div>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          )}
         </div>
       </div>
     )
@@ -185,7 +221,7 @@ export default function FinanceClient({ transactions, categories, customers = []
   function renderAReceber() {
     return (
       <div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: '14px', marginBottom: '16px' }}>
+        <div className="stats-grid">
           <div className="card" style={{ padding: '16px 20px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '6px' }}>
               <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#6366f1' }} />
@@ -210,11 +246,11 @@ export default function FinanceClient({ transactions, categories, customers = []
         </div>
 
         <div style={{ border: '1px solid var(--color-border)', borderRadius: '10px', overflow: 'hidden' }}>
-          <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--color-border)' }}>
-            <div style={{ position: 'relative', maxWidth: '360px' }}>
+          <div className="search-filter-container" style={{ padding: '12px 16px', borderBottom: '1px solid var(--color-border)' }}>
+            <div style={{ position: 'relative', width: '100%' }}>
               <Search size={14} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: 'var(--color-text-muted)' }} />
               <input type="text" placeholder="Buscar por cliente ou OS..." className="input"
-                style={{ paddingLeft: '30px', height: '36px', fontSize: '0.82rem', width: '100%' }} />
+                style={{ paddingLeft: '30px', height: '36px', fontSize: '0.82rem', width: '100%', boxSizing: 'border-box' }} />
             </div>
           </div>
           {aReceber.length === 0 ? (
@@ -224,34 +260,164 @@ export default function FinanceClient({ transactions, categories, customers = []
               <p style={{ fontSize: '0.78rem' }}>Quando você registrar uma OS ou venda a prazo, ela aparecerá aqui.</p>
             </div>
           ) : (
-            <table className="table">
-              <thead><tr style={{ backgroundColor: 'var(--color-bg)' }}>
-                {['CLIENTE','DESCRIÇÃO','VENCIMENTO','VALOR','STATUS','AÇÕES'].map(h => (
-                  <th key={h} style={{ fontSize: '0.7rem', fontWeight: '700', letterSpacing: '0.07em' }}>{h}</th>
-                ))}
-              </tr></thead>
-              <tbody>
+            <>
+              <div className="desktop-table">
+                <table className="table">
+                  <thead><tr style={{ backgroundColor: 'var(--color-bg)' }}>
+                    {['CLIENTE','DESCRIÇÃO','VENCIMENTO','VALOR','STATUS','AÇÕES'].map(h => (
+                      <th key={h} style={{ fontSize: '0.7rem', fontWeight: '700', letterSpacing: '0.07em' }}>{h}</th>
+                    ))}
+                  </tr></thead>
+                  <tbody>
+                    {aReceber.map(t => (
+                      <tr key={t.id}>
+                        <td style={{ fontWeight: '600', fontSize: '0.875rem' }}>{t.customer?.name || '—'}</td>
+                        <td style={{ fontSize: '0.82rem', color: 'var(--color-text-muted)' }}>{t.description}</td>
+                        <td style={{ fontSize: '0.8rem' }}>{t.dueDate ? new Date(t.dueDate).toLocaleDateString('pt-BR') : '—'}</td>
+                        <td style={{ fontWeight: '700', color: '#3b82f6' }}>{fmt(t.amount)}</td>
+                        <td><span style={{ fontSize: '0.7rem', fontWeight: '700', backgroundColor: 'rgba(245,158,11,0.1)', color: '#d97706', padding: '3px 10px', borderRadius: '9999px' }}>Pendente</span></td>
+                        <td>
+                          <button onClick={() => handleDelete(t.id)} style={{ background: 'none', border: '1px solid var(--color-border)', borderRadius: '6px', padding: '4px 8px', cursor: 'pointer', color: '#ef4444', fontSize: '0.72rem', fontWeight: '600', fontFamily: 'inherit' }}>
+                            Excluir
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <div className="mobile-cards" style={{ padding: '0 16px' }}>
                 {aReceber.map(t => (
-                  <tr key={t.id}>
-                    <td style={{ fontWeight: '600', fontSize: '0.875rem' }}>{t.customer?.name || '—'}</td>
-                    <td style={{ fontSize: '0.82rem', color: 'var(--color-text-muted)' }}>{t.description}</td>
-                    <td style={{ fontSize: '0.8rem' }}>{t.dueDate ? new Date(t.dueDate).toLocaleDateString('pt-BR') : '—'}</td>
-                    <td style={{ fontWeight: '700', color: '#3b82f6' }}>{fmt(t.amount)}</td>
-                    <td><span style={{ fontSize: '0.7rem', fontWeight: '700', backgroundColor: 'rgba(245,158,11,0.1)', color: '#d97706', padding: '3px 10px', borderRadius: '9999px' }}>Pendente</span></td>
-                    <td>
-                      <button onClick={() => handleDelete(t.id)} style={{ background: 'none', border: '1px solid var(--color-border)', borderRadius: '6px', padding: '4px 8px', cursor: 'pointer', color: '#ef4444', fontSize: '0.72rem', fontWeight: '600', fontFamily: 'inherit' }}>
-                        Excluir
-                      </button>
-                    </td>
-                  </tr>
+                  <div key={t.id} style={{ border: '1px solid var(--color-border)', borderRadius: '12px', padding: '16px', display: 'flex', flexDirection: 'column', gap: '10px', backgroundColor: 'var(--color-surface)' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                      <div style={{ fontWeight: '700', fontSize: '0.95rem' }}>{t.customer?.name || '—'}</div>
+                      <div style={{ fontWeight: '800', color: '#3b82f6', fontSize: '1rem' }}>{fmt(t.amount)}</div>
+                    </div>
+                    <div style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)' }}>{t.description}</div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{ fontSize: '0.75rem', fontWeight: '600', backgroundColor: 'rgba(100,116,139,0.1)', color: '#475569', padding: '4px 8px', borderRadius: '6px' }}>
+                        Venc: {t.dueDate ? new Date(t.dueDate).toLocaleDateString('pt-BR') : '—'}
+                      </span>
+                      <button onClick={() => handleDelete(t.id)} style={{ background: '#fef2f2', border: 'none', borderRadius: '6px', width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ef4444', cursor: 'pointer' }}><Trash2 size={16} /></button>
+                    </div>
+                  </div>
                 ))}
-              </tbody>
-            </table>
+              </div>
+            </>
           )}
         </div>
 
         <div style={{ marginTop: '12px', padding: '10px 14px', backgroundColor: 'rgba(59,130,246,0.06)', border: '1px solid rgba(59,130,246,0.2)', borderRadius: '8px', fontSize: '0.76rem', color: '#3b82f6' }}>
           ℹ️ <strong>A Receber:</strong> estes valores que seus clientes ainda não pagaram. Esses valores <strong>não entram no caixa</strong> até que o pagamento seja registrado.
+        </div>
+      </div>
+    )
+  }
+
+  function renderFilteredTable(list: any[], emptyMsg: string) {
+    const total = list.reduce((s, t) => s + t.amount, 0);
+    const inCount = list.filter(t => t.type === 'RECEITA').length;
+    const outCount = list.filter(t => t.type === 'DESPESA').length;
+
+    return (
+      <div>
+        <div className="stats-grid">
+          <StatBox label="TOTAL NO PERÍODO" value={total} color="#3b82f6" />
+          <div className="card" style={{ padding: '16px 20px' }}>
+            <div style={{ fontSize: '0.68rem', fontWeight: '700', color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: '6px' }}>Qtd. Entradas</div>
+            <div style={{ fontSize: '1.6rem', fontWeight: '800', color: '#10b981' }}>{inCount}</div>
+          </div>
+          <div className="card" style={{ padding: '16px 20px' }}>
+            <div style={{ fontSize: '0.68rem', fontWeight: '700', color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: '6px' }}>Qtd. Saídas</div>
+            <div style={{ fontSize: '1.6rem', fontWeight: '800', color: '#ef4444' }}>{outCount}</div>
+          </div>
+        </div>
+
+        <div style={{ border: '1px solid var(--color-border)', borderRadius: '10px', overflow: 'hidden' }}>
+          <div className="desktop-table">
+            <table className="table">
+            <thead>
+              <tr style={{ backgroundColor: 'var(--color-bg)' }}>
+                {['DATA','TÍTULO','CATEGORIA','MÉTODO','STATUS','VALOR',''].map(h => (
+                  <th key={h} style={{ fontSize: '0.7rem', fontWeight: '700', letterSpacing: '0.07em' }}>{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {list.map(t => {
+                const isRec = t.type === 'RECEITA'
+                const sc = t.status === 'PAGO'
+                  ? { bg: 'rgba(16,185,129,0.1)', color: '#10b981', label: 'Concluída' }
+                  : { bg: 'rgba(245,158,11,0.1)', color: '#d97706', label: 'Pendente' }
+                return (
+                  <tr key={t.id} style={{ cursor: 'pointer' }} onClick={() => setDetailTx(t)}>
+                    <td style={{ fontSize: '0.8rem' }}>{new Date(t.date).toLocaleDateString('pt-BR')}</td>
+                    <td>
+                      <div style={{ fontWeight: '600', fontSize: '0.875rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: isRec ? '#10b981' : '#ef4444', flexShrink: 0 }} />
+                        {t.description}
+                      </div>
+                    </td>
+                    <td><span style={{ fontSize: '0.72rem', fontWeight: '600', backgroundColor: 'rgba(100,116,139,0.1)', color: '#475569', padding: '2px 8px', borderRadius: '9999px' }}>{t.category?.name || '—'}</span></td>
+                    <td style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)' }}>{t.paymentMethod || '—'}</td>
+                    <td><span style={{ fontSize: '0.72rem', fontWeight: '700', backgroundColor: sc.bg, color: sc.color, padding: '3px 10px', borderRadius: '9999px' }}>{sc.label}</span></td>
+                    <td style={{ fontWeight: '700', color: isRec ? '#10b981' : '#ef4444', fontSize: '0.9rem' }}>
+                      {isRec ? '+' : '-'}{fmt(t.amount)}
+                    </td>
+                    <td>
+                      <div style={{ display: 'flex', gap: '4px' }} onClick={e => e.stopPropagation()}>
+                        <button onClick={() => openEdit(t)} style={{ background: 'none', border: '1px solid var(--color-border)', borderRadius: '6px', padding: '4px 6px', cursor: 'pointer', color: 'var(--color-text-muted)' }}><Edit2 size={13} /></button>
+                        <button onClick={() => handleDelete(t.id)} style={{ background: 'none', border: '1px solid var(--color-border)', borderRadius: '6px', padding: '4px 6px', cursor: 'pointer', color: '#ef4444' }}><Trash2 size={13} /></button>
+                      </div>
+                    </td>
+                  </tr>
+                )
+              })}
+              {list.length === 0 && (
+                <tr><td colSpan={7}>
+                  <div style={{ textAlign: 'center', padding: '40px', color: 'var(--color-text-muted)' }}>
+                    <p>{emptyMsg}</p>
+                  </div>
+                </td></tr>
+              )}
+            </tbody>
+          </table>
+          </div>
+          
+          {list.length > 0 && (
+            <div className="mobile-cards" style={{ padding: '0 16px' }}>
+              {list.map(t => {
+                const isRec = t.type === 'RECEITA'
+                const sc = t.status === 'PAGO'
+                  ? { bg: 'rgba(16,185,129,0.1)', color: '#10b981', label: 'Concluída' }
+                  : { bg: 'rgba(245,158,11,0.1)', color: '#d97706', label: 'Pendente' }
+                return (
+                  <div key={t.id} onClick={() => setDetailTx(t)} style={{ border: '1px solid var(--color-border)', borderRadius: '12px', padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px', backgroundColor: 'var(--color-surface)' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                      <div style={{ fontWeight: '700', fontSize: '0.95rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: isRec ? '#10b981' : '#ef4444', flexShrink: 0 }} />
+                        {t.description}
+                      </div>
+                      <div style={{ fontWeight: '800', color: isRec ? '#10b981' : '#ef4444', fontSize: '1rem' }}>
+                        {isRec ? '+' : '-'}{fmt(t.amount)}
+                      </div>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{ fontSize: '0.75rem', fontWeight: '600', backgroundColor: 'rgba(100,116,139,0.1)', color: '#475569', padding: '4px 8px', borderRadius: '6px' }}>{t.category?.name || '—'}</span>
+                      <span style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)' }}>{new Date(t.date).toLocaleDateString('pt-BR')}</span>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{ fontSize: '0.75rem', fontWeight: '700', backgroundColor: sc.bg, color: sc.color, padding: '4px 10px', borderRadius: '9999px' }}>{sc.label}</span>
+                      <div style={{ display: 'flex', gap: '6px' }} onClick={e => e.stopPropagation()}>
+                        <button onClick={() => openEdit(t)} style={{ background: '#f1f5f9', border: 'none', borderRadius: '6px', width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#475569', cursor: 'pointer' }}><Edit2 size={16} /></button>
+                        <button onClick={() => handleDelete(t.id)} style={{ background: '#fef2f2', border: 'none', borderRadius: '6px', width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ef4444', cursor: 'pointer' }}><Trash2 size={16} /></button>
+                      </div>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          )}
         </div>
       </div>
     )
@@ -278,6 +444,21 @@ export default function FinanceClient({ transactions, categories, customers = []
 
   return (
     <>
+      <style>{`
+        .mobile-cards { display: none; }
+        .desktop-table { display: block; overflow-x: auto; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin-bottom: 20px; }
+        @media (max-width: 768px) {
+          .desktop-table { display: none !important; }
+          .mobile-cards { display: flex !important; flex-direction: column; gap: 12px; padding: 12px 0; }
+          .stats-grid { grid-template-columns: 1fr; }
+          .tabs-container { overflow-x: auto; white-space: nowrap; -webkit-overflow-scrolling: touch; padding-bottom: 4px; }
+          .search-filter-container { flex-direction: column; align-items: stretch; width: 100%; }
+          .search-filter-container input { width: 100% !important; }
+          .actions-container { justify-content: flex-start !important; }
+          .period-pills { overflow-x: auto; white-space: nowrap; width: 100%; justify-content: flex-start; padding-bottom: 4px; border: none !important; background: transparent !important; }
+        }
+      `}</style>
       {/* ── Header ── */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px', flexWrap: 'wrap', gap: '12px' }}>
         <div>
@@ -289,9 +470,9 @@ export default function FinanceClient({ transactions, categories, customers = []
             Acompanhe o fluxo de caixa e lucros da sua loja
           </p>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+        <div className="actions-container" style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', width: '100%', justifyContent: 'flex-end' }}>
           {/* Period pills */}
-          <div style={{ display: 'flex', backgroundColor: 'var(--color-surface)', border: '1px solid var(--color-border)', borderRadius: '9999px', padding: '3px', gap: '2px' }}>
+          <div className="period-pills" style={{ display: 'flex', backgroundColor: 'var(--color-surface)', border: '1px solid var(--color-border)', borderRadius: '9999px', padding: '3px', gap: '2px' }}>
             {PERIODS.map(p => (
               <button key={p.key} onClick={() => setPeriod(p.key)}
                 style={{
@@ -299,27 +480,29 @@ export default function FinanceClient({ transactions, categories, customers = []
                   fontSize: '0.75rem', fontWeight: '600', fontFamily: 'inherit',
                   backgroundColor: period === p.key ? 'var(--color-primary)' : 'transparent',
                   color: period === p.key ? 'white' : 'var(--color-text-muted)',
-                  display: 'flex', alignItems: 'center', gap: '4px',
+                  display: 'flex', alignItems: 'center', gap: '4px', whiteSpace: 'nowrap'
                 }}>
                 {p.label}
                 {p.key === 'todos' && <ChevronDown size={12} />}
               </button>
             ))}
           </div>
-          <button className="btn btn-outline" style={{ gap: '6px', fontSize: '0.82rem', backgroundColor: 'white', height: '36px' }}>
-            <RefreshCw size={14} /> Reparar
-          </button>
-          <button className="btn btn-outline" style={{ gap: '6px', fontSize: '0.82rem', backgroundColor: 'white', height: '36px' }}>
-            <BarChart2 size={14} /> Relatório
-          </button>
-          <button onClick={() => openNew('DESPESA')}
-            style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 16px', borderRadius: 'var(--radius-md)', border: '1px solid #ef4444', color: '#ef4444', backgroundColor: 'white', cursor: 'pointer', fontSize: '0.82rem', fontWeight: '600', fontFamily: 'inherit' }}>
-            Despesa
-          </button>
-          <button onClick={() => openNew('RECEITA')}
-            style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 16px', borderRadius: 'var(--radius-md)', border: 'none', backgroundColor: '#10b981', color: 'white', cursor: 'pointer', fontSize: '0.82rem', fontWeight: '700', fontFamily: 'inherit' }}>
-            + Receita
-          </button>
+          <div className="tabs-container" style={{ display: 'flex', gap: '8px', maxWidth: '100%', paddingBottom: '4px' }}>
+            <button className="btn btn-outline" style={{ gap: '6px', fontSize: '0.82rem', backgroundColor: 'white', height: '36px', whiteSpace: 'nowrap' }}>
+              <RefreshCw size={14} /> Reparar
+            </button>
+            <button className="btn btn-outline" style={{ gap: '6px', fontSize: '0.82rem', backgroundColor: 'white', height: '36px', whiteSpace: 'nowrap' }}>
+              <BarChart2 size={14} /> Relatório
+            </button>
+            <button onClick={() => openNew('DESPESA')}
+              style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 16px', borderRadius: 'var(--radius-md)', border: '1px solid #ef4444', color: '#ef4444', backgroundColor: 'white', cursor: 'pointer', fontSize: '0.82rem', fontWeight: '600', fontFamily: 'inherit', whiteSpace: 'nowrap' }}>
+              Despesa
+            </button>
+            <button onClick={() => openNew('RECEITA')}
+              style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 16px', borderRadius: 'var(--radius-md)', border: 'none', backgroundColor: '#10b981', color: 'white', cursor: 'pointer', fontSize: '0.82rem', fontWeight: '700', fontFamily: 'inherit', whiteSpace: 'nowrap' }}>
+              + Receita
+            </button>
+          </div>
         </div>
       </div>
 
@@ -329,7 +512,7 @@ export default function FinanceClient({ transactions, categories, customers = []
       </div>
 
       {/* ── Sub-tabs ── */}
-      <div style={{ display: 'flex', borderBottom: '1px solid var(--color-border)', marginBottom: '20px', overflowX: 'auto' }}>
+      <div className="tabs-container" style={{ display: 'flex', borderBottom: '1px solid var(--color-border)', marginBottom: '20px', maxWidth: '100%' }}>
         {SUB_TABS.map(t => (
           <button key={t.key} onClick={() => setSubTab(t.key)}
             style={{
@@ -348,12 +531,17 @@ export default function FinanceClient({ transactions, categories, customers = []
       {/* ── Content ── */}
       {subTab === 'geral'    && renderGeral()}
       {subTab === 'areceber' && renderAReceber()}
-      {(subTab === 'reparos' || subTab === 'vendas' || subTab === 'fixas') && (
-        <div style={{ textAlign: 'center', padding: '60px 24px', color: 'var(--color-text-muted)' }}>
-          <BarChart2 size={40} style={{ opacity: 0.2, marginBottom: '12px' }} />
-          <p style={{ fontWeight: '600', marginBottom: '4px' }}>Em breve</p>
-          <p style={{ fontSize: '0.82rem' }}>Esta seção está sendo desenvolvida.</p>
-        </div>
+      {subTab === 'reparos' && renderFilteredTable(
+        filtered.filter(t => t.description?.toLowerCase().includes('os #') || t.category?.name?.toLowerCase().includes('reparo') || t.category?.name?.toLowerCase().includes('serviço')),
+        'Nenhuma receita de reparo ou OS encontrada neste período.'
+      )}
+      {subTab === 'vendas' && renderFilteredTable(
+        filtered.filter(t => t.description?.toLowerCase().includes('venda #') || t.category?.name?.toLowerCase().includes('venda') || (t.type === 'RECEITA' && !t.description?.toLowerCase().includes('os #'))),
+        'Nenhuma receita de vendas encontrada neste período.'
+      )}
+      {subTab === 'fixas' && renderFilteredTable(
+        filtered.filter(t => t.type === 'DESPESA' && !t.description?.toLowerCase().includes('peça') && !t.description?.toLowerCase().includes('estoque')),
+        'Nenhuma despesa fixa registrada neste período.'
       )}
 
       {/* ── Modal: Nova Receita / Nova Despesa ── */}

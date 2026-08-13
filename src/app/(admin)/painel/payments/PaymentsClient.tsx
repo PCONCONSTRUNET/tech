@@ -108,7 +108,22 @@ export default function PaymentsClient({ transactions, categories, customers = [
 
   return (
     <>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+      <style>{`
+        .mobile-cards { display: none; }
+        .desktop-table { display: block; overflow-x: auto; }
+        @media (max-width: 768px) {
+          .desktop-table { display: none !important; }
+          .mobile-cards { display: flex !important; flex-direction: column; gap: 12px; padding: 12px 0; }
+          .mobile-header-actions { flex-direction: column; align-items: stretch; gap: 12px; }
+          .mobile-header-actions button { width: 100%; justify-content: center; }
+          .mobile-filters-row { flex-direction: column; align-items: stretch !important; gap: 12px; }
+          .mobile-filters-row > div { width: 100% !important; max-width: none !important; }
+          .mobile-balance-card { flex-direction: column !important; }
+          .mobile-balance-card > div:first-child { width: 100% !important; border-right: none !important; border-bottom: 1px solid var(--color-border); padding-bottom: 16px; margin-bottom: 8px; }
+          .quick-filters { overflow-x: auto; padding-bottom: 4px; white-space: nowrap; flex-wrap: nowrap !important; justify-content: flex-start !important; width: 100%; }
+        }
+      `}</style>
+      <div className="mobile-header-actions" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap' }}>
         <div>
           <h1 style={{ fontSize: '1.5rem', fontWeight: '700' }}>Pagamentos</h1>
           <p style={{ color: 'var(--color-text-muted)' }}>Análise detalhada do extrato e movimentações.</p>
@@ -119,7 +134,7 @@ export default function PaymentsClient({ transactions, categories, customers = [
       </div>
 
       <div className="card" style={{ marginBottom: '24px' }}>
-        <div style={{ display: 'flex', gap: '24px', alignItems: 'center' }}>
+        <div className="mobile-balance-card" style={{ display: 'flex', gap: '24px', alignItems: 'center' }}>
           
           {/* Gráfico Simplificado */}
           <div style={{ width: '200px', height: '120px', display: 'flex', alignItems: 'flex-end', justifyContent: 'center', gap: '16px', padding: '8px', borderRight: '1px solid var(--color-border)' }}>
@@ -139,12 +154,12 @@ export default function PaymentsClient({ transactions, categories, customers = [
             </div>
           </div>
 
-          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', width: '100%' }}>
             <h3 style={{ fontSize: '0.875rem', color: 'var(--color-text-muted)', marginBottom: '8px' }}>Saldo do Período</h3>
             <p style={{ fontSize: '1.75rem', fontWeight: '700', color: saldo >= 0 ? 'var(--color-success)' : 'var(--color-error)' }}>
               {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(saldo)}
             </p>
-            <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
+            <div className="quick-filters" style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
               <button onClick={() => setQuickFilter('TUDO')} className="btn btn-outline" style={{ fontSize: '0.75rem', padding: '4px 8px' }}>Tudo</button>
               <button onClick={() => setQuickFilter('HOJE')} className="btn btn-outline" style={{ fontSize: '0.75rem', padding: '4px 8px' }}>Hoje</button>
               <button onClick={() => setQuickFilter('SEMANA')} className="btn btn-outline" style={{ fontSize: '0.75rem', padding: '4px 8px' }}>Últimos 7 dias</button>
@@ -156,15 +171,15 @@ export default function PaymentsClient({ transactions, categories, customers = [
       </div>
 
       <div className="card" style={{ marginBottom: '24px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px', marginBottom: showFilters ? '16px' : '0' }}>
-          <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap', flex: 1 }}>
+        <div className="mobile-filters-row" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px', marginBottom: showFilters ? '16px' : '0' }}>
+          <div className="mobile-filters-row" style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap', flex: 1 }}>
             <div style={{ position: 'relative', width: '300px', maxWidth: '100%' }}>
               <Search size={18} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--color-text-muted)' }} />
               <input 
                 type="text" 
                 placeholder="Buscar por descrição, categoria ou cliente..." 
                 className="input" 
-                style={{ paddingLeft: '40px', width: '100%' }} 
+                style={{ paddingLeft: '40px', width: '100%', boxSizing: 'border-box' }} 
                 value={search}
                 onChange={e => setSearch(e.target.value)}
               />
@@ -172,23 +187,23 @@ export default function PaymentsClient({ transactions, categories, customers = [
             <button 
               className={`btn ${showFilters ? 'btn-primary' : 'btn-outline'}`}
               onClick={() => setShowFilters(!showFilters)}
-              style={{ gap: '8px' }}
+              style={{ gap: '8px', whiteSpace: 'nowrap' }}
             >
               <Filter size={18} /> Filtros Avançados
             </button>
           </div>
           
-          <div style={{ display: 'flex', gap: '12px' }}>
+          <div className="mobile-filters-row" style={{ display: 'flex', gap: '12px' }}>
             <button 
               className="btn btn-outline" 
-              style={{ borderColor: 'var(--color-success)', color: 'var(--color-success)' }}
+              style={{ borderColor: 'var(--color-success)', color: 'var(--color-success)', whiteSpace: 'nowrap' }}
               onClick={() => { setTransactionType('RECEITA'); setIsEditing(false); setIsModalOpen(true); }}
             >
               + Nova Entrada
             </button>
             <button 
               className="btn btn-outline" 
-              style={{ borderColor: 'var(--color-error)', color: 'var(--color-error)' }}
+              style={{ borderColor: 'var(--color-error)', color: 'var(--color-error)', whiteSpace: 'nowrap' }}
               onClick={() => { setTransactionType('DESPESA'); setIsEditing(false); setIsModalOpen(true); }}
             >
               - Nova Saída
@@ -245,9 +260,10 @@ export default function PaymentsClient({ transactions, categories, customers = [
       </div>
 
       <div className="card table-container">
-        <table className="table">
-          <thead>
-            <tr>
+        <div className="desktop-table">
+          <table className="table">
+            <thead>
+              <tr>
               <th>Data</th>
               <th>Descrição</th>
               <th>Cliente</th>
@@ -304,6 +320,42 @@ export default function PaymentsClient({ transactions, categories, customers = [
             )}
           </tbody>
         </table>
+        </div>
+        
+        {filteredTransactions.length > 0 && (
+          <div className="mobile-cards">
+            {filteredTransactions.map(t => (
+              <div key={t.id} onClick={() => setSelectedTransaction(t)} style={{ border: '1px solid var(--color-border)', borderRadius: '12px', padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px', backgroundColor: 'var(--color-surface)', cursor: 'pointer' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                  <div style={{ fontWeight: '700', fontSize: '0.95rem' }}>{t.description}</div>
+                  <div style={{ fontWeight: '800', color: t.type === 'RECEITA' ? 'var(--color-success)' : 'var(--color-error)', fontSize: '1rem' }}>
+                    {t.type === 'DESPESA' ? '-' : '+'}{new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(t.amount)}
+                  </div>
+                </div>
+                <div style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)' }}>{t.customer?.name || 'Sem cliente'}</div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ fontSize: '0.75rem', fontWeight: '500', color: '#475569', backgroundColor: '#f1f5f9', padding: '4px 8px', borderRadius: '4px' }}>{t.category?.name || 'Sem categoria'}</span>
+                  <span style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)' }}>{new Date(t.date).toLocaleDateString('pt-BR')}</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                    <span style={{ fontSize: '0.75rem', color: t.type === 'RECEITA' ? 'var(--color-success)' : 'var(--color-error)', backgroundColor: t.type === 'RECEITA' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)', padding: '4px 8px', borderRadius: '4px', fontWeight: '600' }}>
+                      {t.type === 'RECEITA' ? 'Entrada' : 'Saída'}
+                    </span>
+                    <span style={{ fontSize: '0.75rem', color: '#3b82f6', backgroundColor: '#eff6ff', padding: '4px 8px', borderRadius: '4px', fontWeight: '600' }}>
+                      {t.status || 'Pago'}
+                    </span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center' }}>
+                    {t.paymentMethod === 'PIX' && <img src="/pix.png" alt="Pix" style={{ width: '20px', height: '20px' }} />}
+                    {t.paymentMethod === 'CARTAO' && <img src="/cartao.png" alt="Cartão" style={{ width: '20px', height: '20px' }} />}
+                    {t.paymentMethod === 'DINHEIRO' && <img src="/dinheiro.png" alt="Dinheiro" style={{ width: '20px', height: '20px' }} />}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {isModalOpen && (

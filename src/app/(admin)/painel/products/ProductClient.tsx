@@ -37,7 +37,15 @@ export default function ProductClient({
 
   return (
     <>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+      <style>{`
+        .mobile-cards { display: none; }
+        .desktop-table { display: block; overflow-x: auto; }
+        @media (max-width: 768px) {
+          .desktop-table { display: none !important; }
+          .mobile-cards { display: flex !important; flex-direction: column; gap: 16px; padding: 16px 0; }
+        }
+      `}</style>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '24px', flexWrap: 'wrap', gap: '16px' }}>
         <div>
           <h1 style={{ fontSize: '1.25rem', fontWeight: '700', color: 'var(--color-text)' }}>{title}</h1>
           <p style={{ color: 'var(--color-text-muted)', fontSize: '0.85rem' }}>Gerencie o catálogo e estoque.</p>
@@ -60,7 +68,7 @@ export default function ProductClient({
             </div>
           )}
         </div>
-        <button className="btn btn-primary" style={{ gap: '8px' }} onClick={() => setIsModalOpen(true)}>
+        <button className="btn btn-primary" style={{ gap: '8px', whiteSpace: 'nowrap' }} onClick={() => setIsModalOpen(true)}>
           <Plus size={18} /> Novo Produto
         </button>
       </div>
@@ -80,8 +88,8 @@ export default function ProductClient({
           </div>
         </div>
 
-        <div className="table-container">
-          <table className="table">
+        <div className="desktop-table">
+          <table className="table" style={{ minWidth: '800px' }}>
             <thead>
               <tr>
                 <th>Produto</th>
@@ -99,7 +107,7 @@ export default function ProductClient({
                 <tr key={p.id}>
                   <td>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                      <div style={{ width: '40px', height: '40px', backgroundColor: 'var(--color-bg)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-primary)', overflow: 'hidden' }}>
+                      <div style={{ width: '40px', height: '40px', backgroundColor: 'var(--color-bg)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-primary)', overflow: 'hidden', flexShrink: 0 }}>
                         {p.photoUrl ? (
                           <img src={p.photoUrl} alt={p.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                         ) : (
@@ -156,13 +164,84 @@ export default function ProductClient({
               ))}
               {filtered.length === 0 && (
                 <tr>
-                  <td colSpan={6} style={{ textAlign: 'center', padding: '24px', color: 'var(--color-text-muted)' }}>
+                  <td colSpan={8} style={{ textAlign: 'center', padding: '24px', color: 'var(--color-text-muted)' }}>
                     Nenhum produto encontrado.
                   </td>
                 </tr>
               )}
             </tbody>
           </table>
+        </div>
+
+        {/* Mobile View */}
+        <div className="mobile-cards" style={{ padding: '0 16px' }}>
+          {filtered.map(p => (
+            <div key={p.id} style={{ border: '1px solid var(--color-border)', borderRadius: '12px', padding: '16px', backgroundColor: 'var(--color-surface)', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
+                <div style={{ width: '48px', height: '48px', backgroundColor: 'var(--color-bg)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-primary)', overflow: 'hidden', flexShrink: 0 }}>
+                  {p.photoUrl ? (
+                    <img src={p.photoUrl} alt={p.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  ) : (
+                    <Package size={24} />
+                  )}
+                </div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontWeight: '600', fontSize: '1rem', color: 'var(--color-text)' }}>{p.name}</div>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', marginTop: '2px' }}>SKU: {p.sku || '-'}</div>
+                </div>
+                <div>
+                  <button style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-error)' }} onClick={() => handleDelete(p.id)}>
+                    <Trash2 size={18} />
+                  </button>
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                {p.category ? (
+                  <span style={{ fontSize: '0.75rem', fontWeight: '500', color: '#475569', backgroundColor: '#f1f5f9', padding: '4px 8px', borderRadius: '4px' }}>
+                    {p.category.name}
+                  </span>
+                ) : <span />}
+                
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  {p.active ? (
+                    <span style={{ fontSize: '0.75rem', fontWeight: '600', color: 'var(--color-success)' }}>Ativo</span>
+                  ) : (
+                    <span style={{ fontSize: '0.75rem', fontWeight: '600', color: 'var(--color-text-muted)' }}>Inativo</span>
+                  )}
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 0', borderTop: '1px solid var(--color-border)', borderBottom: '1px solid var(--color-border)' }}>
+                <span style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--color-text)' }}>
+                  Estoque: <span style={{ color: p.stock <= p.minStock ? 'var(--color-error)' : 'inherit' }}>{p.stock}</span> un
+                </span>
+                <span style={{ fontSize: '1.1rem', fontWeight: '800', color: 'var(--color-text)' }}>
+                  {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(p.salePrice)}
+                </span>
+              </div>
+
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <span style={{ fontSize: '0.8rem', fontWeight: '500' }}>Loja Online:</span>
+                <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer', gap: '8px' }}>
+                  <input 
+                    type="checkbox" 
+                    checked={p.showOnVitrine} 
+                    onChange={(e) => toggleVitrineVisibility(p.id, e.target.checked)}
+                    style={{ width: '16px', height: '16px', cursor: 'pointer', accentColor: 'var(--color-primary)' }}
+                  />
+                  <span style={{ fontSize: '0.75rem', fontWeight: '500', color: p.showOnVitrine ? 'var(--color-primary)' : 'var(--color-text-muted)' }}>
+                    {p.showOnVitrine ? 'Visível' : 'Oculto'}
+                  </span>
+                </label>
+              </div>
+            </div>
+          ))}
+          {filtered.length === 0 && (
+            <div style={{ textAlign: 'center', padding: '32px', color: 'var(--color-text-muted)', fontSize: '0.875rem' }}>
+              Nenhum produto encontrado.
+            </div>
+          )}
         </div>
       </div>
 

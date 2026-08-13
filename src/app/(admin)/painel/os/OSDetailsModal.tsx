@@ -1,9 +1,10 @@
 'use client'
 
-import { useState, useTransition } from 'react'
-import { X, Edit2, CheckCircle, Calendar, Shield, Trash2, Phone, Printer, User, Smartphone, Lock, Package, Check, FileText, Wrench, Clock, Copy, AlertCircle } from 'lucide-react'
+import { useState, useTransition, useEffect } from 'react'
+import { X, Edit2, CheckCircle, Calendar, Shield, Trash2, Phone, Printer, User, Smartphone, Lock, Package, Check, FileText, Wrench, Clock, Copy, AlertCircle, Plus } from 'lucide-react'
 import WhatsappIcon from '@/components/WhatsappIcon'
-import { deleteServiceOrder, sendOsPdfWhatsApp } from '@/actions/os'
+import { deleteServiceOrder, sendOsPdfWhatsApp, addPartToOS } from '@/actions/os'
+import { getProducts } from '@/actions/product'
 import { useRouter } from 'next/navigation'
 
 const STATUS_LABEL: Record<string, string> = {
@@ -32,7 +33,17 @@ const fmt = (val: number) => new Intl.NumberFormat('pt-BR', { style: 'currency',
 
 export default function OSDetailsModal({ os, osNumber, onClose, isQuote = false }: { os: any; osNumber: number; onClose: () => void; isQuote?: boolean }) {
   const [isPending, startTransition] = useTransition();
+  const [products, setProducts] = useState<any[]>([]);
+  const [selectedProductId, setSelectedProductId] = useState('');
+  const [partQty, setPartQty] = useState(1);
+  const [isAddingPart, setIsAddingPart] = useState(false);
   const router = useRouter();
+
+  useEffect(() => {
+    getProducts().then(res => {
+      if (Array.isArray(res)) setProducts(res);
+    });
+  }, []);
 
   if (!os) return null;
 
@@ -59,6 +70,24 @@ export default function OSDetailsModal({ os, osNumber, onClose, isQuote = false 
         }
       })
     }
+  }
+
+  const handleAddPart = () => {
+    if (!selectedProductId || partQty <= 0) return;
+    const prod = products.find(p => p.id === selectedProductId);
+    if (!prod) return;
+
+    startTransition(async () => {
+      const res = await addPartToOS(os.id, selectedProductId, partQty, prod.salePrice || 0);
+      if (res?.error) alert(res.error);
+      else {
+        setIsAddingPart(false);
+        setSelectedProductId('');
+        setPartQty(1);
+        alert('Peça adicionada com sucesso!');
+        // Ideally we would refresh data here or the layout will revalidate
+      }
+    })
   }
 
   const customerPhoneClean = os.customer?.phone ? os.customer.phone.replace(/\D/g, '') : '';
@@ -239,17 +268,55 @@ export default function OSDetailsModal({ os, osNumber, onClose, isQuote = false 
 
           {/* Serviços e Peças */}
           <div style={{ marginBottom: '24px' }}>
-            <div style={{ fontSize: '0.65rem', fontWeight: '800', letterSpacing: '0.05em', color: '#64748b', textTransform: 'uppercase', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <Wrench size={12} color="#10b981" /> SERVIÇOS E PEÇAS
-            </div>
-            <div style={{ border: '1px solid var(--color-border)', borderRadius: '12px', padding: '16px', marginBottom: '8px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem', color: '#0f172a' }}>
-                <span>{os.defect || 'Serviço'}</span>
-                <span>{os.price ? fmt(os.price) : 'R$ 0,00'}</span>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+              <div style={{ fontSize: '0.65rem', fontWeight: '800', letterSpacing: '0.05em', color: '#64748b', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <Wrench size={12} color="#10b981" /> SERVIÇOS E PEÇAS
               </div>
+              <button onClick={() => setIsAddingPart(!isAddingPart)} style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.75rem', fontWeight: '700', color: '#2563eb', background: 'none', border: 'none', cursor: 'pointer' }}>
+                <Plus size={14} /> ADICIONAR PEÇA
+              </button>
+            </div>
+            
+            {isAddingPart && (
+              <div style={{ border: '1px solid #bfdbfe', backgroundColor: '#eff6ff', borderRadius: '8px', padding: '12px', marginBottom: '12px', display: 'flex', gap: '12px', alignItems: 'flex-end' }}>
+                <div style={{ flex: 1 }}>
+                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: '600', color: '#475569', marginBottom: '4px' }}>Selecione a Peça / Produto</label>
+                  <select 
+                    value={selectedProductId} 
+                    onChange={e => setSelectedProductId(e.target.value)}
+                    style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                  >
+                    <option value="">-- Selecione --</option>
+                    {products.map(p => (
+                      <option key={p.id} value={p.id}>{p.name} - {fmt(p.salePrice)} (Estoque: {p.stock})</option>
+                    ))}
+                  </select>
+                </div>
+                <div style={{ width: '80px' }}>
+                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: '600', color: '#475569', marginBottom: '4px' }}>Qtd</label>
+                  <input type="number" min="1" value={partQty} onChange={e => setPartQty(parseInt(e.target.value) || 1)} style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid #cbd5e1' }} />
+                </div>
+                <button onClick={handleAddPart} disabled={isPending || !selectedProductId} style={{ padding: '8px 16px', backgroundColor: '#2563eb', color: 'white', border: 'none', borderRadius: '6px', fontWeight: '600', cursor: isPending ? 'wait' : 'pointer' }}>
+                  {isPending ? 'Salvando...' : 'Incluir'}
+                </button>
+              </div>
+            )}
+
+            <div style={{ border: '1px solid var(--color-border)', borderRadius: '12px', padding: '16px', marginBottom: '8px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem', color: '#0f172a', fontWeight: '500', marginBottom: '8px' }}>
+                <span>🔧 Serviço Inicial</span>
+                <span>{fmt((os.price || 0) - (os.items?.reduce((acc: number, it: any) => acc + (it.price * it.quantity), 0) || 0))}</span>
+              </div>
+              
+              {os.items && os.items.map((item: any) => (
+                <div key={item.id} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', color: '#475569', marginTop: '8px', borderTop: '1px dashed #e2e8f0', paddingTop: '8px' }}>
+                  <span>📦 {item.product?.name} <span style={{ color: '#94a3b8' }}>x{item.quantity}</span></span>
+                  <span>{fmt(item.price * item.quantity)}</span>
+                </div>
+              ))}
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: '#64748b', padding: '0 8px' }}>
-              <span>Total dos serviços</span>
+              <span>Total da OS</span>
               <span style={{ fontWeight: '800', color: '#0f172a' }}>{os.price ? fmt(os.price) : 'R$ 0,00'}</span>
             </div>
           </div>

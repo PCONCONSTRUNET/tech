@@ -2,8 +2,15 @@
 
 import prisma from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
+import { requireAuth, getDbUser } from '@/lib/auth-check'
 
 export async function createSale(cartItems: any[], paymentMethod: string, total: number) {
+  let userId = undefined;
+  try {
+    const dbUser = await getDbUser()
+    if (dbUser) userId = dbUser.id
+  } catch (e) {}
+
   if (cartItems.length === 0) return { error: 'Carrinho vazio' }
 
   try {
@@ -23,11 +30,22 @@ export async function createSale(cartItems: any[], paymentMethod: string, total:
         }
       })
 
-      // 2. Decrement stock
+      // 2. Decrement stock and register movement
       for (const item of cartItems) {
         await tx.product.update({
           where: { id: item.id },
           data: { stock: { decrement: item.quantity } }
+        })
+
+        await tx.stockMovement.create({
+          data: {
+            productId: item.id,
+            quantity: item.quantity,
+            type: 'SAIDA',
+            origin: 'VENDA',
+            userId: userId,
+            notes: `Venda #${createdSale.id.slice(-6).toUpperCase()}`
+          }
         })
       }
 

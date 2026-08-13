@@ -62,6 +62,8 @@ model ServiceOrder {
   warranty    String?
   notes       String?
 
+  items       ServiceOrderItem[]
+
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
@@ -107,6 +109,8 @@ model Product {
 
   saleItems     SaleItem[]
   quoteItems    QuoteItem[]
+  osItems       ServiceOrderItem[]
+  stockMovements StockMovement[]
 
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
@@ -128,6 +132,7 @@ model Sale {
   status        String     @default("CONCLUIDO") // PENDENTE, PAGO, ENVIADO, CANCELADO, CONCLUIDO
   origin        String     @default("PDV") // PDV, LOJA_VIRTUAL
   items         SaleItem[]
+  payments      SalePayment[]
   
   createdAt     DateTime   @default(now())
 }
@@ -135,7 +140,7 @@ model Sale {
 model SaleItem {
   id        String  @id @default(cuid())
   saleId    String
-  sale      Sale    @relation(fields: [saleId], references: [id])
+  sale      Sale    @relation(fields: [saleId], references: [id], onDelete: Cascade)
   productId String
   product   Product @relation(fields: [productId], references: [id])
   quantity  Int
@@ -274,4 +279,72 @@ model CashMovement {
   method      String?
   description String?
   createdAt   DateTime    @default(now())
+}
+
+model ServiceOrderItem {
+  id             String       @id @default(cuid())
+  serviceOrderId String
+  serviceOrder   ServiceOrder @relation(fields: [serviceOrderId], references: [id], onDelete: Cascade)
+  productId      String
+  product        Product      @relation(fields: [productId], references: [id])
+  quantity       Int
+  price          Float        // Preço na hora da OS
+}
+
+model StockMovement {
+  id          String   @id @default(cuid())
+  productId   String
+  product     Product  @relation(fields: [productId], references: [id])
+  quantity    Int
+  type        String   // ENTRADA, SAIDA
+  origin      String   // VENDA, COMPRA, OS, AJUSTE_MANUAL
+  userId      String?
+  notes       String?
+  createdAt   DateTime @default(now())
+}
+
+model ActivityLog {
+  id          String   @id @default(cuid())
+  action      String   // CREATE, UPDATE, DELETE
+  entity      String   // PRODUCT, OS, SALE
+  entityId    String
+  userId      String
+  userName    String?
+  details     String?  // JSON stringified details
+  createdAt   DateTime @default(now())
+}
+
+model Commission {
+  id             String    @id @default(cuid())
+  userId         String
+  saleId         String?
+  serviceOrderId String?
+  amount         Float
+  percentage     Float
+  status         String    @default("PENDENTE") // PENDENTE, PAGO
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+}
+
+model SalePayment {
+  id            String   @id @default(cuid())
+  saleId        String
+  sale          Sale     @relation(fields: [saleId], references: [id], onDelete: Cascade)
+  amount        Float
+  paymentMethod String   // PIX, CREDIT, DEBIT, CASH
+  installments  Int      @default(1)
+  createdAt     DateTime @default(now())
+}
+
+model Gateway {
+  id          String   @id @default(cuid())
+  name        String   @unique // MERCADOPAGO, STRIPE, PAGARME, etc
+  active      Boolean  @default(false)
+  publicKey   String?
+  accessToken String?
+  secretKey   String?
+  webhookUrl  String?
+  sandbox     Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }

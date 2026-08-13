@@ -133,8 +133,18 @@ export default function CustomerClient({ customers }: { customers: any[] }) {
 
   return (
     <>
+      <style>{`
+        .mobile-cards { display: none; }
+        .desktop-table { display: block; overflow-x: auto; }
+        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 20px; }
+        @media (max-width: 768px) {
+          .desktop-table { display: none !important; }
+          .mobile-cards { display: flex !important; flex-direction: column; gap: 16px; padding: 16px 0; }
+          .stats-grid { grid-template-columns: 1fr; }
+        }
+      `}</style>
       {/* ── Header ── */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px', flexWrap: 'wrap', gap: '16px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <div>
             <h1 style={{ fontSize: '1.5rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -157,7 +167,7 @@ export default function CustomerClient({ customers }: { customers: any[] }) {
       </div>
 
       {/* ── Stats ── */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: '14px', marginBottom: '20px' }}>
+      <div className="stats-grid">
         <div className="card" style={{ padding: '16px 20px', display: 'flex', alignItems: 'center', gap: '16px' }}>
           <div style={{ width: '44px', height: '44px', borderRadius: '12px', backgroundColor: 'rgba(99,102,241,0.1)', color: '#6366f1', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <Users size={22} />
@@ -190,24 +200,24 @@ export default function CustomerClient({ customers }: { customers: any[] }) {
       {/* ── Table Card ── */}
       <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
         {/* Search + filter bar */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 20px', borderBottom: '1px solid var(--color-border)' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 20px', borderBottom: '1px solid var(--color-border)', flexWrap: 'wrap', gap: '12px' }}>
           <span style={{ fontSize: '0.82rem', color: 'var(--color-text-muted)' }}>
             {filtered.length} cliente{filtered.length !== 1 ? 's' : ''} encontrado{filtered.length !== 1 ? 's' : ''}
           </span>
-          <div style={{ display: 'flex', gap: '8px' }}>
-            <div style={{ position: 'relative' }}>
+          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', width: '100%', maxWidth: 'max-content' }}>
+            <div style={{ position: 'relative', flex: 1, minWidth: '200px' }}>
               <Search size={14} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: 'var(--color-text-muted)' }} />
               <input
                 type="text"
                 placeholder="Buscar por nome, telefone ou documento..."
                 className="input"
-                style={{ paddingLeft: '30px', fontSize: '0.82rem', height: '36px', width: '300px' }}
+                style={{ paddingLeft: '30px', fontSize: '0.82rem', height: '36px', width: '100%', boxSizing: 'border-box' }}
                 value={search}
                 onChange={e => { setSearch(e.target.value); setPage(1) }}
               />
             </div>
-            <button className="btn btn-outline" style={{ fontSize: '0.82rem', gap: '6px', height: '36px', backgroundColor: 'white' }}>
-              <SlidersHorizontal size={14} /> Filtrar Clientes
+            <button className="btn btn-outline" style={{ fontSize: '0.82rem', gap: '6px', height: '36px', backgroundColor: 'white', whiteSpace: 'nowrap' }}>
+              <SlidersHorizontal size={14} /> Filtrar
             </button>
           </div>
         </div>
@@ -221,8 +231,8 @@ export default function CustomerClient({ customers }: { customers: any[] }) {
             {search && <button onClick={() => setSearch('')} style={{ marginTop: '12px', color: 'var(--color-primary)', background: 'none', border: 'none', cursor: 'pointer', fontWeight: '600', fontSize: '0.85rem' }}>Limpar filtros</button>}
           </div>
         ) : (
-          <div className="table-container">
-            <table className="table">
+          <div className="desktop-table">
+            <table className="table" style={{ minWidth: '800px' }}>
               <thead>
                 <tr style={{ backgroundColor: 'var(--color-bg)' }}>
                   <th style={{ fontSize: '0.72rem', fontWeight: '700', letterSpacing: '0.06em' }}>CLIENTE</th>
@@ -284,6 +294,63 @@ export default function CustomerClient({ customers }: { customers: any[] }) {
                 ))}
               </tbody>
             </table>
+          </div>
+        )}
+
+        {/* Mobile View */}
+        {paginated.length > 0 && (
+          <div className="mobile-cards" style={{ padding: '0 16px' }}>
+            {paginated.map(c => (
+              <div key={c.id} style={{ border: '1px solid var(--color-border)', borderRadius: '12px', padding: '16px', backgroundColor: 'var(--color-surface)', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
+                  <div style={{
+                    width: '44px', height: '44px', borderRadius: '50%',
+                    backgroundColor: avatarColor(c.name),
+                    color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontSize: '0.9rem', fontWeight: '700', flexShrink: 0,
+                  }}>
+                    {avatarInitials(c.name)}
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontWeight: '600', fontSize: '1rem', color: 'var(--color-text)' }}>{c.name}</div>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', marginTop: '2px' }}>{c.email || ''}</div>
+                  </div>
+                  <div style={{ display: 'flex', gap: '6px' }}>
+                    {(c.phone || c.whatsapp) && (
+                      <a href={`https://wa.me/55${c.phone?.replace(/\D/g, '') || ''}?text=Olá ${c.name.split(' ')[0]}...`} target="_blank" style={{ textDecoration: 'none', backgroundColor: '#f0fdf4', color: '#16a34a', border: 'none', borderRadius: '6px', width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }} title="Chamar no WhatsApp">
+                        <WhatsappIcon size={15} color="#25D366" />
+                      </a>
+                    )}
+                    <button
+                      onClick={() => handleDelete(c.id)}
+                      title="Excluir"
+                      style={{ background: 'none', border: '1px solid var(--color-border)', borderRadius: '6px', padding: '5px 7px', cursor: 'pointer', color: '#ef4444' }}
+                    >
+                      <Trash2 size={15} />
+                    </button>
+                  </div>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', fontSize: '0.8rem' }}>
+                  <div>
+                    <span style={{ color: 'var(--color-text-muted)', display: 'block', fontSize: '0.7rem' }}>Contato</span>
+                    <span style={{ fontWeight: '500' }}>{c.phone || c.whatsapp || '—'}</span>
+                  </div>
+                  <div>
+                    <span style={{ color: 'var(--color-text-muted)', display: 'block', fontSize: '0.7rem' }}>Documento</span>
+                    <span style={{ fontWeight: '500' }}>{c.document || '—'}</span>
+                  </div>
+                  <div>
+                    <span style={{ color: 'var(--color-text-muted)', display: 'block', fontSize: '0.7rem' }}>Cidade</span>
+                    <span style={{ fontWeight: '500' }}>{c.city ? `${c.city}${c.state ? ` - ${c.state}` : ''}` : '—'}</span>
+                  </div>
+                  <div>
+                    <span style={{ color: 'var(--color-text-muted)', display: 'block', fontSize: '0.7rem' }}>Cadastro</span>
+                    <span style={{ fontWeight: '500' }}>{new Date(c.createdAt).toLocaleDateString('pt-BR')}</span>
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         )}
 

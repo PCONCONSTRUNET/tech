@@ -237,13 +237,26 @@ export default function QuotesClient({ quotes, customers, products }: { quotes: 
 
   return (
     <>
+      <style>{`
+        .mobile-cards { display: none; }
+        .desktop-table { display: block; overflow-x: auto; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 24px; }
+        @media (max-width: 768px) {
+          .desktop-table { display: none !important; }
+          .mobile-cards { display: flex !important; flex-direction: column; gap: 16px; padding: 16px 0; }
+          .stats-grid { grid-template-columns: 1fr; }
+          .tabs-container { overflow-x: auto; white-space: nowrap; -webkit-overflow-scrolling: touch; padding-bottom: 4px; }
+          .search-filter-container { flex-direction: column; align-items: stretch; width: 100%; }
+          .search-filter-container input { width: 100% !important; }
+        }
+      `}</style>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '24px', flexWrap: 'wrap', gap: '16px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <div style={{ width: '48px', height: '48px', borderRadius: '12px', backgroundColor: '#6366f1', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ width: '48px', height: '48px', borderRadius: '12px', backgroundColor: 'var(--color-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 6px -1px rgba(99, 102, 241, 0.2)' }}>
             <Wrench size={24} style={{ color: 'white' }} />
           </div>
           <div>
-            <h1 style={{ fontSize: '1.5rem', fontWeight: '700', color: 'var(--color-text)' }}>
+            <h1 style={{ fontSize: '1.5rem', fontWeight: '800', color: 'var(--color-text)', letterSpacing: '-0.02em', lineHeight: 1.1 }}>
               Orçamentos
             </h1>
             <p style={{ color: 'var(--color-text-muted)', fontSize: '0.85rem', marginTop: '2px' }}>
@@ -251,13 +264,13 @@ export default function QuotesClient({ quotes, customers, products }: { quotes: 
             </p>
           </div>
         </div>
-        <div style={{ display: 'flex', gap: '10px' }}>
-          <button className="btn btn-outline" style={{ fontSize: '0.85rem', gap: '6px', backgroundColor: 'white', height: '40px' }}>
+        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+          <button className="btn btn-outline" style={{ fontSize: '0.85rem', gap: '6px', backgroundColor: 'white', height: '40px', whiteSpace: 'nowrap' }}>
             <FileText size={16} /> Relatório Geral
           </button>
           <button
             className="btn btn-primary"
-            style={{ gap: '6px', fontSize: '0.85rem', height: '40px', padding: '0 20px', fontWeight: '700' }}
+            style={{ gap: '6px', fontSize: '0.85rem', height: '40px', padding: '0 20px', fontWeight: '700', whiteSpace: 'nowrap' }}
             onClick={() => { setModalStep(1); setIsModalOpen(true); }}
           >
             <Plus size={18} /> Novo Orçamento
@@ -265,7 +278,7 @@ export default function QuotesClient({ quotes, customers, products }: { quotes: 
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px', marginBottom: '24px' }}>
+      <div className="stats-grid">
         <div className="card" style={{ padding: '20px', border: '1px solid var(--color-border)', borderRadius: '12px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
             <span style={{ fontSize: '0.7rem', fontWeight: '700', letterSpacing: '0.05em', color: 'var(--color-text-muted)', textTransform: 'uppercase' }}>TOTAL EM BANCADA</span>
@@ -308,7 +321,7 @@ export default function QuotesClient({ quotes, customers, products }: { quotes: 
       <div className="card" style={{ padding: '0', overflow: 'hidden' }}>
 
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0 24px', borderBottom: '1px solid var(--color-border)', flexWrap: 'wrap', gap: '16px', backgroundColor: 'var(--color-surface)' }}>
-          <div style={{ display: 'flex' }}>
+          <div className="tabs-container" style={{ display: 'flex', maxWidth: '100%' }}>
             {([
               { key: 'todas',        label: 'Todas as OS' },
               { key: 'andamento',    label: 'Em Andamento' },
@@ -325,6 +338,7 @@ export default function QuotesClient({ quotes, customers, products }: { quotes: 
                   color: tab === t.key ? 'var(--color-primary)' : 'var(--color-text-muted)',
                   borderBottom: tab === t.key ? '2px solid var(--color-primary)' : '2px solid transparent',
                   transition: 'all 0.15s',
+                  whiteSpace: 'nowrap'
                 }}
               >
                 {t.label}
@@ -332,14 +346,14 @@ export default function QuotesClient({ quotes, customers, products }: { quotes: 
             ))}
           </div>
 
-          <div style={{ display: 'flex', gap: '8px', padding: '12px 0' }}>
-            <div style={{ position: 'relative' }}>
+          <div className="search-filter-container" style={{ display: 'flex', gap: '8px', padding: '12px 0', flexWrap: 'wrap' }}>
+            <div style={{ position: 'relative', flex: 1, minWidth: '200px' }}>
               <Search size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--color-text-muted)' }} />
               <input
                 type="text"
                 placeholder="Buscar cliente, IMEI, OS..."
                 className="input"
-                style={{ paddingLeft: '36px', fontSize: '0.85rem', height: '40px', width: '280px', borderRadius: '8px' }}
+                style={{ paddingLeft: '36px', fontSize: '0.85rem', height: '40px', width: '280px', borderRadius: '8px', boxSizing: 'border-box' }}
                 value={search}
                 onChange={e => { setSearch(e.target.value); setPage(1) }}
               />
@@ -347,14 +361,14 @@ export default function QuotesClient({ quotes, customers, products }: { quotes: 
             <button 
               onClick={() => setIsFilterModalOpen(true)}
               className="btn btn-outline" 
-              style={{ fontSize: '0.85rem', gap: '8px', height: '40px', backgroundColor: 'white', borderRadius: '8px' }}
+              style={{ fontSize: '0.85rem', gap: '8px', height: '40px', backgroundColor: 'white', borderRadius: '8px', whiteSpace: 'nowrap' }}
             >
               <SlidersHorizontal size={16} /> Filtros
             </button>
           </div>
         </div>
 
-        <div className="table-container">
+        <div className="desktop-table">
           <table className="table">
             <thead>
               <tr style={{ backgroundColor: '#f8fafc', borderBottom: '1px solid var(--color-border)' }}>
@@ -474,6 +488,86 @@ export default function QuotesClient({ quotes, customers, products }: { quotes: 
             </tbody>
           </table>
         </div>
+
+        {/* Mobile View */}
+        {paginated.length > 0 && (
+          <div className="mobile-cards" style={{ padding: '0 16px' }}>
+            {paginated.map(os => {
+              const sc = STATUS_COLOR[os.status] || { bg: '#f1f5f9', color: '#475569', border: '#e2e8f0' }
+              return (
+                <div key={os.id} style={{ border: '1px solid var(--color-border)', borderRadius: '12px', padding: '16px', backgroundColor: 'var(--color-surface)', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      <div style={{ width: '40px', height: '40px', borderRadius: '50%', backgroundColor: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.85rem', fontWeight: '700', color: '#64748b' }}>
+                        #{numberMap[os.id] ?? 0}
+                      </div>
+                      <div>
+                        <div style={{ fontWeight: '700', fontSize: '1rem', color: '#0f172a' }}>{os.customer?.name}</div>
+                        <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '2px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                          <Smartphone size={12} style={{ color: '#3b82f6' }} /> {os.device || 'N/A'}
+                        </div>
+                      </div>
+                    </div>
+                    <div style={{ textAlign: 'right' }}>
+                      <div style={{ fontWeight: '800', fontSize: '1.1rem', color: '#0f172a' }}>
+                        {os.price ? fmt(os.price) : 'R$ 0,00'}
+                      </div>
+                      {os.price && (
+                        <div style={{ fontSize: '0.65rem', fontWeight: '700', color: '#16a34a', marginTop: '2px' }}>
+                          <CheckCircle size={10} style={{ display: 'inline', verticalAlign: 'middle' }} /> Entrada Paga
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div style={{ fontSize: '0.85rem', color: '#334155', backgroundColor: '#f8fafc', padding: '8px 12px', borderRadius: '8px' }}>
+                    <strong>Serviço:</strong> {os.defect || 'Nenhum serviço'}
+                  </div>
+
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div style={{ position: 'relative', width: '60%' }}>
+                      <div 
+                        style={{
+                          display: 'inline-flex', alignItems: 'center', gap: '6px',
+                          fontSize: '0.75rem', fontWeight: '600',
+                          color: sc.color, backgroundColor: 'white',
+                          border: `1px solid ${sc.color}`, cursor: 'pointer',
+                          padding: '4px 12px', borderRadius: '16px',
+                        }}
+                      >
+                        <Clock size={12} /> {STATUS_LABEL[os.status as keyof typeof STATUS_LABEL]}
+                        <ChevronDown size={12} />
+                      </div>
+                      <select
+                        value={os.status}
+                        onChange={e => updateQuoteStatus(os.id, e.target.value)}
+                        style={{
+                          position: 'absolute', top: '0', left: '0', width: '100px', height: '24px',
+                          opacity: 0, cursor: 'pointer'
+                        }}
+                      >
+                        {Object.entries(STATUS_LABEL).map(([v, l]) => (
+                          <option key={v} value={v}>{l}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div style={{ display: 'flex', gap: '6px' }}>
+                      <button onClick={() => setSelectedQuote(os)} style={{ background: '#f1f5f9', border: 'none', borderRadius: '6px', width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#475569', cursor: 'pointer' }}>
+                        <Eye size={16} />
+                      </button>
+                      <button onClick={() => window.open(`/painel/quotes/${os.id}`, '_blank')} style={{ background: '#f1f5f9', border: 'none', borderRadius: '6px', width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#475569', cursor: 'pointer' }}>
+                        <Printer size={16} />
+                      </button>
+                      <button onClick={() => handleDelete(os.id)} style={{ background: '#fef2f2', border: 'none', borderRadius: '6px', width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ef4444', cursor: 'pointer' }}>
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        )}
         
         <div style={{
           display: 'flex', justifyContent: 'space-between', alignItems: 'center',

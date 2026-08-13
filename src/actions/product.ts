@@ -2,6 +2,7 @@
 
 import prisma from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
+import { requireAuth, requireRole, getDbUser } from '@/lib/auth-check'
 
 export async function getProducts(type?: string) {
   const whereClause = type ? { type } : {}
@@ -19,6 +20,15 @@ export async function getCategories() {
 }
 
 export async function createProduct(formData: FormData) {
+  let userId = undefined;
+  try {
+    const dbUser = await getDbUser()
+    if (dbUser) userId = dbUser.id
+    await requireRole(['ADMIN', 'VENDEDOR'])
+  } catch (e: any) {
+    return { error: e.message }
+  }
+
   const name = formData.get('name') as string
   const sku = formData.get('sku') as string
   const salePrice = parseFloat(formData.get('salePrice') as string || '0')
@@ -47,7 +57,7 @@ export async function createProduct(formData: FormData) {
       categoryId = category.id;
     }
 
-    await prisma.product.create({
+    const created = await prisma.product.create({
       data: { 
         name, 
         description,
@@ -62,6 +72,20 @@ export async function createProduct(formData: FormData) {
         photos
       }
     })
+
+    if (stock > 0) {
+      await prisma.stockMovement.create({
+        data: {
+          productId: created.id,
+          quantity: stock,
+          type: 'ENTRADA',
+          origin: 'COMPRA',
+          userId: userId,
+          notes: 'Estoque inicial no cadastro'
+        }
+      })
+    }
+
     revalidatePath('/products')
     return { success: true }
   } catch (error) {
@@ -70,6 +94,12 @@ export async function createProduct(formData: FormData) {
 }
 
 export async function deleteProduct(id: string) {
+  try {
+    await requireRole(['ADMIN'])
+  } catch (e: any) {
+    return { error: e.message }
+  }
+
   try {
     await prisma.product.delete({ where: { id } })
     revalidatePath('/products')
