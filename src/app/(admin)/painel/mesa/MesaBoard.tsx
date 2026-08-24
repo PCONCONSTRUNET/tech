@@ -68,7 +68,7 @@ export default function MesaBoard({ cards }: { cards: OSCard[] }) {
   }, [filtered]);
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', height: '100%' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', height: '100%', minWidth: 0, width: '100%' }}>
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
@@ -124,6 +124,8 @@ export default function MesaBoard({ cards }: { cards: OSCard[] }) {
         display: 'flex', gap: '14px', overflowX: 'auto',
         paddingBottom: '16px', flex: 1,
         alignItems: 'flex-start',
+        WebkitOverflowScrolling: 'touch',
+        width: '100%',
       }}>
         {COLUMNS.map((col) => {
           const colCards = byStatus[col.key] ?? [];
