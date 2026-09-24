@@ -42,6 +42,7 @@ export async function GET(
   const defect = notesData.defect || 'Não informado'
   const password = notesData.password || ''
   const physicalCondition = notesData.physicalCondition || ''
+  const warranty = notesData.warranty || '90 dias'
 
   const quoteCode = quote.id.slice(-6).toUpperCase()
 
@@ -173,11 +174,15 @@ export async function GET(
     </div>
   </div>
 
-  ${settings?.warrantyTerm ? `
-  <div class="section" style="background:#f8fafc;border-radius:8px;padding:12px 16px;font-size:0.78rem;color:#64748b">
+  ${warranty === 'Sem Garantia' ? `
+  <div class="section" style="background:#fef2f2;border-radius:8px;padding:12px 16px;font-size:0.78rem;color:#991b1b">
     <div style="font-weight:700;margin-bottom:4px;font-size:0.72rem;text-transform:uppercase;letter-spacing:.06em">Termos de Garantia</div>
-    <div>${settings.warrantyTerm}</div>
-  </div>` : ''}
+    <div>Este orçamento não possui garantia.</div>
+  </div>` : `
+  <div class="section" style="background:#f8fafc;border-radius:8px;padding:12px 16px;font-size:0.78rem;color:#64748b">
+    <div style="font-weight:700;margin-bottom:4px;font-size:0.72rem;text-transform:uppercase;letter-spacing:.06em">Termos de Garantia - ${warranty}</div>
+    <div>${settings?.warrantyTerm || 'Garantia legal aplicável para serviços e peças.'}</div>
+  </div>`}
 
   <!-- ASSINATURAS -->
   <div class="sig-area">

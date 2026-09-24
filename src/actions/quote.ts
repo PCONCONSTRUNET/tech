@@ -44,7 +44,8 @@ export async function createQuote(data: {
   diagnostic?: string,
   password?: string,
   accessories?: string,
-  physicalCondition?: string
+  physicalCondition?: string,
+  warranty?: string
 }) {
   try {
     const quote = await prisma.quote.create({
@@ -64,7 +65,8 @@ export async function createQuote(data: {
           diagnostic: data.diagnostic,
           password: data.password,
           accessories: data.accessories,
-          physicalCondition: data.physicalCondition
+          physicalCondition: data.physicalCondition,
+          warranty: data.warranty
         }),
         items: {
           create: data.items.map(item => ({

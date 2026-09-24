@@ -150,6 +150,7 @@ export default function QuotesClient({ quotes, customers, products }: { quotes: 
   const [physicalChecklist, setPhysicalChecklist] = useState<string[]>([])
   const [lockType, setLockType] = useState<'padrao' | 'desenho'>('padrao')
   const [devicePassword, setDevicePassword] = useState('')
+  const [warranty, setWarranty] = useState('90 dias')
   const [isCreatingCustomer, setIsCreatingCustomer] = useState(false)
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false)
 
@@ -282,6 +283,7 @@ export default function QuotesClient({ quotes, customers, products }: { quotes: 
     const accessories = formData.get('accessories')?.toString() || '';
     const customerId = formData.get('customerId')?.toString() || null;
     const physicalCondition = formData.get('physicalCondition')?.toString() || '';
+    const warranty = formData.get('warranty')?.toString() || '90 dias';
     
     const items = [{
       name: defect || 'Orçamento de Reparo',
@@ -293,7 +295,7 @@ export default function QuotesClient({ quotes, customers, products }: { quotes: 
       customerId,
       totalAmount,
       items,
-      device, brand, model, imei, defect, diagnostic, password, accessories, physicalCondition
+      device, brand, model, imei, defect, diagnostic, password, accessories, physicalCondition, warranty
     });
     if (res.quote) setCreatedQuote(res.quote);
     setModalStep(7);
@@ -991,6 +993,18 @@ export default function QuotesClient({ quotes, customers, products }: { quotes: 
                         <div style={{ fontSize: '0.7rem', fontWeight: '700', color: '#64748b', textTransform: 'uppercase', marginBottom: '8px' }}>TOTAL PREVISTO</div>
                         <div style={{ fontSize: '1.6rem', fontWeight: '900', color: '#0f172a' }}>{fmt(totalServicesPrice)}</div>
                         <div style={{ fontSize: '0.75rem', fontWeight: '700', color: '#059669', marginTop: '8px' }}>Lucro Estimado: {fmt(totalServicesPrice)}</div>
+                      </div>
+
+                      <div className="card" style={{ padding: '16px' }}>
+                        <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: '700', color: '#0f172a', marginBottom: '8px' }}>Termo de Garantia</label>
+                        <select className="input" value={warranty} onChange={(e) => setWarranty(e.target.value)} style={{ width: '100%' }}>
+                          <option value="Sem Garantia">Sem Garantia</option>
+                          <option value="30 dias">30 dias</option>
+                          <option value="90 dias">90 dias</option>
+                          <option value="6 meses">6 meses</option>
+                          <option value="1 ano">1 ano</option>
+                        </select>
+                        <input type="hidden" name="warranty" value={warranty} />
                       </div>
                       
                       <div className="card" style={{ padding: '16px' }}>

@@ -42,6 +42,7 @@ export default function QuoteDetailsModal({ quote, quoteNumber, onClose, isQuote
   const password = parsedNotes.password || quote.password || 'Não informado';
   const accessories = parsedNotes.accessories || quote.accessories || 'Nenhum acessório';
   const physicalCondition = parsedNotes.physicalCondition || quote.physicalCondition || '';
+  const warranty = parsedNotes.warranty || '90 dias';
   const totalPrice = quote.totalAmount ?? quote.price ?? 0;
 
   const sc = STATUS_COLOR[quote.status] || { bg: '#f1f5f9', color: '#475569', border: '#e2e8f0' }
@@ -145,7 +146,7 @@ export default function QuoteDetailsModal({ quote, quoteNumber, onClose, isQuote
                   <Shield size={20} />
                 </div>
                 <div>
-                  <div style={{ fontWeight: '800', fontSize: '0.95rem', color: '#065f46' }}>90 dias</div>
+                  <div style={{ fontWeight: '800', fontSize: '0.95rem', color: '#065f46' }}>{warranty}</div>
                   <div style={{ fontSize: '0.7rem', color: '#16a34a' }}>Garantia legal aplicável.</div>
                 </div>
               </div>
