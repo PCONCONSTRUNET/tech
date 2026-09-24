@@ -20,6 +20,9 @@ export default function PaymentsClient({ transactions, categories, customers = [
   const [dateFrom, setDateFrom] = useState('')
   const [dateTo, setDateTo] = useState('')
   const [showFilters, setShowFilters] = useState(false)
+  const [customerSearchModal, setCustomerSearchModal] = useState('')
+  const [selectedCustomerId, setSelectedCustomerId] = useState('')
+  const [showCustomerDropdown, setShowCustomerDropdown] = useState(false)
 
   function setQuickFilter(type: 'HOJE' | 'SEMANA' | 'MES' | 'TUDO') {
     if (type === 'TUDO') {
@@ -386,14 +389,49 @@ export default function PaymentsClient({ transactions, categories, customers = [
               </div>
 
               <div className="grid-responsive-2">
-                <div style={{ gridColumn: 'span 2' }}>
+                <div style={{ gridColumn: 'span 2', position: 'relative' }}>
                   <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.875rem', fontWeight: '500' }}>Vincular a um Cliente (Opcional)</label>
-                  <select name="customerId" className="input" defaultValue={isEditing ? (selectedTransaction?.customerId || '') : ''}>
-                    <option value="">Nenhum cliente</option>
-                    {customers.map(c => (
-                      <option key={c.id} value={c.id}>{c.name}</option>
-                    ))}
-                  </select>
+                  <input type="hidden" name="customerId" value={selectedCustomerId} />
+                  <div style={{ position: 'relative' }}>
+                    <Search size={14} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: 'var(--color-text-muted)', pointerEvents: 'none' }} />
+                    <input
+                      type="text"
+                      className="input"
+                      placeholder="Buscar por nome, CPF ou telefone..."
+                      value={customerSearchModal}
+                      onChange={e => { setCustomerSearchModal(e.target.value); setShowCustomerDropdown(true); setSelectedCustomerId('') }}
+                      onFocus={() => setShowCustomerDropdown(true)}
+                      style={{ paddingLeft: '32px' }}
+                      autoComplete="off"
+                    />
+                  </div>
+                  {showCustomerDropdown && customerSearchModal.length > 0 && (
+                    <div style={{ position: 'absolute', zIndex: 99, top: '100%', left: 0, right: 0, backgroundColor: 'white', border: '1px solid var(--color-border)', borderRadius: '8px', boxShadow: '0 8px 24px rgba(0,0,0,0.12)', maxHeight: '180px', overflowY: 'auto', marginTop: '4px' }}>
+                      {customers
+                        .filter((c: any) => {
+                          const q = customerSearchModal.toLowerCase()
+                          return c.name?.toLowerCase().includes(q) || c.document?.toLowerCase().includes(q) || c.phone?.toLowerCase().includes(q) || c.whatsapp?.toLowerCase().includes(q)
+                        })
+                        .slice(0, 8)
+                        .map((c: any) => (
+                          <div key={c.id}
+                            onClick={() => { setSelectedCustomerId(c.id); setCustomerSearchModal(c.name); setShowCustomerDropdown(false) }}
+                            style={{ padding: '10px 14px', cursor: 'pointer', borderBottom: '1px solid #f1f5f9', fontSize: '0.875rem' }}
+                            onMouseEnter={e => (e.currentTarget.style.backgroundColor = '#f8fafc')}
+                            onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'white')}
+                          >
+                            <div style={{ fontWeight: '600' }}>{c.name}</div>
+                            <div style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>{c.document && `CPF: ${c.document}`}{c.phone && ` • ${c.phone}`}</div>
+                          </div>
+                        ))}
+                      {customers.filter((c: any) => {
+                        const q = customerSearchModal.toLowerCase()
+                        return c.name?.toLowerCase().includes(q) || c.document?.toLowerCase().includes(q) || c.phone?.toLowerCase().includes(q)
+                      }).length === 0 && (
+                        <div style={{ padding: '12px 14px', color: 'var(--color-text-muted)', fontSize: '0.85rem' }}>Nenhum cliente encontrado</div>
+                      )}
+                    </div>
+                  )}
                 </div>
                 <div style={{ gridColumn: 'span 2' }}>
                   <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.875rem', fontWeight: '500' }}>Observações (Opcional)</label>
