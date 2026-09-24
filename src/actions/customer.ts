@@ -5,7 +5,11 @@ import { revalidatePath } from 'next/cache'
 
 export async function getCustomers() {
   return prisma.customer.findMany({
-    orderBy: { createdAt: 'desc' }
+    orderBy: { createdAt: 'desc' },
+    include: {
+      serviceOrders: { orderBy: { createdAt: 'desc' } },
+      sales: { orderBy: { createdAt: 'desc' } }
+    }
   })
 }
 

@@ -4,7 +4,7 @@ import { useState, useMemo } from 'react'
 import {
   Users, Plus, Trash2, X, Search, SlidersHorizontal,
   Upload, Smartphone, Tablet, Laptop, Gamepad2, Watch, LayoutGrid,
-  MapPin, User, FileText, MessageCircle, TrendingUp, Edit
+  MapPin, User, FileText, MessageCircle, TrendingUp, Edit, Wrench, ShoppingBag
 } from 'lucide-react'
 import WhatsappIcon from '@/components/WhatsappIcon'
 import { createCustomer, deleteCustomer, updateCustomer } from '@/actions/customer'
@@ -43,6 +43,7 @@ export default function CustomerClient({ customers }: { customers: any[] }) {
   const [page, setPage] = useState(1)
 
   /* ── modal state ── */
+  const [viewingCustomer, setViewingCustomer] = useState<any>(null)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [name, setName]           = useState('')
   const [document, setDocument]   = useState('')
@@ -282,7 +283,7 @@ export default function CustomerClient({ customers }: { customers: any[] }) {
                 {paginated.map(c => (
                   <tr key={c.id}>
                     <td>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }} onClick={() => setViewingCustomer(c)}>
                         <div style={{
                           width: '36px', height: '36px', borderRadius: '50%',
                           backgroundColor: avatarColor(c.name),
@@ -350,10 +351,11 @@ export default function CustomerClient({ customers }: { customers: any[] }) {
                     backgroundColor: avatarColor(c.name),
                     color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center',
                     fontSize: '0.9rem', fontWeight: '700', flexShrink: 0,
-                  }}>
+                    cursor: 'pointer'
+                  }} onClick={() => setViewingCustomer(c)}>
                     {avatarInitials(c.name)}
                   </div>
-                  <div style={{ flex: 1 }}>
+                  <div style={{ flex: 1, cursor: 'pointer' }} onClick={() => setViewingCustomer(c)}>
                     <div style={{ fontWeight: '600', fontSize: '1rem', color: 'var(--color-text)' }}>{c.name}</div>
                     <div style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', marginTop: '2px' }}>{c.email || ''}</div>
                   </div>
@@ -639,6 +641,102 @@ export default function CustomerClient({ customers }: { customers: any[] }) {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* ── Modal: Ficha Técnica do Cliente ── */}
+      {viewingCustomer && (
+        <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.55)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50, padding: '24px', overflowY: 'auto' }}>
+          <div style={{
+            background: 'var(--color-surface)', borderRadius: '16px', width: '100%', maxWidth: '800px', maxHeight: '90vh',
+            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)', display: 'flex', flexDirection: 'column', overflow: 'hidden'
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', padding: '24px 32px', borderBottom: '1px solid var(--color-border)', flexShrink: 0, backgroundColor: 'var(--color-bg)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                <div style={{
+                  width: '56px', height: '56px', borderRadius: '50%', backgroundColor: avatarColor(viewingCustomer.name),
+                  color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.4rem', fontWeight: '700'
+                }}>
+                  {avatarInitials(viewingCustomer.name)}
+                </div>
+                <div>
+                  <h2 style={{ fontSize: '1.3rem', fontWeight: '700', margin: 0, color: 'var(--color-text)' }}>{viewingCustomer.name}</h2>
+                  <div style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)', marginTop: '4px', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                    {viewingCustomer.document && <span><FileText size={12} style={{ display: 'inline', marginRight: '4px', verticalAlign: '-2px' }}/>{viewingCustomer.document}</span>}
+                    {(viewingCustomer.phone || viewingCustomer.whatsapp) && <span><Smartphone size={12} style={{ display: 'inline', marginRight: '4px', verticalAlign: '-2px' }}/>{viewingCustomer.phone || viewingCustomer.whatsapp}</span>}
+                    {viewingCustomer.email && <span>✉ {viewingCustomer.email}</span>}
+                  </div>
+                </div>
+              </div>
+              <button onClick={() => setViewingCustomer(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-text-muted)', padding: '4px' }}>
+                <X size={24} />
+              </button>
+            </div>
+            
+            <div style={{ flex: 1, overflowY: 'auto', padding: '32px', backgroundColor: 'var(--color-surface)' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
+                
+                {/* Ordens de Serviço */}
+                <div>
+                  <h3 style={{ fontSize: '1rem', fontWeight: '700', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--color-text)' }}>
+                    <Wrench size={18} style={{ color: 'var(--color-primary)' }} /> Histórico de Serviços (OS)
+                  </h3>
+                  {viewingCustomer.serviceOrders && viewingCustomer.serviceOrders.length > 0 ? (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                      {viewingCustomer.serviceOrders.map((os: any) => (
+                        <div key={os.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px', backgroundColor: 'var(--color-bg)', border: '1px solid var(--color-border)', borderRadius: '12px' }}>
+                          <div>
+                            <div style={{ fontWeight: '600', fontSize: '0.9rem', marginBottom: '4px' }}>OS #{os.id.slice(-5).toUpperCase()} · {os.brand} {os.model}</div>
+                            <div style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)' }}>{os.defect}</div>
+                          </div>
+                          <div style={{ textAlign: 'right' }}>
+                            <div style={{ fontWeight: '700', color: 'var(--color-text)', fontSize: '0.9rem', marginBottom: '4px' }}>
+                              {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(os.price || 0)}
+                            </div>
+                            <div style={{ fontSize: '0.75rem', fontWeight: '600', padding: '4px 8px', borderRadius: '4px', backgroundColor: '#e2e8f0', color: '#475569', display: 'inline-block' }}>
+                              {os.status}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)' }}>Nenhuma ordem de serviço registrada para este cliente.</p>
+                  )}
+                </div>
+
+                {/* Vendas */}
+                <div>
+                  <h3 style={{ fontSize: '1rem', fontWeight: '700', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--color-text)' }}>
+                    <ShoppingBag size={18} style={{ color: 'var(--color-primary)' }} /> Compras na Loja / PDV
+                  </h3>
+                  {viewingCustomer.sales && viewingCustomer.sales.length > 0 ? (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                      {viewingCustomer.sales.map((sale: any) => (
+                        <div key={sale.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px', backgroundColor: 'var(--color-bg)', border: '1px solid var(--color-border)', borderRadius: '12px' }}>
+                          <div>
+                            <div style={{ fontWeight: '600', fontSize: '0.9rem', marginBottom: '4px' }}>Venda em {new Date(sale.createdAt).toLocaleDateString('pt-BR')}</div>
+                            <div style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)' }}>Método: {sale.paymentMethod}</div>
+                          </div>
+                          <div style={{ textAlign: 'right' }}>
+                            <div style={{ fontWeight: '700', color: '#16a34a', fontSize: '0.9rem', marginBottom: '4px' }}>
+                              {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(sale.totalAmount || 0)}
+                            </div>
+                            <div style={{ fontSize: '0.75rem', fontWeight: '600', padding: '4px 8px', borderRadius: '4px', backgroundColor: '#e2e8f0', color: '#475569', display: 'inline-block' }}>
+                              {sale.status}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)' }}>Nenhuma venda registrada para este cliente.</p>
+                  )}
+                </div>
+
+              </div>
+            </div>
           </div>
         </div>
       )}
