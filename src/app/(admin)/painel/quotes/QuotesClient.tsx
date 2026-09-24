@@ -152,6 +152,25 @@ export default function QuotesClient({ quotes, customers, products }: { quotes: 
   const [isCreatingCustomer, setIsCreatingCustomer] = useState(false)
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false)
 
+  // Services State
+  const dbServices = products.filter((p: any) => p.type === 'SERVICE')
+  const [servicesList, setServicesList] = useState(
+    dbServices.length > 0 
+      ? dbServices.map((s: any) => ({ id: s.id, name: s.name, price: s.salePrice || 0 }))
+      : [
+          { id: '1', name: 'Troca de Tela', price: 150 },
+          { id: '2', name: 'Troca de Bateria', price: 80 },
+          { id: '3', name: 'Reparo de Placa', price: 200 }
+        ]
+  )
+  const [selectedServiceIds, setSelectedServiceIds] = useState<string[]>([])
+  const [serviceSearchTerm, setServiceSearchTerm] = useState('')
+  const filteredServices = servicesList.filter(s => s.name.toLowerCase().includes(serviceSearchTerm.toLowerCase()))
+  
+  const [isAddingCustomService, setIsAddingCustomService] = useState(false)
+  const [customServiceName, setCustomServiceName] = useState('')
+  const [customServicePrice, setCustomServicePrice] = useState('')
+
   console.log("QuotesClient rendered, lockType:", lockType, "physicalChecklist:", physicalChecklist)
 
   /* ── CEP autocomplete ── */
@@ -905,26 +924,46 @@ export default function QuotesClient({ quotes, customers, products }: { quotes: 
                       </div>
                       <div style={{ position: 'relative', marginBottom: '16px' }}>
                         <Search size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
-                        <input type="text" className="input" placeholder="Buscar serviço (ex: Troca de Tela)..." style={{ paddingLeft: '36px', height: '40px', backgroundColor: '#f8fafc' }} />
+                        <input type="text" className="input" placeholder="Buscar serviço (ex: Troca de Tela)..." style={{ paddingLeft: '36px', height: '40px', backgroundColor: '#f8fafc' }} value={serviceSearchTerm} onChange={e => setServiceSearchTerm(e.target.value)} />
                       </div>
                       
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                        {[
-                          { name: 'Troca de Tela', price: 150 },
-                          { name: 'Troca de Bateria', price: 80 },
-                          { name: 'Reparo de Placa', price: 200 }
-                        ].map((srv, i) => (
-                          <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px', border: i === 0 ? '1px solid #bfdbfe' : '1px solid var(--color-border)', borderRadius: '8px', backgroundColor: i === 0 ? '#eff6ff' : 'white' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                              <input type="checkbox" defaultChecked={i === 0} style={{ width: '16px', height: '16px', accentColor: '#2563eb' }} />
-                              <span style={{ fontSize: '0.85rem', fontWeight: '500', color: '#334155' }}>{srv.name}</span>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: '300px', overflowY: 'auto' }}>
+                        {filteredServices.map((srv) => {
+                          const isSelected = selectedServiceIds.includes(srv.id);
+                          return (
+                            <div key={srv.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px', border: isSelected ? '1px solid #bfdbfe' : '1px solid var(--color-border)', borderRadius: '8px', backgroundColor: isSelected ? '#eff6ff' : 'white', cursor: 'pointer' }} onClick={() => {
+                              setSelectedServiceIds(prev => prev.includes(srv.id) ? prev.filter(id => id !== srv.id) : [...prev, srv.id]);
+                            }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                <input type="checkbox" checked={isSelected} readOnly style={{ width: '16px', height: '16px', accentColor: '#2563eb', pointerEvents: 'none' }} />
+                                <span style={{ fontSize: '0.85rem', fontWeight: '500', color: '#334155' }}>{srv.name}</span>
+                              </div>
+                              <span style={{ fontSize: '0.85rem', fontWeight: '700', color: '#0f172a' }}>{fmt(srv.price)}</span>
                             </div>
-                            <span style={{ fontSize: '0.85rem', fontWeight: '700', color: '#0f172a' }}>R$ {srv.price},00</span>
+                          );
+                        })}
+                        
+                        {isAddingCustomService ? (
+                          <div style={{ display: 'flex', gap: '8px', padding: '12px', border: '1px solid #cbd5e1', borderRadius: '8px', backgroundColor: '#f8fafc', alignItems: 'center' }}>
+                            <input type="text" placeholder="Nome do serviço..." className="input" value={customServiceName} onChange={e => setCustomServiceName(e.target.value)} style={{ flex: 2, height: '36px' }} />
+                            <input type="number" placeholder="R$ 0,00" className="input" value={customServicePrice} onChange={e => setCustomServicePrice(e.target.value)} style={{ flex: 1, height: '36px' }} />
+                            <button type="button" onClick={() => {
+                              if (customServiceName && customServicePrice) {
+                                const newId = Math.random().toString(36).substr(2, 9);
+                                setServicesList(prev => [...prev, { id: newId, name: customServiceName, price: parseFloat(customServicePrice) }]);
+                                setSelectedServiceIds(prev => [...prev, newId]);
+                                setCustomServiceName('');
+                                setCustomServicePrice('');
+                                setIsAddingCustomService(false);
+                              }
+                            }} style={{ padding: '8px 16px', backgroundColor: '#2563eb', color: 'white', border: 'none', borderRadius: '6px', fontWeight: '600', cursor: 'pointer' }}>Add</button>
+                            <button type="button" onClick={() => setIsAddingCustomService(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ef4444' }}><X size={16} /></button>
                           </div>
-                        ))}
-                        <button type="button" style={{ padding: '12px', border: '1px dashed #cbd5e1', borderRadius: '8px', backgroundColor: 'transparent', color: '#475569', fontSize: '0.8rem', fontWeight: '600', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', marginTop: '8px' }}>
-                          <Plus size={16} /> Adicionar Serviço Personalizado
-                        </button>
+                        ) : (
+                          <button type="button" onClick={() => setIsAddingCustomService(true)} style={{ padding: '12px', border: '1px dashed #cbd5e1', borderRadius: '8px', backgroundColor: 'transparent', color: '#475569', fontSize: '0.8rem', fontWeight: '600', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', marginTop: '8px' }}>
+                            <Plus size={16} /> Adicionar Serviço Personalizado
+                          </button>
+                        )}
                       </div>
                     </div>
                     

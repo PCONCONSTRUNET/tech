@@ -128,7 +128,7 @@ const PAGE_SIZE = 15
 
 type Tab = 'todas' | 'andamento' | 'finalizadas' | 'interrompidas'
 
-export default function OSClient({ serviceOrders, customers }: { serviceOrders: any[]; customers: any[] }) {
+export default function OSClient({ serviceOrders, customers, services = [] }: { serviceOrders: any[]; customers: any[]; services?: any[] }) {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [modalStep, setModalStep] = useState(1)
   const [search, setSearch] = useState('')
@@ -157,12 +157,19 @@ export default function OSClient({ serviceOrders, customers }: { serviceOrders: 
   const [isPaid, setIsPaid] = useState(false)
 
   // Services State
-  const [servicesList, setServicesList] = useState([
-    { id: '1', name: 'Troca de Tela', price: 150 },
-    { id: '2', name: 'Troca de Bateria', price: 80 },
-    { id: '3', name: 'Reparo de Placa', price: 200 }
-  ])
-  const [selectedServiceIds, setSelectedServiceIds] = useState<string[]>(['1'])
+  const [servicesList, setServicesList] = useState(
+    services.length > 0 
+      ? services.map(s => ({ id: s.id, name: s.name, price: s.salePrice || 0 }))
+      : [
+          { id: '1', name: 'Troca de Tela', price: 150 },
+          { id: '2', name: 'Troca de Bateria', price: 80 },
+          { id: '3', name: 'Reparo de Placa', price: 200 }
+        ]
+  )
+  const [selectedServiceIds, setSelectedServiceIds] = useState<string[]>([])
+  const [serviceSearchTerm, setServiceSearchTerm] = useState('')
+  const filteredServices = servicesList.filter(s => s.name.toLowerCase().includes(serviceSearchTerm.toLowerCase()))
+
   const [isAddingCustomService, setIsAddingCustomService] = useState(false)
   const [customServiceName, setCustomServiceName] = useState('')
   const [customServicePrice, setCustomServicePrice] = useState('')
@@ -918,11 +925,11 @@ export default function OSClient({ serviceOrders, customers }: { serviceOrders: 
                       </div>
                       <div style={{ position: 'relative', marginBottom: '16px' }}>
                         <Search size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
-                        <input type="text" className="input" placeholder="Buscar serviço (ex: Troca de Tela)..." style={{ paddingLeft: '36px', height: '40px', backgroundColor: '#f8fafc' }} />
+                        <input type="text" className="input" placeholder="Buscar serviço (ex: Troca de Tela)..." style={{ paddingLeft: '36px', height: '40px', backgroundColor: '#f8fafc' }} value={serviceSearchTerm} onChange={e => setServiceSearchTerm(e.target.value)} />
                       </div>
                       
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                        {servicesList.map((srv) => {
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: '300px', overflowY: 'auto' }}>
+                        {filteredServices.map((srv) => {
                           const isSelected = selectedServiceIds.includes(srv.id);
                           return (
                             <div key={srv.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px', border: isSelected ? '1px solid #bfdbfe' : '1px solid var(--color-border)', borderRadius: '8px', backgroundColor: isSelected ? '#eff6ff' : 'white', cursor: 'pointer' }} onClick={() => {

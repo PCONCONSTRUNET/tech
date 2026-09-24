@@ -30,6 +30,7 @@ const defaultNavItems = [
   { id: 'sales', href: '/painel/sales', iconName: 'ShoppingBag', label: 'Vendas' },
   { id: 'pos', href: '/painel/pos', iconName: 'ShoppingCart', label: 'PDV Físico' },
   { id: 'caixa', href: '/painel/caixa', iconName: 'Landmark', label: 'Caixa' },
+  { id: 'services', href: '/painel/services', iconName: 'Wrench', label: 'Serviços' },
   { id: 'parts', href: '/painel/parts', iconName: 'Package', label: 'Peças' },
   { id: 'products', href: '/painel/products', iconName: 'ShoppingBag', label: 'Produtos' },
   { id: 'customers', href: '/painel/customers', iconName: 'Users', label: 'Clientes' },
@@ -38,7 +39,6 @@ const defaultNavItems = [
   { id: 'quotes', href: '/painel/quotes', iconName: 'FileText', label: 'Orçamentos' },
   { id: 'finance', href: '/painel/finance', iconName: 'DollarSign', label: 'Financeiro' },
   { id: 'payments', href: '/painel/payments', iconName: 'CreditCard', label: 'Pagamentos' },
-  // { id: 'invoices', href: '/painel/invoices', iconName: 'Receipt', label: 'Notas Fiscais' },
   { id: 'coupons', href: '/painel/coupons', iconName: 'Tag', label: 'Cupons' },
   { id: 'integrations', href: '/painel/integrations', iconName: 'Settings', label: 'Integrações' },
 ];
