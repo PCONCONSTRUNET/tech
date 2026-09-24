@@ -160,7 +160,7 @@ export default function OSClient({ serviceOrders, customers, services = [] }: { 
   // Services State
   const [servicesList, setServicesList] = useState(
     services.length > 0 
-      ? services.map(s => ({ id: s.id, name: s.name, price: s.salePrice || 0 }))
+      ? services.map(s => ({ id: s.id, name: s.name, price: Number(s.salePrice) || 0 }))
       : [
           { id: '1', name: 'Troca de Tela', price: 150 },
           { id: '2', name: 'Troca de Bateria', price: 80 },
@@ -959,7 +959,8 @@ export default function OSClient({ serviceOrders, customers, services = [] }: { 
                             <button type="button" onClick={() => {
                               if (customServiceName && customServicePrice) {
                                 const newId = Math.random().toString(36).substr(2, 9);
-                                setServicesList(prev => [...prev, { id: newId, name: customServiceName, price: parseFloat(customServicePrice) }]);
+                                const priceVal = Number(customServicePrice.replace(',', '.')) || 0;
+                                setServicesList(prev => [...prev, { id: newId, name: customServiceName, price: priceVal }]);
                                 setSelectedServiceIds(prev => [...prev, newId]);
                                 setCustomServiceName('');
                                 setCustomServicePrice('');
@@ -1032,10 +1033,12 @@ export default function OSClient({ serviceOrders, customers, services = [] }: { 
                     
                     <div style={{ padding: '24px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', borderBottom: '1px solid var(--color-border)' }}>
                       <div>
-                        <div style={{ fontSize: '0.65rem', fontWeight: '700', color: '#94a3b8', textTransform: 'uppercase', marginBottom: '4px' }}>Serviço / Problema</div>
-                        <div style={{ fontSize: '0.9rem', fontWeight: '600', color: '#0f172a' }}>Não liga, tela quebrada</div>
-                        <div style={{ marginTop: '12px', display: 'flex', gap: '8px' }}>
-                          <span style={{ fontSize: '0.7rem', fontWeight: '600', padding: '4px 8px', border: '1px solid var(--color-border)', borderRadius: '4px' }}>Troca de Tela</span>
+                        <div style={{ fontSize: '0.65rem', fontWeight: '700', color: '#94a3b8', textTransform: 'uppercase', marginBottom: '4px' }}>Serviços Selecionados</div>
+                        <div style={{ marginTop: '4px', display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                          {selectedServiceIds.length > 0 ? selectedServiceIds.map(id => {
+                            const srv = servicesList.find(s => s.id === id);
+                            return srv ? <span key={id} style={{ fontSize: '0.7rem', fontWeight: '600', padding: '4px 8px', border: '1px solid var(--color-border)', borderRadius: '4px' }}>{srv.name}</span> : null;
+                          }) : <span style={{ fontSize: '0.8rem', color: '#64748b' }}>Nenhum serviço</span>}
                         </div>
                       </div>
                       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
@@ -1066,7 +1069,7 @@ export default function OSClient({ serviceOrders, customers, services = [] }: { 
                   <div className="card" style={{ padding: '24px', marginTop: '24px', display: 'flex', justifyContent: 'space-between', backgroundColor: '#f8fafc' }}>
                     <div>
                       <div style={{ fontSize: '0.65rem', fontWeight: '700', color: '#94a3b8', textTransform: 'uppercase', marginBottom: '4px' }}>Receita Total</div>
-                      <div style={{ fontSize: '1.4rem', fontWeight: '900', color: '#0f172a' }}>R$ 150,00</div>
+                      <div style={{ fontSize: '1.4rem', fontWeight: '900', color: '#0f172a' }}>{fmt(totalServicesPrice)}</div>
                     </div>
                     <div>
                       <div style={{ fontSize: '0.65rem', fontWeight: '700', color: '#94a3b8', textTransform: 'uppercase', marginBottom: '4px' }}>Custo Peças</div>
@@ -1074,7 +1077,7 @@ export default function OSClient({ serviceOrders, customers, services = [] }: { 
                     </div>
                     <div>
                       <div style={{ fontSize: '0.65rem', fontWeight: '700', color: '#94a3b8', textTransform: 'uppercase', marginBottom: '4px' }}>Lucro Estimado</div>
-                      <div style={{ fontSize: '1.4rem', fontWeight: '900', color: '#10b981' }}>R$ 150,00</div>
+                      <div style={{ fontSize: '1.4rem', fontWeight: '900', color: '#10b981' }}>{fmt(totalServicesPrice)}</div>
                     </div>
                   </div>
                   
