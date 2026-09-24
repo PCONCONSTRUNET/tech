@@ -95,17 +95,20 @@ export async function createProduct(formData: FormData) {
 
 export async function deleteProduct(id: string) {
   try {
-    await requireRole(['ADMIN'])
+    await requireRole(['ADMIN', 'VENDEDOR'])
   } catch (e: any) {
-    return { error: e.message }
+    return { error: 'Acesso negado para excluir produtos.' }
   }
 
   try {
     await prisma.product.delete({ where: { id } })
     revalidatePath('/painel', 'layout')
     return { success: true }
-  } catch (error) {
-    return { error: 'Erro ao excluir produto' }
+  } catch (error: any) {
+    if (error.code === 'P2003') {
+      return { error: 'Este produto não pode ser excluído pois já foi utilizado em vendas, orçamentos ou ordens de serviço. Você pode inativá-lo editando o produto.' }
+    }
+    return { error: 'Erro ao excluir produto. Tente inativá-lo.' }
   }
 }
 
