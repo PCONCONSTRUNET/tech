@@ -205,7 +205,7 @@ model QuoteItem {
   quoteId   String
   quote     Quote    @relation(fields: [quoteId], references: [id], onDelete: Cascade)
   productId String?
-  product   Product? @relation(fields: [productId], references: [id])
+  product   Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
   name      String
   quantity  Int
   price     Float
@@ -286,7 +286,7 @@ model ServiceOrderItem {
   serviceOrderId String
   serviceOrder   ServiceOrder @relation(fields: [serviceOrderId], references: [id], onDelete: Cascade)
   productId      String?
-  product        Product?     @relation(fields: [productId], references: [id])
+  product        Product?     @relation(fields: [productId], references: [id], onDelete: SetNull)
   name           String       @default("Serviço")
   quantity       Int
   price          Float        // Preço na hora da OS
@@ -295,7 +295,7 @@ model ServiceOrderItem {
 model StockMovement {
   id          String   @id @default(cuid())
   productId   String
-  product     Product  @relation(fields: [productId], references: [id])
+  product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
   quantity    Int
   type        String   // ENTRADA, SAIDA
   origin      String   // VENDA, COMPRA, OS, AJUSTE_MANUAL
