@@ -19,13 +19,34 @@ const STATUS_MAP = [
 export default async function TrackPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = await params
   
-  const [os, settings] = await Promise.all([
+  let [os, settings] = await Promise.all([
     prisma.serviceOrder.findUnique({
       where: { id: resolvedParams.id },
       include: { customer: true }
     }),
     prisma.settings.findFirst()
   ])
+
+  if (!os) {
+    const quote = await prisma.quote.findUnique({
+      where: { id: resolvedParams.id },
+      include: { customer: true }
+    })
+    if (quote) {
+      let parsedNotes: any = {}
+      try { parsedNotes = JSON.parse(quote.notes || '{}') } catch {}
+      os = {
+        id: quote.id,
+        status: quote.status,
+        device: parsedNotes.device || 'Não informado',
+        brand: parsedNotes.brand || '',
+        model: parsedNotes.model || '',
+        price: quote.totalAmount,
+        customer: quote.customer,
+        createdAt: quote.createdAt,
+      } as any
+    }
+  }
 
   if (!os) return notFound()
 

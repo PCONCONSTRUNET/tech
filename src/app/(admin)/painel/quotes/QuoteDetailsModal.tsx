@@ -45,6 +45,12 @@ export default function QuoteDetailsModal({ quote, quoteNumber, onClose, isQuote
   const warranty = parsedNotes.warranty || '90 dias';
   const totalPrice = quote.totalAmount ?? quote.price ?? 0;
 
+  const trackingUrl = typeof window !== 'undefined' ? `${window.location.origin}/loja/track/${quote.id}` : ''
+  const handleCopyTrackLink = () => {
+    navigator.clipboard.writeText(trackingUrl)
+    alert('Link de acompanhamento copiado!')
+  }
+
   const sc = STATUS_COLOR[quote.status] || { bg: '#f1f5f9', color: '#475569', border: '#e2e8f0' }
 
   return (
@@ -227,15 +233,15 @@ export default function QuoteDetailsModal({ quote, quoteNumber, onClose, isQuote
                 Crie um link seguro para que o cliente acompanhe o status da quote em tempo real.
               </div>
               <div style={{ fontSize: '0.7rem', color: '#94a3b8', marginBottom: '4px' }}>Exemplo de link gerado</div>
-              <div style={{ backgroundColor: '#f1f5f9', border: '1px solid #e2e8f0', borderRadius: '8px 8px 0 0', padding: '16px', fontSize: '0.85rem', color: '#2563eb', fontFamily: 'monospace' }}>
-                https://reparopro.com.br/og/track/abc123...
+              <div style={{ backgroundColor: '#f1f5f9', border: '1px solid #e2e8f0', borderRadius: '8px 8px 0 0', padding: '16px', fontSize: '0.85rem', color: '#2563eb', fontFamily: 'monospace', overflowX: 'auto', whiteSpace: 'nowrap' }}>
+                {trackingUrl}
               </div>
               <div style={{ backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', borderTop: 'none', borderRadius: '0 0 8px 8px', padding: '12px 16px', fontSize: '0.7rem', color: '#64748b', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <Shield size={12} style={{ color: '#f59e0b' }} /> Link privado e seguro para seus clientes.
+                <Shield size={12} style={{ color: '#10b981' }} /> Link privado e seguro para seus clientes.
               </div>
               
-              <button style={{ width: '100%', marginTop: '16px', backgroundColor: '#3b82f6', color: 'white', border: 'none', borderRadius: '8px', padding: '12px', fontSize: '0.9rem', fontWeight: '700', cursor: 'pointer', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px' }}>
-                Gerar link de acompanhamento
+              <button onClick={handleCopyTrackLink} style={{ width: '100%', marginTop: '16px', backgroundColor: '#3b82f6', color: 'white', border: 'none', borderRadius: '8px', padding: '12px', fontSize: '0.9rem', fontWeight: '700', cursor: 'pointer', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px' }}>
+                <Copy size={16} /> Copiar link de acompanhamento
               </button>
             </div>
           </div>
