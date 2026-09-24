@@ -1,8 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { Plus, Search, Edit, Trash2, X, Package, Store, Copy, ExternalLink, Check } from 'lucide-react'
-import { createProduct, deleteProduct, toggleVitrineVisibility } from '@/actions/product'
+import { Plus, Search, Edit, Trash2, X, Package, Store, Copy } from 'lucide-react'
+import { createProduct, deleteProduct, toggleVitrineVisibility, updateProduct } from '@/actions/product'
 import ImageUploader from '@/components/ImageUploader'
 
 export default function ProductClient({ 
@@ -20,6 +20,7 @@ export default function ProductClient({
   const safeCategories = categories || [];
 
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [editingProduct, setEditingProduct] = useState<any>(null)
   const [search, setSearch] = useState('')
   
   const filtered = safeProducts.filter(p => {
@@ -34,6 +35,11 @@ export default function ProductClient({
   async function handleAdd(formData: FormData) {
     await createProduct(formData)
     setIsModalOpen(false)
+  }
+
+  async function handleEdit(formData: FormData) {
+    await updateProduct(formData)
+    setEditingProduct(null)
   }
 
   async function handleDelete(id: string) {
@@ -170,7 +176,10 @@ export default function ProductClient({
                   </td>
                   <td>
                     <div style={{ display: 'flex', gap: '8px' }}>
-                      <button style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-error)' }} onClick={() => handleDelete(p.id)}>
+                      <button style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-primary)' }} onClick={() => setEditingProduct(p)} title="Editar">
+                        <Edit size={18} />
+                      </button>
+                      <button style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-error)' }} onClick={() => handleDelete(p.id)} title="Excluir">
                         <Trash2 size={18} />
                       </button>
                     </div>
@@ -212,7 +221,10 @@ export default function ProductClient({
                   <div style={{ fontWeight: '600', fontSize: '1rem', color: 'var(--color-text)' }}>{p.name}</div>
                   <div style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', marginTop: '2px' }}>SKU: {p.sku || '-'}</div>
                 </div>
-                <div>
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <button style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-primary)' }} onClick={() => setEditingProduct(p)}>
+                    <Edit size={18} />
+                  </button>
                   <button style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-error)' }} onClick={() => handleDelete(p.id)}>
                     <Trash2 size={18} />
                   </button>
@@ -341,6 +353,90 @@ export default function ProductClient({
               </div>
 
               <button type="submit" className="btn btn-primary" style={{ marginTop: '16px', padding: '12px' }}>Salvar Produto</button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Edição */}
+      {editingProduct && (
+        <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50 }}>
+          <div className="modal-content">
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+              <h2 style={{ fontSize: '1.25rem', fontWeight: '600' }}>Editar Produto</h2>
+              <button onClick={() => setEditingProduct(null)} style={{ background: 'none', border: 'none', cursor: 'pointer' }}><X size={20} /></button>
+            </div>
+
+            <form action={handleEdit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <input type="hidden" name="id" value={editingProduct.id} />
+              <input type="hidden" name="type" value={editingProduct.type} />
+
+              <div>
+                <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.875rem', fontWeight: '500' }}>Fotos do Produto</label>
+                <ImageUploader
+                  initialPhotos={(() => {
+                    try { return JSON.parse(editingProduct.photos || '[]') } catch { return [] }
+                  })()}
+                  onChange={() => {}}
+                />
+              </div>
+
+              <div className="grid-responsive-2">
+                <div>
+                  <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.875rem', fontWeight: '500' }}>Nome do Produto *</label>
+                  <input name="name" type="text" className="input" required defaultValue={editingProduct.name} />
+                </div>
+                <div>
+                  <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.875rem', fontWeight: '500' }}>Categoria</label>
+                  <input name="category" type="text" className="input" list="edit-category-list" defaultValue={editingProduct.category?.name || ''} />
+                  <datalist id="edit-category-list">
+                    {safeCategories.map(c => (
+                      <option key={c.id} value={c.name} />
+                    ))}
+                  </datalist>
+                </div>
+              </div>
+
+              <div>
+                <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.875rem', fontWeight: '500' }}>Descrição</label>
+                <textarea name="description" className="input" rows={3} defaultValue={editingProduct.description || ''} style={{ resize: 'vertical' }}></textarea>
+              </div>
+
+              <div className="grid-responsive-3">
+                <div>
+                  <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.875rem', fontWeight: '500' }}>Código / SKU</label>
+                  <input name="sku" type="text" className="input" defaultValue={editingProduct.sku || ''} />
+                </div>
+                <div>
+                  <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.875rem', fontWeight: '500' }}>NCM</label>
+                  <input name="ncm" type="text" className="input" defaultValue={editingProduct.ncm || ''} />
+                </div>
+                <div>
+                  <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.875rem', fontWeight: '500' }}>Estoque atual</label>
+                  <input type="text" className="input" value={`${editingProduct.stock} un`} disabled style={{ opacity: 0.6 }} />
+                </div>
+              </div>
+
+              <div className="grid-responsive-2">
+                <div>
+                  <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.875rem', fontWeight: '500' }}>Custo (R$)</label>
+                  <input name="costPrice" type="number" step="0.01" className="input" defaultValue={editingProduct.costPrice} />
+                </div>
+                <div>
+                  <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.875rem', fontWeight: '500' }}>Preço de Venda (R$)</label>
+                  <input name="salePrice" type="number" step="0.01" className="input" defaultValue={editingProduct.salePrice} />
+                </div>
+              </div>
+
+              <div style={{ backgroundColor: 'var(--color-bg)', padding: '16px', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <input type="checkbox" name="showOnVitrine" id="editShowOnVitrine" value="true" defaultChecked={editingProduct.showOnVitrine} style={{ width: '18px', height: '18px', accentColor: 'var(--color-primary)' }} />
+                <div>
+                  <label htmlFor="editShowOnVitrine" style={{ fontWeight: '600', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}><Store size={16} /> Exibir na Vitrine Online</label>
+                  <span style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>O produto ficará visível e disponível para compra na loja pública.</span>
+                </div>
+              </div>
+
+              <button type="submit" className="btn btn-primary" style={{ marginTop: '16px', padding: '12px' }}>Salvar Alterações</button>
             </form>
           </div>
         </div>

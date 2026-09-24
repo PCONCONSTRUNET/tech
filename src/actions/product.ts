@@ -116,9 +116,51 @@ export async function toggleVitrineVisibility(id: string, showOnVitrine: boolean
       data: { showOnVitrine }
     })
     revalidatePath('/painel', 'layout')
-    revalidatePath('/painel', 'layout')
     return { success: true }
   } catch (error) {
     return { error: 'Erro ao atualizar visibilidade na vitrine' }
+  }
+}
+
+export async function updateProduct(formData: FormData) {
+  try {
+    await requireRole(['ADMIN', 'VENDEDOR'])
+  } catch (e: any) {
+    return { error: e.message }
+  }
+
+  const id = formData.get('id') as string
+  const name = formData.get('name') as string
+  const sku = formData.get('sku') as string || null
+  const salePrice = parseFloat(formData.get('salePrice') as string || '0')
+  const costPrice = parseFloat(formData.get('costPrice') as string || '0')
+  const ncm = formData.get('ncm') as string || null
+  const description = formData.get('description') as string || null
+  const categoryName = formData.get('category') as string
+  const showOnVitrine = formData.get('showOnVitrine') === 'true'
+  const photos = formData.get('photos') as string || null
+
+  if (!id) return { error: 'ID do produto inválido' }
+  if (!name) return { error: 'O nome é obrigatório' }
+
+  try {
+    let categoryId = null;
+    if (categoryName) {
+      let category = await prisma.category.findFirst({ where: { name: categoryName } })
+      if (!category) {
+        category = await prisma.category.create({ data: { name: categoryName } })
+      }
+      categoryId = category.id
+    }
+
+    await prisma.product.update({
+      where: { id },
+      data: { name, sku, salePrice, costPrice, ncm, description, categoryId, showOnVitrine, photos }
+    })
+
+    revalidatePath('/painel', 'layout')
+    return { success: true }
+  } catch (error) {
+    return { error: 'Erro ao atualizar produto' }
   }
 }
