@@ -15,7 +15,7 @@ export default function LojaClient({ initialProducts, initialSettings }: { initi
 
   const CATEGORIAS = ['Todos', 'Barbeadores', 'Carregador Powerbank', 'Cabo Auxiliar'];
   const CNPJ = "58.645.937/0001-02";
-  const WHATSAPP = "5548999779829";
+  const WHATSAPP = "5519995885715";
 
   const handleWhatsApp = (prod: any, qtd: number) => {
     const priceToUse = prod.price || prod.salePrice || 0;
