@@ -160,6 +160,49 @@ export default function FinanceClient({ transactions, categories, customers = []
     if (w) { w.document.write(html); w.document.close() }
   }
 
+  /* ── Comprovante Generation ── */
+  const gerarComprovante = (t: any) => {
+    const dt = new Date(t.date).toLocaleString('pt-BR')
+    const html = `<html><head><title>Comprovante - ${t.description}</title>
+      <style>
+        body { font-family: 'Inter', sans-serif; padding: 40px; color: #1e293b; max-width: 600px; margin: 0 auto; }
+        .header { text-align: center; margin-bottom: 30px; border-bottom: 2px dashed #cbd5e1; padding-bottom: 20px; }
+        .logo { max-height: 60px; margin-bottom: 10px; }
+        .title { font-size: 20px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; color: #0f172a; }
+        .row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #f1f5f9; }
+        .label { color: #64748b; font-size: 14px; }
+        .val { font-weight: 600; font-size: 15px; text-align: right; }
+        .total { font-size: 24px; font-weight: 800; color: ${t.type === 'RECEITA' ? '#10b981' : '#ef4444'}; margin-top: 10px; }
+        .footer { text-align: center; margin-top: 40px; font-size: 12px; color: #94a3b8; }
+      </style>
+      </head><body>
+        <div class="header">
+          <img src="${window.location.origin}/logo.png" class="logo" alt="Digitech" onerror="this.style.display='none'" />
+          <div class="title">Comprovante de ${t.type === 'RECEITA' ? 'Pagamento' : 'Despesa'}</div>
+          <div style="color:#64748b; margin-top:5px">Gerado em ${new Date().toLocaleString('pt-BR')}</div>
+        </div>
+        <div class="row"><div class="label">Descrição</div><div class="val">${t.description}</div></div>
+        <div class="row"><div class="label">Data da Transação</div><div class="val">${dt}</div></div>
+        <div class="row"><div class="label">Categoria</div><div class="val">${t.category?.name || '—'}</div></div>
+        <div class="row"><div class="label">Método</div><div class="val">${t.paymentMethod || '—'}</div></div>
+        <div class="row"><div class="label">Status</div><div class="val">${t.status === 'PAGO' ? 'Concluída' : 'Pendente'}</div></div>
+        <div class="row"><div class="label">Cliente</div><div class="val">${t.customer?.name || (t.customerId ? 'Cliente Oculto' : '—')}</div></div>
+        ${t.customer?.document ? `<div class="row"><div class="label">CPF/CNPJ do Cliente</div><div class="val">${t.customer.document}</div></div>` : ''}
+        
+        <div style="margin-top: 30px; text-align: right;">
+          <div class="label">Valor Total</div>
+          <div class="total">${fmt(t.amount)}</div>
+        </div>
+        <div class="footer">
+          Este documento não possui valor fiscal.<br>
+          Obrigado pela preferência!
+        </div>
+        <script>window.onload=function(){window.print()}<\/script>
+      </body></html>`
+    const w = window.open('', '_blank')
+    if (w) { w.document.write(html); w.document.close() }
+  }
+
   /* ── handlers ── */
   function openNew(type: 'RECEITA'|'DESPESA') {
     setModalType(type); setEditingTx(null)
@@ -778,6 +821,7 @@ export default function FinanceClient({ transactions, categories, customers = []
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
               <h2 style={{ fontWeight: '700', fontSize: '1.1rem' }}>Detalhes da Transação</h2>
               <div style={{ display: 'flex', gap: '8px' }}>
+                <button onClick={() => gerarComprovante(detailTx)} style={{ background: 'none', border: '1px solid var(--color-border)', borderRadius: '6px', padding: '6px', cursor: 'pointer', color: '#10b981' }} title="Gerar Comprovante"><Download size={15} /></button>
                 <button onClick={() => openEdit(detailTx)} style={{ background: 'none', border: '1px solid var(--color-border)', borderRadius: '6px', padding: '6px', cursor: 'pointer' }}><Edit2 size={15} /></button>
                 <button onClick={() => handleDelete(detailTx.id)} style={{ background: 'none', border: '1px solid var(--color-border)', borderRadius: '6px', padding: '6px', cursor: 'pointer', color: '#ef4444' }}><Trash2 size={15} /></button>
                 <button onClick={() => setDetailTx(null)} style={{ background: 'none', border: 'none', cursor: 'pointer' }}><X size={20} /></button>
