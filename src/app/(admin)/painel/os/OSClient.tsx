@@ -309,7 +309,7 @@ export default function OSClient({ serviceOrders, customers }: { serviceOrders: 
         .mobile-cards { display: none; }
         .desktop-table { display: block; overflow-x: auto; }
         .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 24px; }
-        .grid-responsive-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .grid-responsive-2 { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px; }
         @media (max-width: 768px) {
           .desktop-table { display: none !important; }
           .mobile-cards { display: flex !important; flex-direction: column; gap: 16px; padding: 16px 0; }
