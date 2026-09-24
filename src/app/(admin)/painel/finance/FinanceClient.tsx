@@ -44,6 +44,9 @@ export default function FinanceClient({ transactions, categories, customers = []
   const [category, setCategory]     = useState('')
   const [method, setMethod]         = useState('Pix')
   const [status, setStatus]         = useState<'PAGO'|'PENDENTE'>('PAGO')
+  const [customerId, setCustomerId] = useState('')
+  const [customerSearch, setCustomerSearch] = useState('')
+  const [showCustomerList, setShowCustomerList] = useState(false)
 
   /* ── period filter ── */
   const periodStart = startOf(period)
@@ -79,6 +82,7 @@ export default function FinanceClient({ transactions, categories, customers = []
     setTitle(''); setAmount(''); setTxDate(today())
     setCategory(type === 'DESPESA' ? 'Peças' : 'Vendas')
     setMethod('Pix'); setStatus('PAGO')
+    setCustomerId(''); setCustomerSearch(''); setShowCustomerList(false)
   }
 
   function openEdit(t: any) {
@@ -615,6 +619,50 @@ export default function FinanceClient({ transactions, categories, customers = []
                     </button>
                   ))}
                 </div>
+              </div>
+
+              {/* CLIENTE */}
+              <div style={{ position: 'relative' }}>
+                <label style={{ display: 'block', fontSize: '0.68rem', fontWeight: '700', letterSpacing: '0.08em', color: 'var(--color-text-muted)', marginBottom: '6px', textTransform: 'uppercase' }}>VINCULAR CLIENTE (OPCIONAL)</label>
+                <div style={{ position: 'relative' }}>
+                  <Search size={14} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: 'var(--color-text-muted)', pointerEvents: 'none' }} />
+                  <input
+                    className="input"
+                    placeholder="Buscar por nome, CPF ou telefone..."
+                    value={customerSearch}
+                    onChange={e => { setCustomerSearch(e.target.value); setShowCustomerList(true); setCustomerId('') }}
+                    onFocus={() => setShowCustomerList(true)}
+                    style={{ paddingLeft: '32px' }}
+                    autoComplete="off"
+                  />
+                </div>
+                {showCustomerList && customerSearch.length > 0 && (
+                  <div style={{ position: 'absolute', zIndex: 99, top: '100%', left: 0, right: 0, backgroundColor: 'white', border: '1px solid var(--color-border)', borderRadius: '8px', boxShadow: '0 8px 24px rgba(0,0,0,0.12)', maxHeight: '180px', overflowY: 'auto', marginTop: '4px' }}>
+                    {customers
+                      .filter((c: any) => {
+                        const q = customerSearch.toLowerCase()
+                        return c.name?.toLowerCase().includes(q) || c.document?.toLowerCase().includes(q) || c.phone?.toLowerCase().includes(q) || c.whatsapp?.toLowerCase().includes(q)
+                      })
+                      .slice(0, 8)
+                      .map((c: any) => (
+                        <div key={c.id}
+                          onClick={() => { setCustomerId(c.id); setCustomerSearch(c.name); setShowCustomerList(false) }}
+                          style={{ padding: '10px 14px', cursor: 'pointer', borderBottom: '1px solid #f1f5f9', fontSize: '0.875rem' }}
+                          onMouseEnter={e => (e.currentTarget.style.backgroundColor = '#f8fafc')}
+                          onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'white')}
+                        >
+                          <div style={{ fontWeight: '600' }}>{c.name}</div>
+                          <div style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>{c.document && `CPF: ${c.document}`}{c.phone && ` • ${c.phone}`}</div>
+                        </div>
+                      ))}
+                    {customers.filter((c: any) => {
+                      const q = customerSearch.toLowerCase()
+                      return c.name?.toLowerCase().includes(q) || c.document?.toLowerCase().includes(q) || c.phone?.toLowerCase().includes(q)
+                    }).length === 0 && (
+                      <div style={{ padding: '12px 14px', color: 'var(--color-text-muted)', fontSize: '0.85rem' }}>Nenhum cliente encontrado</div>
+                    )}
+                  </div>
+                )}
               </div>
 
               {/* Footer */}
