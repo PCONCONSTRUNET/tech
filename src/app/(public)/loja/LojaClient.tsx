@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Search, ShoppingBag, LayoutGrid, LayoutList, ArrowLeft } from 'lucide-react';
+import { Search, ShoppingBag, LayoutGrid, LayoutList, ArrowLeft, Plus, Minus } from 'lucide-react';
 import Link from 'next/link';
 import { useCart } from '@/components/loja/CartContext';
 
