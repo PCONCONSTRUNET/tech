@@ -25,6 +25,7 @@ export async function createTransaction(formData: FormData) {
   const notes = formData.get('notes') as string | null
   const customerId = formData.get('customerId') as string | null
   const finalCustomerId = customerId === '' ? null : customerId;
+  const dateStr = formData.get('date') as string | null
 
   const categoryName = formData.get('category') as string | null
 
@@ -55,9 +56,12 @@ export async function createTransaction(formData: FormData) {
         categoryId: finalCategoryId,
         paymentMethod,
         notes,
-        customerId: finalCustomerId
+        customerId: finalCustomerId,
+        ...(dateStr && { date: new Date(dateStr) })
       }
     })
+    revalidatePath('/painel/finance')
+    revalidatePath('/painel/payments')
     revalidatePath('/painel', 'layout')
     return { success: true }
   } catch (error) {
@@ -68,6 +72,8 @@ export async function createTransaction(formData: FormData) {
 export async function deleteTransaction(id: string) {
   try {
     await prisma.transaction.delete({ where: { id } })
+    revalidatePath('/painel/finance')
+    revalidatePath('/painel/payments')
     revalidatePath('/painel', 'layout')
     return { success: true }
   } catch (error) {
@@ -84,6 +90,7 @@ export async function updateTransaction(id: string, formData: FormData) {
   const notes = formData.get('notes') as string | null
   const customerId = formData.get('customerId') as string | null
   const finalCustomerId = customerId === '' ? null : customerId;
+  const dateStr = formData.get('date') as string | null
 
   const categoryName = formData.get('category') as string | null
 
@@ -114,9 +121,12 @@ export async function updateTransaction(id: string, formData: FormData) {
         categoryId: finalCategoryId,
         paymentMethod,
         notes,
-        customerId: finalCustomerId
+        customerId: finalCustomerId,
+        ...(dateStr && { date: new Date(dateStr) })
       }
     })
+    revalidatePath('/painel/finance')
+    revalidatePath('/painel/payments')
     revalidatePath('/painel', 'layout')
     return { success: true }
   } catch (error) {

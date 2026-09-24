@@ -2,7 +2,7 @@ import { getTransactions, getTransactionCategories } from '@/actions/finance'
 import PaymentsClient from './PaymentsClient'
 import prisma from '@/lib/prisma'
 
-
+export const dynamic = 'force-dynamic'
 
 export default async function PaymentsPage() {
   const transactions = await getTransactions()
