@@ -63,20 +63,34 @@ export default function POSClient({ products }: { products: any[] }) {
         </div>
         
         <div style={{ flex: 1, overflowY: 'auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '16px', alignContent: 'start' }}>
-          {filteredProducts.map(p => (
+          {filteredProducts.map(p => {
+            let displayPhoto = p.photoUrl;
+            if (!displayPhoto && p.photos) {
+              try {
+                const arr = JSON.parse(p.photos);
+                if (Array.isArray(arr) && arr.length > 0) displayPhoto = arr[0];
+              } catch(e) {}
+            }
+            return (
             <div 
               key={p.id}
               onClick={() => addToCart(p)}
-              style={{ border: '1px solid var(--color-border)', borderRadius: '8px', padding: '16px', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', transition: 'all 0.2s', backgroundColor: 'var(--color-surface)' }}
+              style={{ border: '1px solid var(--color-border)', borderRadius: '8px', padding: '12px', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', transition: 'all 0.2s', backgroundColor: 'var(--color-surface)' }}
             >
-              <div style={{ fontSize: '2.5rem', marginBottom: '12px' }}>📦</div>
+              <div style={{ width: '80px', height: '80px', marginBottom: '12px', borderRadius: '8px', overflow: 'hidden', backgroundColor: 'var(--color-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                {displayPhoto ? (
+                  <img src={displayPhoto} alt={p.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                ) : (
+                  <span style={{ fontSize: '2rem' }}>📦</span>
+                )}
+              </div>
               <div style={{ fontWeight: '600', fontSize: '0.875rem', marginBottom: '4px' }}>{p.name}</div>
               <div style={{ fontWeight: '700', color: 'var(--color-primary)', marginBottom: '8px' }}>
                 {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(p.salePrice)}
               </div>
               <div style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>Estoque: {p.stock}</div>
             </div>
-          ))}
+          )})}
           {filteredProducts.length === 0 && (
             <div style={{ gridColumn: '1 / -1', textAlign: 'center', color: 'var(--color-text-muted)', marginTop: '24px' }}>
               Nenhum produto em estoque encontrado.
