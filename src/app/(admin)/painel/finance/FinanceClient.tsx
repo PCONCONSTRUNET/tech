@@ -76,6 +76,90 @@ export default function FinanceClient({ transactions, categories, customers = []
   const aReceber  = transactions.filter(t => t.type === 'RECEITA' && t.status === 'PENDENTE')
   const vencidas  = aReceber.filter(t => new Date(t.dueDate || t.date) < new Date())
 
+  /* ── DRE Generation ── */
+  const gerarDRE = () => {
+    const fmt = (v: number) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v)
+    const fmtDate = (d: string) => new Date(d).toLocaleDateString('pt-BR')
+
+    // Breakdown by category
+    const receitasPorCategoria = receitas.reduce((acc: any, t) => {
+      const cat = t.category?.name || 'Sem categoria'
+      acc[cat] = (acc[cat] || 0) + t.amount
+      return acc
+    }, {})
+
+    const despesasPorCategoria = despesas.reduce((acc: any, t) => {
+      const cat = t.category?.name || 'Sem categoria'
+      acc[cat] = (acc[cat] || 0) + t.amount
+      return acc
+    }, {})
+
+    const txRows = filtered.filter(t => t.status === 'PAGO').sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()).map(t => `
+      <tr style="border-bottom:1px solid #eee">
+        <td style="padding:6px">${fmtDate(t.date)}</td>
+        <td style="padding:6px">${t.description}</td>
+        <td style="padding:6px">${t.category?.name || '-'}</td>
+        <td style="padding:6px;text-align:right;color:${t.type === 'RECEITA' ? '#10b981' : '#ef4444'}">${t.type === 'RECEITA' ? '+' : '-'}${fmt(t.amount)}</td>
+      </tr>`).join('')
+
+    const recCatsHtml = Object.entries(receitasPorCategoria).map(([cat, val]) => `
+      <div style="display:flex; justify-content:space-between; margin-bottom:4px; font-size:0.85rem">
+        <span>${cat}</span>
+        <span>${fmt(val as number)}</span>
+      </div>`).join('')
+
+    const despCatsHtml = Object.entries(despesasPorCategoria).map(([cat, val]) => `
+      <div style="display:flex; justify-content:space-between; margin-bottom:4px; font-size:0.85rem">
+        <span>${cat}</span>
+        <span>${fmt(val as number)}</span>
+      </div>`).join('')
+
+    const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>DRE</title>
+      <style>
+        body{font-family:Arial,sans-serif;padding:32px;color:#111}
+        h1{font-size:1.5rem;margin-bottom:4px;text-align:center}
+        .header-sub{text-align:center;color:#555;font-size:0.9rem;margin-bottom:32px}
+        .section-title{font-size:1.1rem;font-weight:bold;margin-bottom:12px;border-bottom:2px solid #ddd;padding-bottom:4px;margin-top:24px}
+        .row{display:flex;justify-content:space-between;margin-bottom:8px;font-size:0.95rem}
+        .row.bold{font-weight:bold;font-size:1.05rem;border-top:1px solid #ddd;padding-top:8px}
+        .sub-items{padding-left:16px;margin-bottom:16px;color:#444}
+        .result-box{background:#f8fafc;border:1px solid #e2e8f0;padding:16px;border-radius:8px;margin-top:24px;text-align:center}
+        .result-label{font-size:0.8rem;text-transform:uppercase;font-weight:bold;color:#64748b}
+        .result-value{font-size:1.6rem;font-weight:bold;margin-top:4px;color:${balance >= 0 ? '#10b981' : '#ef4444'}}
+        table{width:100%;border-collapse:collapse;font-size:0.85rem;margin-top:32px}
+        th{background:#f3f4f6;padding:8px 6px;text-align:left;font-size:0.75rem;text-transform:uppercase;letter-spacing:.04em}
+        tr:nth-child(even){background:#fafafa}
+        @media print{button{display:none}}
+      </style>
+      </head><body>
+      <h1>DRE - Demonstração do Resultado do Exercício</h1>
+      <div class="header-sub">Período: ${PERIODS.find(p=>p.key===period)?.label || 'Personalizado'} (Gerado em ${new Date().toLocaleString('pt-BR')})</div>
+      
+      <div class="section-title">1. Receita Bruta</div>
+      <div class="row bold"><span>Total de Receitas</span><span style="color:#10b981">${fmt(totalIn)}</span></div>
+      <div class="sub-items">${recCatsHtml}</div>
+
+      <div class="section-title">2. Despesas Operacionais</div>
+      <div class="row bold"><span>Total de Despesas</span><span style="color:#ef4444">${fmt(totalOut)}</span></div>
+      <div class="sub-items">${despCatsHtml}</div>
+
+      <div class="result-box">
+        <div class="result-label">3. Lucro Líquido (Resultado do Exercício)</div>
+        <div class="result-value">${fmt(balance)}</div>
+      </div>
+
+      <div class="section-title">Extrato Detalhado do Período</div>
+      <table>
+        <thead><tr><th>Data</th><th>Descrição</th><th>Categoria</th><th style="text-align:right">Valor</th></tr></thead>
+        <tbody>${txRows}</tbody>
+      </table>
+
+      <script>window.onload=function(){window.print()}<\/script>
+      </body></html>`
+    const w = window.open('', '_blank')
+    if (w) { w.document.write(html); w.document.close() }
+  }
+
   /* ── handlers ── */
   function openNew(type: 'RECEITA'|'DESPESA') {
     setModalType(type); setEditingTx(null)
@@ -495,8 +579,8 @@ export default function FinanceClient({ transactions, categories, customers = []
             <button className="btn btn-outline" style={{ gap: '6px', fontSize: '0.82rem', backgroundColor: 'white', height: '36px', whiteSpace: 'nowrap' }}>
               <RefreshCw size={14} /> Reparar
             </button>
-            <button className="btn btn-outline" style={{ gap: '6px', fontSize: '0.82rem', backgroundColor: 'white', height: '36px', whiteSpace: 'nowrap' }}>
-              <BarChart2 size={14} /> Relatório
+            <button className="btn btn-outline" onClick={gerarDRE} style={{ gap: '6px', fontSize: '0.82rem', backgroundColor: 'white', height: '36px', whiteSpace: 'nowrap' }}>
+              <BarChart2 size={14} /> Gerar DRE
             </button>
             <button onClick={() => openNew('DESPESA')}
               style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 16px', borderRadius: 'var(--radius-md)', border: '1px solid #ef4444', color: '#ef4444', backgroundColor: 'white', cursor: 'pointer', fontSize: '0.82rem', fontWeight: '600', fontFamily: 'inherit', whiteSpace: 'nowrap' }}>
