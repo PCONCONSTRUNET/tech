@@ -37,6 +37,16 @@ export async function createCustomer(data: {
   }
 }
 
+export async function updateCustomer(id: string, data: any) {
+  try {
+    const customer = await prisma.customer.update({ where: { id }, data })
+    revalidatePath('/painel', 'layout')
+    return { success: true, customer }
+  } catch (error) {
+    return { error: 'Erro ao atualizar cliente' }
+  }
+}
+
 export async function deleteCustomer(id: string) {
   try {
     await prisma.customer.delete({ where: { id } })

@@ -4,10 +4,10 @@ import { useState, useMemo } from 'react'
 import {
   Users, Plus, Trash2, X, Search, SlidersHorizontal,
   Upload, Smartphone, Tablet, Laptop, Gamepad2, Watch, LayoutGrid,
-  MapPin, User, FileText, MessageCircle, TrendingUp,
+  MapPin, User, FileText, MessageCircle, TrendingUp, Edit
 } from 'lucide-react'
 import WhatsappIcon from '@/components/WhatsappIcon'
-import { createCustomer, deleteCustomer } from '@/actions/customer'
+import { createCustomer, deleteCustomer, updateCustomer } from '@/actions/customer'
 import { maskCPFOrCNPJ, maskCEP, maskPhone } from '@/lib/masks'
 
 /* ── device types ── */
@@ -43,6 +43,7 @@ export default function CustomerClient({ customers }: { customers: any[] }) {
   const [page, setPage] = useState(1)
 
   /* ── modal state ── */
+  const [editingId, setEditingId] = useState<string | null>(null)
   const [name, setName]           = useState('')
   const [document, setDocument]   = useState('')
   const [phone, setPhone]         = useState('')
@@ -105,6 +106,7 @@ export default function CustomerClient({ customers }: { customers: any[] }) {
   }
 
   function resetModal() {
+    setEditingId(null)
     setName(''); setDocument(''); setPhone(''); setEmail('')
     setBirthDay(''); setBirthMonth(''); setBirthYear('')
     setCep(''); setStreet(''); setAddrNumber(''); setComplement('')
@@ -113,16 +115,49 @@ export default function CustomerClient({ customers }: { customers: any[] }) {
     setDeviceType('Celular')
   }
 
+  function handleEdit(c: any) {
+    setEditingId(c.id)
+    setName(c.name || '')
+    setDocument(c.document || '')
+    setPhone(c.phone || c.whatsapp || '')
+    setEmail(c.email || '')
+    if (c.birthDate) {
+      const parts = c.birthDate.split('/')
+      if (parts[0]) setBirthDay(parts[0])
+      if (parts[1]) setBirthMonth(parts[1])
+      if (parts[2]) setBirthYear(parts[2])
+    } else {
+      setBirthDay(''); setBirthMonth(''); setBirthYear('')
+    }
+    setCep(c.cep || '')
+    setStreet(c.street || '')
+    setAddrNumber(c.number || '')
+    setComplement(c.complement || '')
+    setNeighborhood(c.neighborhood || '')
+    setCity(c.city || '')
+    setState(c.state || '')
+    setNotes(c.notes || '')
+    try {
+      if (c.devices) setDevices(JSON.parse(c.devices))
+      else setDevices([])
+    } catch { setDevices([]) }
+    setIsModalOpen(true)
+  }
+
   async function handleSave(e: React.FormEvent) {
     e.preventDefault()
     if (!name) return
     const birthDate = birthDay && birthMonth ? `${birthDay}/${birthMonth}${birthYear ? '/' + birthYear : ''}` : undefined
-    const res = await createCustomer({
+    const data = {
       name, document, phone, email, birthDate,
       cep, street, number: addrNumber, complement, neighborhood, city, state,
       devices: devices.length > 0 ? JSON.stringify(devices) : undefined,
       notes,
-    })
+    }
+    const res = editingId 
+      ? await updateCustomer(editingId, data)
+      : await createCustomer(data)
+      
     if (res?.error) alert(res.error)
     else { setIsModalOpen(false); resetModal() }
   }
@@ -282,6 +317,13 @@ export default function CustomerClient({ customers }: { customers: any[] }) {
                           </a>
                         )}
                         <button
+                          onClick={() => handleEdit(c)}
+                          title="Editar"
+                          style={{ background: 'none', border: '1px solid var(--color-border)', borderRadius: '6px', padding: '5px 7px', cursor: 'pointer', color: '#6366f1' }}
+                        >
+                          <Edit size={15} />
+                        </button>
+                        <button
                           onClick={() => handleDelete(c.id)}
                           title="Excluir"
                           style={{ background: 'none', border: '1px solid var(--color-border)', borderRadius: '6px', padding: '5px 7px', cursor: 'pointer', color: '#ef4444' }}
@@ -321,6 +363,13 @@ export default function CustomerClient({ customers }: { customers: any[] }) {
                         <WhatsappIcon size={15} color="#25D366" />
                       </a>
                     )}
+                    <button
+                      onClick={() => handleEdit(c)}
+                      title="Editar"
+                      style={{ background: 'none', border: '1px solid var(--color-border)', borderRadius: '6px', padding: '5px 7px', cursor: 'pointer', color: '#6366f1' }}
+                    >
+                      <Edit size={15} />
+                    </button>
                     <button
                       onClick={() => handleDelete(c.id)}
                       title="Excluir"
@@ -381,7 +430,7 @@ export default function CustomerClient({ customers }: { customers: any[] }) {
                   <User size={20} />
                 </div>
                 <div>
-                  <h2 style={{ fontSize: '1.1rem', fontWeight: '700' }}>Novo Cliente</h2>
+                  <h2 style={{ fontSize: '1.1rem', fontWeight: '700' }}>{editingId ? 'Editar Cliente' : 'Novo Cliente'}</h2>
                   <p style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>Preencha os dados do cliente e dispositivos associados.</p>
                 </div>
               </div>
@@ -586,7 +635,7 @@ export default function CustomerClient({ customers }: { customers: any[] }) {
                   Cancelar
                 </button>
                 <button type="submit" className="btn btn-primary" style={{ gap: '8px' }}>
-                  💾 Salvar Cliente
+                  💾 {editingId ? 'Atualizar Cliente' : 'Salvar Cliente'}
                 </button>
               </div>
             </form>
