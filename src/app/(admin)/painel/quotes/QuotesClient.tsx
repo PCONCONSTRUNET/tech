@@ -987,8 +987,8 @@ export default function QuotesClient({ quotes, customers, products }: { quotes: 
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                       <div className="card" style={{ padding: '20px', backgroundColor: '#ecfdf5', borderColor: '#a7f3d0' }}>
                         <div style={{ fontSize: '0.7rem', fontWeight: '700', color: '#64748b', textTransform: 'uppercase', marginBottom: '8px' }}>TOTAL PREVISTO</div>
-                        <div style={{ fontSize: '1.6rem', fontWeight: '900', color: '#0f172a' }}>R$ 150,00</div>
-                        <div style={{ fontSize: '0.75rem', fontWeight: '700', color: '#059669', marginTop: '8px' }}>Lucro Estimado: R$ 150,00</div>
+                        <div style={{ fontSize: '1.6rem', fontWeight: '900', color: '#0f172a' }}>{fmt(totalServicesPrice)}</div>
+                        <div style={{ fontSize: '0.75rem', fontWeight: '700', color: '#059669', marginTop: '8px' }}>Lucro Estimado: {fmt(totalServicesPrice)}</div>
                       </div>
                       
                       <div className="card" style={{ padding: '16px' }}>
