@@ -1,4 +1,4 @@
-import { X, Edit2, CheckCircle, Calendar, Shield, Trash2, Phone, Printer, User, Smartphone, Lock, Package, Check, Mail, FileText, Wrench, AlertCircle, Clock, ChevronDown, Plus, Search } from 'lucide-react'
+import { X, Edit2, CheckCircle, Calendar, Shield, Trash2, Phone, Printer, User, Smartphone, Lock, Package, Check, Mail, FileText, Wrench, AlertCircle, Clock, ChevronDown, Plus, Search, Copy } from 'lucide-react'
 import WhatsappIcon from '@/components/WhatsappIcon'
 import { sendOsPdfWhatsApp } from '@/actions/os'
 
