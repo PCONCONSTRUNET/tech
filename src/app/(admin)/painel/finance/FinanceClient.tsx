@@ -187,6 +187,7 @@ export default function FinanceClient({ transactions, categories, customers = []
     fd.append('type', modalType!)
     fd.append('paymentMethod', method)
     fd.append('status', status)
+    if (customerId) fd.append('customerId', customerId)
     if (editingTx) await updateTransaction(editingTx.id, fd)
     else await createTransaction(fd)
     setModalType(null); setEditingTx(null)
@@ -790,6 +791,7 @@ export default function FinanceClient({ transactions, categories, customers = []
                 ['Categoria', detailTx.category?.name || '—'],
                 ['Método', detailTx.paymentMethod || '—'],
                 ['Status', detailTx.status === 'PAGO' ? 'Concluída' : 'Pendente'],
+                ['Cliente', detailTx.customer?.name || '—'],
               ].map(([k,v]) => (
                 <div key={k} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.875rem' }}>
                   <span style={{ color: 'var(--color-text-muted)' }}>{k}</span>
