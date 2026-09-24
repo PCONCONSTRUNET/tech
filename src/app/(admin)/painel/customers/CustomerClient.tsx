@@ -137,8 +137,6 @@ export default function CustomerClient({ customers }: { customers: any[] }) {
         .mobile-cards { display: none; }
         .desktop-table { display: block; overflow-x: auto; }
         .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 20px; }
-        .grid-responsive-2 { display: flex; flex-wrap: wrap; gap: 12px; }
-        .grid-responsive-2 > * { flex: 1 1 220px; min-width: 0; }
         @media (max-width: 768px) {
           .desktop-table { display: none !important; }
           .mobile-cards { display: flex !important; flex-direction: column; gap: 16px; padding: 16px 0; }
@@ -411,7 +409,8 @@ export default function CustomerClient({ customers }: { customers: any[] }) {
                         onChange={e => setDocument(maskCPFOrCNPJ(e.target.value))} />
                     </div>
                     <div>
-                      <Label>WHATSAPP / TELEFONE <span style={{ fontSize: '0.65rem', color: 'var(--color-text-muted)' }}>(obrigatório para WhatsApp)</span></Label>
+                      <Label>WHATSAPP / TELEFONE</Label>
+                      <div style={{ fontSize: '0.65rem', color: 'var(--color-warning)', marginBottom: '4px', marginTop: '-4px', fontWeight: '500' }}>(obrigatório para WhatsApp)</div>
                       <div style={{ display: 'flex', gap: '6px' }}>
                         <select className="input" style={{ width: '90px', flexShrink: 0 }}>
                           <option>BR +55</option>
