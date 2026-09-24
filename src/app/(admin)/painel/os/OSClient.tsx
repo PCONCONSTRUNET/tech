@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useMemo, useRef } from 'react'
-import { Plus, Search, Trash2, X, FileText, SlidersHorizontal, Clock, AlertCircle, Eye, Wrench, Smartphone, CheckCircle, Phone, ChevronDown, Mail, Printer, Users } from 'lucide-react'
+import { Plus, Search, Trash2, X, FileText, SlidersHorizontal, Clock, AlertCircle, Eye, EyeOff, Wrench, Smartphone, CheckCircle, Phone, ChevronDown, Mail, Printer, Users } from 'lucide-react'
 import { createServiceOrder, deleteServiceOrder, updateServiceOrderStatus, sendOsPdfWhatsApp } from '@/actions/os'
 import { createCustomer } from '@/actions/customer'
 import { printA4, printThermal, printLabel, type PrintOS } from '@/lib/print-os'
@@ -177,6 +177,7 @@ export default function OSClient({ serviceOrders, customers }: { serviceOrders: 
   const emBancada = serviceOrders.filter(o => !['ENTREGUE', 'CANCELADO'].includes(o.status))
   const interrompidas = serviceOrders.filter(o => INTERROMPIDAS.includes(o.status))
   const valorEstimado = serviceOrders.reduce((acc, o) => acc + (o.price || 0), 0)
+  const [showValor, setShowValor] = useState(true)
 
   /* ── filtered list ── */
   const filtered = useMemo(() => {
@@ -329,10 +330,16 @@ export default function OSClient({ serviceOrders, customers }: { serviceOrders: 
         <div className="card" style={{ padding: '20px', border: '1px solid var(--color-border)', borderRadius: '12px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
             <span style={{ fontSize: '0.7rem', fontWeight: '700', letterSpacing: '0.05em', color: 'var(--color-text-muted)', textTransform: 'uppercase' }}>VALOR ESTIMADO</span>
-            <Eye size={14} style={{ marginLeft: 'auto', color: 'var(--color-text-muted)' }} />
+            <button 
+              onClick={() => setShowValor(v => !v)}
+              style={{ marginLeft: 'auto', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-text-muted)', display: 'flex', alignItems: 'center', padding: '2px' }}
+              title={showValor ? 'Ocultar valor' : 'Mostrar valor'}
+            >
+              {showValor ? <Eye size={16} /> : <EyeOff size={16} />}
+            </button>
           </div>
           <div style={{ fontSize: '1.8rem', fontWeight: '800', color: 'var(--color-text)' }}>
-            {fmt(valorEstimado)}
+            {showValor ? fmt(valorEstimado) : '•••••'}
           </div>
         </div>
 
