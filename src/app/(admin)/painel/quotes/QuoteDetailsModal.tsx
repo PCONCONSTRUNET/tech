@@ -300,10 +300,10 @@ export default function QuoteDetailsModal({ quote, quoteNumber, onClose, isQuote
               <WhatsappIcon size={16} color="#25D366" /> Enviar PDF (API)
             </button>
             <button 
-              onClick={() => window.open(isQuote ? `/painel/quotes/${quote.id}` : `/painel/quote/${quote.id}`, '_blank')}
+              onClick={() => window.open(`/api/quotes/${quote.id}/pdf`, '_blank')}
               style={{ padding: '10px 24px', backgroundColor: '#2563eb', border: 'none', borderRadius: '8px', color: 'white', fontWeight: '700', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}
             >
-              <Printer size={16} /> Imprimir {isQuote ? 'Orçamento' : 'quote'}
+              <Printer size={16} /> Imprimir Orçamento
             </button>
           </div>
         </div>
