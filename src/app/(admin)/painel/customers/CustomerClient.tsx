@@ -137,10 +137,12 @@ export default function CustomerClient({ customers }: { customers: any[] }) {
         .mobile-cards { display: none; }
         .desktop-table { display: block; overflow-x: auto; }
         .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 20px; }
+        .grid-responsive-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
         @media (max-width: 768px) {
           .desktop-table { display: none !important; }
           .mobile-cards { display: flex !important; flex-direction: column; gap: 16px; padding: 16px 0; }
           .stats-grid { grid-template-columns: 1fr; }
+          .grid-responsive-2 { grid-template-columns: 1fr; }
         }
       `}</style>
       {/* ── Header ── */}
@@ -402,7 +404,7 @@ export default function CustomerClient({ customers }: { customers: any[] }) {
                       <input required className="input" style={{ paddingLeft: '34px' }} placeholder="Nome Completo" value={name} onChange={e => setName(e.target.value)} />
                     </div>
                   </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '12px' }}>
+                  <div className="grid-responsive-2">
                     <div>
                       <Label>CPF / CNPJ</Label>
                       <input className="input" placeholder="000.000.000-00" value={document}
@@ -453,7 +455,7 @@ export default function CustomerClient({ customers }: { customers: any[] }) {
 
                 {/* ── Endereço ── */}
                 <Section icon={<MapPin size={16} />} iconBg="rgba(59,130,246,0.1)" iconColor="#3b82f6" title="Endereço Principal">
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '12px' }}>
+                  <div className="grid-responsive-2">
                     <div>
                       <Label>CEP</Label>
                       <input className="input" placeholder="00000-000" value={cep}
@@ -465,7 +467,7 @@ export default function CustomerClient({ customers }: { customers: any[] }) {
                       <input className="input" placeholder="Rua, Avenida..." value={street} onChange={e => setStreet(e.target.value)} />
                     </div>
                   </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '12px' }}>
+                  <div className="grid-responsive-2">
                     <div>
                       <Label>NÚMERO</Label>
                       <input className="input" placeholder="123" value={addrNumber} onChange={e => setAddrNumber(e.target.value)} />
@@ -513,7 +515,7 @@ export default function CustomerClient({ customers }: { customers: any[] }) {
                         })}
                       </div>
                     </div>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                    <div className="grid-responsive-2">
                       <div>
                         <Label>EX: IPHONE 13 PRO MAX</Label>
                         <input className="input" placeholder={`Ex: iPhone 13 Pro Max`} value={deviceModel} onChange={e => setDeviceModel(e.target.value)} />
