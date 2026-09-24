@@ -3,7 +3,7 @@ import { getTemplates } from '@/actions/whatsapp-templates'
 import { getGateways } from '@/actions/gateways'
 import IntegrationsClient from './IntegrationsClient'
 
-export const dynamic = 'force-dynamic'
+
 
 export default async function IntegrationsPage() {
   const settings = await getSettings()

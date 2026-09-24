@@ -3,7 +3,7 @@ import MesaBoard from './MesaBoard';
 
 import { Suspense } from 'react';
 
-export const dynamic = 'force-dynamic';
+
 
 const MESA_STATUSES = ['RECEBIDO', 'EM_ANALISE', 'AGUARDANDO_PECA', 'EM_CONSERTO', 'PRONTO', 'ENTREGUE'];
 

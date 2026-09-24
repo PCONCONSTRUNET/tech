@@ -8,7 +8,7 @@ import { Suspense } from 'react';
 
 // ... (keep dynamic, formatting helpers, etc.)
 
-export const dynamic = 'force-dynamic';
+
 
 const formatCurrency = (val: number) => `R$ ${val.toFixed(2).replace('.', ',')}`;
 
