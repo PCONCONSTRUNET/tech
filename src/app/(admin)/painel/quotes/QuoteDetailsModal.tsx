@@ -29,6 +29,21 @@ const fmt = (val: number) => new Intl.NumberFormat('pt-BR', { style: 'currency',
 export default function QuoteDetailsModal({ quote, quoteNumber, onClose, isQuote = false }: { quote: any; quoteNumber: number; onClose: () => void; isQuote?: boolean }) {
   if (!quote) return null;
 
+  let parsedNotes: any = {};
+  if (quote.notes) {
+    try { parsedNotes = JSON.parse(quote.notes); } catch(e) {}
+  }
+  const device = parsedNotes.device || quote.device || 'Não informado';
+  const brand = parsedNotes.brand || quote.brand || '';
+  const model = parsedNotes.model || quote.model || '';
+  const imei = parsedNotes.imei || quote.imei || '';
+  const defect = parsedNotes.defect || quote.defect || 'Não informado';
+  const diagnostic = parsedNotes.diagnostic || quote.diagnostic || 'Não informado';
+  const password = parsedNotes.password || quote.password || 'Não informado';
+  const accessories = parsedNotes.accessories || quote.accessories || 'Nenhum acessório';
+  const physicalCondition = parsedNotes.physicalCondition || quote.physicalCondition || '';
+  const totalPrice = quote.totalAmount ?? quote.price ?? 0;
+
   const sc = STATUS_COLOR[quote.status] || { bg: '#f1f5f9', color: '#475569', border: '#e2e8f0' }
 
   return (
@@ -78,8 +93,8 @@ export default function QuoteDetailsModal({ quote, quoteNumber, onClose, isQuote
                 <Smartphone size={20} />
               </div>
               <div>
-                <div style={{ fontWeight: '700', fontSize: '1rem', color: '#0f172a' }}>{quote.device || 'Não informado'} {quote.brand} {quote.model}</div>
-                {quote.imei && <div style={{ fontSize: '0.75rem', color: '#64748b', backgroundColor: '#f8fafc', padding: '4px 8px', borderRadius: '6px', border: '1px solid var(--color-border)', display: 'inline-block', marginTop: '6px' }}>IMEI {quote.imei}</div>}
+                <div style={{ fontWeight: '700', fontSize: '1rem', color: '#0f172a' }}>{device} {brand} {model}</div>
+                {imei && <div style={{ fontSize: '0.75rem', color: '#64748b', backgroundColor: '#f8fafc', padding: '4px 8px', borderRadius: '6px', border: '1px solid var(--color-border)', display: 'inline-block', marginTop: '6px' }}>IMEI {imei}</div>}
               </div>
             </div>
           </div>
@@ -87,20 +102,20 @@ export default function QuoteDetailsModal({ quote, quoteNumber, onClose, isQuote
           {/* Valor Total & Status de Pagamento */}
           <div style={{ marginBottom: '24px', border: '1px solid var(--color-border)', borderRadius: '12px', padding: '24px', backgroundColor: '#fafafa' }}>
             <div style={{ fontSize: '0.7rem', fontWeight: '800', letterSpacing: '0.05em', color: '#64748b', textTransform: 'uppercase', marginBottom: '4px' }}>VALOR TOTAL</div>
-            <div style={{ fontSize: '2.2rem', fontWeight: '800', color: '#0f172a', marginBottom: '16px' }}>{quote.price ? fmt(quote.price) : 'R$ 0,00'}</div>
+            <div style={{ fontSize: '2.2rem', fontWeight: '800', color: '#0f172a', marginBottom: '16px' }}>{totalPrice ? fmt(totalPrice) : 'R$ 0,00'}</div>
             
-            {quote.price > 0 && (
+            {totalPrice > 0 && (
               <div style={{ backgroundColor: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '12px', padding: '16px', marginBottom: '16px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.75rem', fontWeight: '800', color: '#16a34a', letterSpacing: '0.05em', textTransform: 'uppercase', marginBottom: '12px' }}>
                   <CheckCircle size={16} /> ENTRADA RECEBIDA
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', color: '#16a34a', marginBottom: '8px', borderBottom: '1px solid #dcfce7', paddingBottom: '8px' }}>
                   <span>Pix</span>
-                  <span>{fmt(quote.price)}</span>
+                  <span>{fmt(totalPrice)}</span>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem', color: '#16a34a', marginBottom: '4px' }}>
                   <span>Já recebido:</span>
-                  <span style={{ fontWeight: '800' }}>{fmt(quote.price)}</span>
+                  <span style={{ fontWeight: '800' }}>{fmt(totalPrice)}</span>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem', color: '#16a34a' }}>
                   <span>Falta receber:</span>
@@ -144,7 +159,7 @@ export default function QuoteDetailsModal({ quote, quoteNumber, onClose, isQuote
           <div style={{ marginBottom: '24px' }}>
             <div style={{ fontSize: '0.65rem', fontWeight: '800', letterSpacing: '0.05em', color: '#64748b', textTransform: 'uppercase', marginBottom: '8px' }}>PROBLEMA RELATADO / SERVIÇO</div>
             <div style={{ border: '1px solid var(--color-border)', borderRadius: '12px', padding: '16px', fontSize: '0.9rem', color: '#0f172a', minHeight: '60px' }}>
-              {quote.defect || 'Não informado'}
+              {defect}
             </div>
           </div>
           
@@ -171,7 +186,7 @@ export default function QuoteDetailsModal({ quote, quoteNumber, onClose, isQuote
                 <Lock size={12} color="#f59e0b" /> SENHA DO APARELHO
               </div>
               <div style={{ border: '1px solid var(--color-border)', borderRadius: '12px', padding: '16px', fontSize: '0.9rem', color: '#0f172a' }}>
-                Não informado
+                {password}
               </div>
             </div>
             <div>
@@ -179,7 +194,7 @@ export default function QuoteDetailsModal({ quote, quoteNumber, onClose, isQuote
                 <Package size={12} color="#8b5cf6" /> ACESSÓRIOS RECEBIDOS
               </div>
               <div style={{ border: '1px solid var(--color-border)', borderRadius: '12px', padding: '16px', fontSize: '0.9rem', color: '#0f172a' }}>
-                Nenhum acessório
+                {accessories}
               </div>
             </div>
           </div>
@@ -191,13 +206,13 @@ export default function QuoteDetailsModal({ quote, quoteNumber, onClose, isQuote
             </div>
             <div style={{ border: '1px solid var(--color-border)', borderRadius: '12px', padding: '16px', marginBottom: '8px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem', color: '#0f172a' }}>
-                <span>{quote.defect || 'Serviço'}</span>
-                <span>{quote.price ? fmt(quote.price) : 'R$ 0,00'}</span>
+                <span>{defect || 'Serviço'}</span>
+                <span>{totalPrice ? fmt(totalPrice) : 'R$ 0,00'}</span>
               </div>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: '#64748b', padding: '0 8px' }}>
-              <span>Total dos serviçquote</span>
-              <span style={{ fontWeight: '800', color: '#0f172a' }}>{quote.price ? fmt(quote.price) : 'R$ 0,00'}</span>
+              <span>Total dos serviços</span>
+              <span style={{ fontWeight: '800', color: '#0f172a' }}>{totalPrice ? fmt(totalPrice) : 'R$ 0,00'}</span>
             </div>
           </div>
 

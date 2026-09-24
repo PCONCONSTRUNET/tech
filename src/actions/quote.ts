@@ -53,6 +53,7 @@ export async function createQuote(data: {
         totalAmount: data.totalAmount,
         discount: data.discount || 0,
         validity: data.validity || 7,
+        status: 'RECEBIDO',
         notes: JSON.stringify({
           originalNotes: data.notes,
           device: data.device,
