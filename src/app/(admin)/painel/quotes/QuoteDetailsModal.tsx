@@ -190,12 +190,23 @@ export default function QuoteDetailsModal({ quote, quoteNumber, onClose, isQuote
             <div style={{ fontSize: '0.65rem', fontWeight: '800', letterSpacing: '0.05em', color: '#64748b', textTransform: 'uppercase', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
               <Wrench size={12} color="#10b981" /> SERVIÇOS E PEÇAS
             </div>
-            <div style={{ border: '1px solid var(--color-border)', borderRadius: '12px', padding: '16px', marginBottom: '8px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem', color: '#0f172a' }}>
-                <span>{defect || 'Serviço'}</span>
-                <span>{totalPrice ? fmt(totalPrice) : 'R$ 0,00'}</span>
+            {quote.items && quote.items.length > 0 ? (
+              quote.items.map((item: any, idx: number) => (
+                <div key={idx} style={{ border: '1px solid var(--color-border)', borderRadius: '12px', padding: '16px', marginBottom: '8px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem', color: '#0f172a' }}>
+                    <span>{item.name} {item.quantity > 1 ? `(x${item.quantity})` : ''}</span>
+                    <span>{fmt(item.price)}</span>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div style={{ border: '1px solid var(--color-border)', borderRadius: '12px', padding: '16px', marginBottom: '8px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem', color: '#0f172a' }}>
+                  <span>{defect || 'Serviço'}</span>
+                  <span>{totalPrice ? fmt(totalPrice) : 'R$ 0,00'}</span>
+                </div>
               </div>
-            </div>
+            )}
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: '#64748b', padding: '0 8px' }}>
               <span>Total dos serviços</span>
               <span style={{ fontWeight: '800', color: '#0f172a' }}>{totalPrice ? fmt(totalPrice) : 'R$ 0,00'}</span>

@@ -508,7 +508,9 @@ export default function QuotesClient({ quotes, customers, products }: { quotes: 
                     </td>
                     <td style={{ padding: '16px 24px' }}>
                       <div style={{ fontSize: '0.85rem', color: '#334155' }}>
-                        {os.defect || 'Nenhum serviço'}
+                        {os.items && os.items.length > 0 
+                          ? os.items.map((i: any) => i.name).join(', ') 
+                          : (os.defect || 'Nenhum serviço')}
                       </div>
                     </td>
                     <td style={{ padding: '16px 24px', position: 'relative' }}>
@@ -612,7 +614,9 @@ export default function QuotesClient({ quotes, customers, products }: { quotes: 
                   </div>
 
                   <div style={{ fontSize: '0.85rem', color: '#334155', backgroundColor: '#f8fafc', padding: '8px 12px', borderRadius: '8px' }}>
-                    <strong>Serviço:</strong> {os.defect || 'Nenhum serviço'}
+                    <strong>Serviço:</strong> {os.items && os.items.length > 0 
+                      ? os.items.map((i: any) => i.name).join(', ') 
+                      : (os.defect || 'Nenhum serviço')}
                   </div>
 
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
