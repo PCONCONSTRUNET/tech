@@ -284,8 +284,17 @@ export default function QuotesClient({ quotes, customers, products }: { quotes: 
     const physicalCondition = formData.get('physicalCondition')?.toString() || '';
     const warranty = formData.get('warranty')?.toString() || '90 dias';
 
-    let items = selectedServiceIds.map(id => {
-      const srv = servicesList.find(s => s.id === id);
+    const _selIdsStr = formData.get('__selectedServiceIds')?.toString() || '[]';
+    const _srvListStr = formData.get('__servicesList')?.toString() || '[]';
+    let _parsedSelIds: string[] = [];
+    let _parsedSrvList: any[] = [];
+    try {
+      _parsedSelIds = JSON.parse(_selIdsStr);
+      _parsedSrvList = JSON.parse(_srvListStr);
+    } catch(e) {}
+
+    let items = _parsedSelIds.map(id => {
+      const srv = _parsedSrvList.find((s: any) => s.id === id);
       return {
         name: srv ? srv.name : 'Serviço',
         quantity: 1,
@@ -300,7 +309,7 @@ export default function QuotesClient({ quotes, customers, products }: { quotes: 
 
     if (items.length === 0) {
       items.push({
-        name: defect || 'Orçamento de Reparo',
+        name: 'Orçamento de Reparo',
         quantity: 1,
         price: totalAmount
       });
@@ -730,6 +739,8 @@ export default function QuotesClient({ quotes, customers, products }: { quotes: 
 
             <div style={{ padding: modalStep === 7 ? '0' : '32px 48px', overflowY: 'auto', flex: 1, backgroundColor: modalStep === 7 ? '#f8fafc' : 'white' }}>
               <form action={handleAdd} id="os-form" style={{ height: modalStep === 7 ? '100%' : 'auto' }}>
+                <input type="hidden" name="__selectedServiceIds" value={JSON.stringify(selectedServiceIds)} />
+                <input type="hidden" name="__servicesList" value={JSON.stringify(servicesList)} />
                 
                 <div style={{ display: modalStep === 1 ? 'block' : 'none' }}>
                   <div style={{ textAlign: 'center', marginBottom: '32px' }}>
