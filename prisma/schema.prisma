@@ -285,8 +285,9 @@ model ServiceOrderItem {
   id             String       @id @default(cuid())
   serviceOrderId String
   serviceOrder   ServiceOrder @relation(fields: [serviceOrderId], references: [id], onDelete: Cascade)
-  productId      String
-  product        Product      @relation(fields: [productId], references: [id])
+  productId      String?
+  product        Product?     @relation(fields: [productId], references: [id])
+  name           String       @default("Serviço")
   quantity       Int
   price          Float        // Preço na hora da OS
 }
