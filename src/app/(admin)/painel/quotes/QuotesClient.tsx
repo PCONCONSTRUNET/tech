@@ -1004,11 +1004,11 @@ export default function QuotesClient({ quotes, customers, products }: { quotes: 
                         <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: '700', color: '#0f172a', marginBottom: '16px' }}>Responsáveis</label>
                         <div style={{ marginBottom: '12px' }}>
                           <div style={{ fontSize: '0.65rem', fontWeight: '700', color: '#94a3b8', textTransform: 'uppercase', marginBottom: '4px' }}>Recebido Por</div>
-                          <div style={{ backgroundColor: '#2563eb', color: 'white', fontSize: '0.75rem', fontWeight: '600', padding: '6px 12px', borderRadius: '6px', display: 'inline-block' }}>lucaspereirabn10</div>
+                          <div style={{ backgroundColor: '#2563eb', color: 'white', fontSize: '0.75rem', fontWeight: '600', padding: '6px 12px', borderRadius: '6px', display: 'inline-block' }}>Diego Henrique</div>
                         </div>
                         <div>
                           <div style={{ fontSize: '0.65rem', fontWeight: '700', color: '#94a3b8', textTransform: 'uppercase', marginBottom: '4px' }}>Executor do Reparo</div>
-                          <div style={{ backgroundColor: '#a855f7', color: 'white', fontSize: '0.75rem', fontWeight: '600', padding: '6px 12px', borderRadius: '6px', display: 'inline-block' }}>lucaspereirabn10</div>
+                          <div style={{ backgroundColor: '#a855f7', color: 'white', fontSize: '0.75rem', fontWeight: '600', padding: '6px 12px', borderRadius: '6px', display: 'inline-block' }}>Diego Henrique</div>
                         </div>
                       </div>
                     </div>
@@ -1046,11 +1046,11 @@ export default function QuotesClient({ quotes, customers, products }: { quotes: 
                       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
                         <div>
                           <div style={{ fontSize: '0.65rem', fontWeight: '700', color: '#94a3b8', textTransform: 'uppercase', marginBottom: '4px' }}>Aberto por</div>
-                          <div style={{ fontSize: '0.8rem', fontWeight: '700' }}>lucaspereirabn10</div>
+                          <div style={{ fontSize: '0.8rem', fontWeight: '700' }}>Diego Henrique</div>
                         </div>
                         <div>
                           <div style={{ fontSize: '0.65rem', fontWeight: '700', color: '#94a3b8', textTransform: 'uppercase', marginBottom: '4px' }}>Executor</div>
-                          <div style={{ fontSize: '0.8rem', fontWeight: '700' }}>lucaspereirabn10</div>
+                          <div style={{ fontSize: '0.8rem', fontWeight: '700' }}>Diego Henrique</div>
                         </div>
                       </div>
                     </div>
