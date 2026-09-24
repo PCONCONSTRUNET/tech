@@ -543,7 +543,7 @@ export default function QuotesClient({ quotes, customers, products }: { quotes: 
                         <button style={{ background: 'none', border: 'none', color: '#10b981', cursor: 'pointer', padding: '6px' }} title="Contato">
                           <Phone size={18} />
                         </button>
-                        <button onClick={() => window.open(`/painel/quotes/${os.id}`, '_blank')} style={{ background: 'none', border: 'none', color: '#475569', cursor: 'pointer', padding: '6px' }} title="Imprimir">
+                        <button onClick={() => window.open(`/api/quotes/${os.id}/pdf`, '_blank')} style={{ background: 'none', border: 'none', color: '#475569', cursor: 'pointer', padding: '6px' }} title="Imprimir">
                           <Printer size={18} />
                         </button>
                         <button
@@ -642,7 +642,7 @@ export default function QuotesClient({ quotes, customers, products }: { quotes: 
                       <button style={{ background: '#ecfdf5', border: 'none', borderRadius: '6px', width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#10b981', cursor: 'pointer' }}>
                         <Phone size={16} />
                       </button>
-                      <button onClick={() => window.open(`/painel/quotes/${os.id}`, '_blank')} style={{ background: '#f1f5f9', border: 'none', borderRadius: '6px', width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#475569', cursor: 'pointer' }}>
+                      <button onClick={() => window.open(`/api/quotes/${os.id}/pdf`, '_blank')} style={{ background: '#f1f5f9', border: 'none', borderRadius: '6px', width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#475569', cursor: 'pointer' }}>
                         <Printer size={16} />
                       </button>
                       <button onClick={() => handleDelete(os.id)} style={{ background: '#fef2f2', border: 'none', borderRadius: '6px', width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ef4444', cursor: 'pointer' }}>
