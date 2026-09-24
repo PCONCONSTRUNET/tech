@@ -1169,16 +1169,18 @@ export default function OSClient({ serviceOrders, customers, services = [] }: { 
                 {modalStep === 1 ? 'Cancelar' : '← Voltar'}
               </button>
               
-              {modalStep < 6 ? (
+              {modalStep < 6 && (
                 <button 
+                  key="btn-continue"
                   type="button" 
-                  onClick={() => setModalStep(s => s + 1)} 
+                  onClick={(e) => { e.preventDefault(); setModalStep(s => s + 1); }} 
                   className="btn btn-primary" 
                   style={{ padding: '12px 32px', fontSize: '0.9rem', fontWeight: '700', backgroundColor: '#2563eb' }}
                 >
                   Continuar →
                 </button>
-              ) : (
+              )}
+              {modalStep === 6 && (
                 <button 
                   type="submit" 
                   form="os-form"
