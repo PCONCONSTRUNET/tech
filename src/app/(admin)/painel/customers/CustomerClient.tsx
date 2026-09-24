@@ -602,7 +602,7 @@ function Section({ icon, iconBg, iconColor, title, children }: {
   icon: React.ReactNode; iconBg: string; iconColor: string; title: string; children: React.ReactNode
 }) {
   return (
-    <div style={{ border: '1px solid var(--color-border)', borderRadius: '12px', overflow: 'hidden' }}>
+    <div style={{ border: '1px solid var(--color-border)', borderRadius: '12px', overflow: 'hidden', flexShrink: 0 }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '12px 16px', borderBottom: '1px solid var(--color-border)', backgroundColor: 'var(--color-bg)' }}>
         <div style={{ width: '28px', height: '28px', borderRadius: '8px', backgroundColor: iconBg, color: iconColor, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           {icon}
