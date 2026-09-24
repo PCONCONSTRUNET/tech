@@ -154,6 +154,25 @@ export default function QuotesClient({ quotes, customers, products }: { quotes: 
 
   console.log("QuotesClient rendered, lockType:", lockType, "physicalChecklist:", physicalChecklist)
 
+  /* ── CEP autocomplete ── */
+  async function handleCepBlur() {
+    const clean = newCustomerData.cep.replace(/\D/g, '')
+    if (clean.length !== 8) return
+    try {
+      const r = await fetch(`https://viacep.com.br/ws/${clean}/json/`)
+      const d = await r.json()
+      if (!d.erro) {
+        setNewCustomerData(prev => ({
+          ...prev,
+          street: d.logradouro || '',
+          neighborhood: d.bairro || '',
+          city: d.localidade || '',
+          state: d.uf || ''
+        }))
+      }
+    } catch {}
+  }
+
   /* ── derived stats ── */
   const emBancada = quotes.filter(o => !['ENTREGUE', 'CANCELADO'].includes(o.status))
   const interrompidasCount = quotes.filter(o => INTERROMPIDAS.includes(o.status))
@@ -1212,7 +1231,7 @@ export default function QuotesClient({ quotes, customers, products }: { quotes: 
                   <div className="grid-responsive-2" style={{ marginBottom: '12px' }}>
                     <div>
                       <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: '700', color: '#64748b', textTransform: 'uppercase', marginBottom: '4px' }}>CEP</label>
-                      <input type="text" className="input" value={newCustomerData.cep} onChange={e => setNewCustomerData({ ...newCustomerData, cep: e.target.value })} placeholder="00000-000" style={{ height: '40px', backgroundColor: '#f8fafc' }} />
+                      <input type="text" className="input" value={newCustomerData.cep} onChange={e => setNewCustomerData({ ...newCustomerData, cep: e.target.value })} onBlur={handleCepBlur} placeholder="00000-000" style={{ height: '40px', backgroundColor: '#f8fafc' }} />
                     </div>
                     <div>
                       <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: '700', color: '#64748b', textTransform: 'uppercase', marginBottom: '4px' }}>Logradouro</label>
