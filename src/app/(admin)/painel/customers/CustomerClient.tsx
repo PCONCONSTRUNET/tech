@@ -4,7 +4,7 @@ import { useState, useMemo } from 'react'
 import {
   Users, Plus, Trash2, X, Search, SlidersHorizontal,
   Upload, Smartphone, Tablet, Laptop, Gamepad2, Watch, LayoutGrid,
-  MapPin, User, FileText, MessageCircle, TrendingUp, Edit, Wrench, ShoppingBag
+  MapPin, User, FileText, MessageCircle, TrendingUp, Edit, Wrench, ShoppingBag, DollarSign
 } from 'lucide-react'
 import WhatsappIcon from '@/components/WhatsappIcon'
 import { createCustomer, deleteCustomer, updateCustomer } from '@/actions/customer'
@@ -736,6 +736,41 @@ export default function CustomerClient({ customers }: { customers: any[] }) {
                 </div>
 
               </div>
+
+                {/* Pagamentos / Transações */}
+                <div>
+                  <h3 style={{ fontSize: '1rem', fontWeight: '700', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--color-text)' }}>
+                    <DollarSign size={18} style={{ color: 'var(--color-primary)' }} /> Histórico de Pagamentos
+                  </h3>
+                  {viewingCustomer.transactions && viewingCustomer.transactions.length > 0 ? (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                      {viewingCustomer.transactions.map((tx: any) => (
+                        <div key={tx.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px', backgroundColor: 'var(--color-bg)', border: '1px solid var(--color-border)', borderRadius: '12px' }}>
+                          <div>
+                            <div style={{ fontWeight: '600', fontSize: '0.9rem', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                              <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: tx.type === 'RECEITA' ? '#10b981' : '#ef4444', flexShrink: 0 }} />
+                              {tx.description}
+                            </div>
+                            <div style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)' }}>
+                              {new Date(tx.date).toLocaleDateString('pt-BR')} • {tx.paymentMethod || '—'}
+                            </div>
+                          </div>
+                          <div style={{ textAlign: 'right' }}>
+                            <div style={{ fontWeight: '700', color: tx.type === 'RECEITA' ? '#10b981' : '#ef4444', fontSize: '0.9rem', marginBottom: '4px' }}>
+                              {tx.type === 'DESPESA' ? '-' : '+'}{new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(tx.amount || 0)}
+                            </div>
+                            <div style={{ fontSize: '0.75rem', fontWeight: '600', padding: '4px 8px', borderRadius: '4px', backgroundColor: tx.status === 'PAGO' ? '#dcfce7' : '#fef3c7', color: tx.status === 'PAGO' ? '#166534' : '#92400e', display: 'inline-block' }}>
+                              {tx.status === 'PAGO' ? 'Concluída' : 'Pendente'}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)' }}>Nenhum pagamento registrado para este cliente.</p>
+                  )}
+                </div>
+
             </div>
           </div>
         </div>

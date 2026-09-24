@@ -8,7 +8,8 @@ export async function getCustomers() {
     orderBy: { createdAt: 'desc' },
     include: {
       serviceOrders: { orderBy: { createdAt: 'desc' } },
-      sales: { orderBy: { createdAt: 'desc' } }
+      sales: { orderBy: { createdAt: 'desc' } },
+      transactions: { orderBy: { date: 'desc' } }
     }
   })
 }
