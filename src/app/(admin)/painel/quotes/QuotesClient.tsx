@@ -172,6 +172,11 @@ export default function QuotesClient({ quotes, customers, products }: { quotes: 
   const [customServiceName, setCustomServiceName] = useState('')
   const [customServicePrice, setCustomServicePrice] = useState('')
 
+  const totalServicesPrice = selectedServiceIds.reduce((sum, id) => {
+    const srv = servicesList.find(s => s.id === id)
+    return sum + (srv ? srv.price : 0)
+  }, 0)
+
   console.log("QuotesClient rendered, lockType:", lockType, "physicalChecklist:", physicalChecklist)
 
   /* ── CEP autocomplete ── */
