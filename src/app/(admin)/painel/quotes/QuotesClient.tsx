@@ -159,6 +159,37 @@ export default function QuotesClient({ quotes, customers, products }: { quotes: 
   const interrompidasCount = quotes.filter(o => INTERROMPIDAS.includes(o.status))
   const valorEstimado = quotes.reduce((acc, o) => acc + (o.price || 0), 0)
 
+  const gerarRelatorio = () => {
+    const fmt = (v: number) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v)
+    const fmtDate = (d: string) => new Date(d).toLocaleDateString('pt-BR')
+    const rows = quotes.map(o => `
+      <tr style="border-bottom:1px solid #eee">
+        <td style="padding:8px 6px">#${o.number || '-'}</td>
+        <td style="padding:8px 6px">${o.customer?.name || '-'}</td>
+        <td style="padding:8px 6px">${o.brand || ''} ${o.model || ''}</td>
+        <td style="padding:8px 6px">${STATUS_LABEL[o.status] || o.status}</td>
+        <td style="padding:8px 6px;text-align:right">${fmt(o.price || 0)}</td>
+        <td style="padding:8px 6px">${fmtDate(o.createdAt)}</td>
+      </tr>`).join('')
+    const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Relatório de Orçamentos</title>
+      <style>body{font-family:Arial,sans-serif;padding:32px;color:#111}h1{font-size:1.4rem;margin-bottom:4px}p{color:#555;font-size:0.85rem;margin-bottom:24px}table{width:100%;border-collapse:collapse;font-size:0.85rem}th{background:#f3f4f6;padding:8px 6px;text-align:left;font-size:0.75rem;text-transform:uppercase;letter-spacing:.04em}tr:nth-child(even){background:#fafafa}.summary{display:flex;gap:32px;margin-bottom:24px;flex-wrap:wrap}.stat{background:#f9f9f9;border:1px solid #e5e7eb;border-radius:8px;padding:12px 20px}.stat-label{font-size:0.7rem;text-transform:uppercase;color:#888;font-weight:700}.stat-value{font-size:1.3rem;font-weight:800;margin-top:2px}@media print{button{display:none}}</style>
+      </head><body>
+      <h1>Relatório Geral de Orçamentos</h1>
+      <p>Gerado em ${new Date().toLocaleString('pt-BR')}</p>
+      <div class="summary">
+        <div class="stat"><div class="stat-label">Total de Orçamentos</div><div class="stat-value">${quotes.length}</div></div>
+        <div class="stat"><div class="stat-label">Ativos</div><div class="stat-value">${emBancada.length}</div></div>
+        <div class="stat"><div class="stat-label">Valor Estimado</div><div class="stat-value">${fmt(valorEstimado)}</div></div>
+        <div class="stat"><div class="stat-label">Interrompidos</div><div class="stat-value">${interrompidasCount.length}</div></div>
+      </div>
+      <table><thead><tr><th>#</th><th>Cliente</th><th>Aparelho</th><th>Status</th><th style="text-align:right">Valor</th><th>Data</th></tr></thead>
+      <tbody>${rows}</tbody></table>
+      <script>window.onload=function(){window.print()}<\/script>
+      </body></html>`
+    const w = window.open('', '_blank')
+    if (w) { w.document.write(html); w.document.close() }
+  }
+
   /* ── filtered list ── */
   const filtered = useMemo(() => {
     const q = search.toLowerCase()
@@ -265,7 +296,7 @@ export default function QuotesClient({ quotes, customers, products }: { quotes: 
           </div>
         </div>
         <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-          <button className="btn btn-outline" style={{ fontSize: '0.85rem', gap: '6px', backgroundColor: 'white', height: '40px', whiteSpace: 'nowrap' }}>
+          <button className="btn btn-outline" onClick={gerarRelatorio} style={{ fontSize: '0.85rem', gap: '6px', backgroundColor: 'white', height: '40px', whiteSpace: 'nowrap' }}>
             <FileText size={16} /> Relatório Geral
           </button>
           <button
