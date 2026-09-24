@@ -1,14 +1,12 @@
 'use server'
 
-import fs from 'fs'
-import path from 'path'
+import { createClient } from '@/utils/supabase/server'
 
 export async function uploadImage(formData: FormData) {
   try {
     const file = formData.get('file') as File | null;
     const url = formData.get('url') as string | null;
 
-    // Se recebemos uma URL direta (caso o usuário cole uma URL de imagem)
     if (url && url.startsWith('http')) {
       return { success: true, url };
     }
@@ -17,28 +15,31 @@ export async function uploadImage(formData: FormData) {
       return { error: 'Nenhum arquivo enviado.' }
     }
 
-    const bytes = await file.arrayBuffer()
-    const buffer = Buffer.from(bytes)
+    const supabase = await createClient()
 
-    const uploadDir = path.join(process.cwd(), 'public', 'uploads')
-    
-    // Garantir que a pasta existe
-    if (!fs.existsSync(uploadDir)) {
-      fs.mkdirSync(uploadDir, { recursive: true })
-    }
-
-    // Criar nome de arquivo único
+    // Criar nome único para o arquivo
     const ext = file.name.split('.').pop() || 'jpg'
     const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${ext}`
-    const filePath = path.join(uploadDir, fileName)
 
-    // Salvar o arquivo
-    fs.writeFileSync(filePath, buffer)
+    // Fazendo upload para o Supabase Storage no bucket "uploads"
+    const { data, error } = await supabase.storage
+      .from('uploads')
+      .upload(fileName, file, {
+        cacheControl: '3600',
+        upsert: false
+      })
 
-    // Retornar a URL relativa
-    return { success: true, url: `/uploads/${fileName}` }
-  } catch (error) {
+    if (error) {
+      console.error('Erro no Supabase Storage:', error.message)
+      return { error: 'Falha ao salvar a imagem no servidor de storage. Verifique se o bucket "uploads" existe no Supabase e se é público.' }
+    }
+
+    // Gerar URL pública da imagem
+    const { data: { publicUrl } } = supabase.storage.from('uploads').getPublicUrl(fileName)
+
+    return { success: true, url: publicUrl }
+  } catch (error: any) {
     console.error('Erro no upload:', error)
-    return { error: 'Falha ao salvar a imagem no servidor.' }
+    return { error: 'Ocorreu um erro ao processar a imagem.' }
   }
 }

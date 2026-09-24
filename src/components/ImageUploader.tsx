@@ -47,6 +47,8 @@ export default function ImageUploader({ initialPhotos = [], onChange }: ImageUpl
         const result = await uploadImage(formData)
         if (result.success && result.url) {
           newUrls.push(result.url)
+        } else if (result.error) {
+          alert(`Erro ao subir imagem: ${result.error}`)
         }
       } catch (error) {
         console.error('Erro na compressão/upload', error)
