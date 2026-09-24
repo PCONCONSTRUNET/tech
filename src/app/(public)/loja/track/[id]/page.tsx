@@ -53,6 +53,7 @@ export default async function TrackPage({ params }: { params: Promise<{ id: stri
   const currentIndex = STATUS_MAP.findIndex(s => s.key === os.status)
   const isCanceled = os.status === 'CANCELADO'
   const storeName = settings?.storeName || 'Digital Tech'
+  const logoUrl = settings?.logoUrl || '/logo.png'
 
   return (
     <div style={{ minHeight: '100vh', backgroundColor: '#f8fafc', padding: '24px 16px', fontFamily: 'system-ui, sans-serif' }}>
@@ -60,8 +61,8 @@ export default async function TrackPage({ params }: { params: Promise<{ id: stri
         
         {/* Header */}
         <div style={{ backgroundColor: '#0f172a', padding: '32px 24px', textAlign: 'center', color: 'white' }}>
-          {settings?.logoUrl ? (
-            <img src={settings.logoUrl} alt={storeName} style={{ height: '60px', objectFit: 'contain', marginBottom: '16px', filter: 'brightness(0) invert(1)' }} />
+          {logoUrl ? (
+            <img src={logoUrl} alt={storeName} style={{ height: '60px', objectFit: 'contain', marginBottom: '16px', filter: 'brightness(0) invert(1)' }} />
           ) : (
             <div style={{ fontSize: '1.5rem', fontWeight: '900', marginBottom: '16px' }}>🔧 {storeName}</div>
           )}
