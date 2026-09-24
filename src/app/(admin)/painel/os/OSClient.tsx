@@ -175,6 +175,7 @@ export default function OSClient({ serviceOrders, customers, services = [] }: { 
   const [customServiceName, setCustomServiceName] = useState('')
   const [customServicePrice, setCustomServicePrice] = useState('')
   const [createdOs, setCreatedOs] = useState<PrintOS | null>(null)
+  const [defect, setDefect] = useState('')
 
   const totalServicesPrice = selectedServiceIds.reduce((sum, id) => {
     const srv = servicesList.find(s => s.id === id)
@@ -306,12 +307,37 @@ export default function OSClient({ serviceOrders, customers, services = [] }: { 
   function handleTabChange(t: Tab) { setTab(t); setPage(1) }
 
   async function handleAdd(formData: FormData) {
+    const _selIdsStr = formData.get('__selectedServiceIds')?.toString() || '[]';
+    const _srvListStr = formData.get('__servicesList')?.toString() || '[]';
+    let _parsedSelIds: string[] = [];
+    let _parsedSrvList: any[] = [];
+    try {
+      _parsedSelIds = JSON.parse(_selIdsStr);
+      _parsedSrvList = JSON.parse(_srvListStr);
+    } catch(e) {}
+
+    let items = _parsedSelIds.map(id => {
+      const srv = _parsedSrvList.find((s: any) => s.id === id);
+      return {
+        name: srv ? srv.name : 'Serviço',
+        quantity: 1,
+        price: srv ? srv.price : 0
+      };
+    });
+    
+    if (items.length === 0) {
+      items.push({
+        name: 'Orçamento de Reparo',
+        quantity: 1,
+        price: Number(formData.get('price')) || 0
+      });
+    }
+
+    formData.set('items', JSON.stringify(items));
+
     const result = await createServiceOrder(formData)
     if (result && 'os' in result && result.os) {
-      const selectedSvcs = selectedServiceIds.map(id => {
-        const s = servicesList.find(x => x.id === id)
-        return s ? { name: s.name, price: s.price } : null
-      }).filter(Boolean) as { name: string; price: number }[]
+      const selectedSvcs = items.map(s => ({ name: s.name, price: s.price }))
       setCreatedOs({ ...result.os, selectedServices: selectedSvcs })
     }
     setModalStep(7)
@@ -702,6 +728,8 @@ export default function OSClient({ serviceOrders, customers, services = [] }: { 
 
             <div style={{ padding: modalStep === 7 ? '0' : '32px 48px', overflowY: 'auto', flex: 1, backgroundColor: modalStep === 7 ? '#f8fafc' : 'white' }}>
               <form action={handleAdd} id="os-form" style={{ height: modalStep === 7 ? '100%' : 'auto' }}>
+                <input type="hidden" name="__selectedServiceIds" value={JSON.stringify(selectedServiceIds)} />
+                <input type="hidden" name="__servicesList" value={JSON.stringify(servicesList)} />
                 
                 {/* STEP 1: Quem é o cliente? */}
                 <div style={{ display: modalStep === 1 ? 'block' : 'none' }}>
@@ -834,7 +862,7 @@ export default function OSClient({ serviceOrders, customers, services = [] }: { 
                         <label style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', fontWeight: '700', color: '#64748b', textTransform: 'uppercase', marginBottom: '12px' }}>
                           Defeito Relatado * <span style={{ color: '#ef4444' }}>Obrigatório</span>
                         </label>
-                        <textarea name="defect" rows={4} className="input" placeholder="Ex: Cliente relata que o aparelho não carrega..." style={{ resize: 'vertical' }} />
+                        <textarea name="defect" rows={4} className="input" value={defect} onChange={e => setDefect(e.target.value)} placeholder="Ex: Cliente relata que o aparelho não carrega..." style={{ resize: 'vertical' }} />
                       </div>
                       <div className="card" style={{ padding: '20px' }}>
                         <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: '700', color: '#64748b', textTransform: 'uppercase', marginBottom: '12px' }}>
@@ -1022,12 +1050,19 @@ export default function OSClient({ serviceOrders, customers, services = [] }: { 
                   <div className="card" style={{ padding: '0', overflow: 'hidden', borderTop: '4px solid #a855f7' }}>
                     <div style={{ padding: '24px', display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--color-border)' }}>
                       <div>
-                        <h4 style={{ fontSize: '1.2rem', fontWeight: '800', color: '#0f172a' }}>Cliente Teste</h4>
-                        <p style={{ fontSize: '0.85rem', color: '#64748b' }}>(48) 99619-5303</p>
+                        <h4 style={{ fontSize: '1.2rem', fontWeight: '800', color: '#0f172a' }}>{localCustomers.find(c => c.id === selectedCustomer)?.name || 'Cliente não selecionado'}</h4>
+                        <p style={{ fontSize: '0.85rem', color: '#64748b' }}>{localCustomers.find(c => c.id === selectedCustomer)?.phone || ''}</p>
                       </div>
                       <div style={{ textAlign: 'right' }}>
-                        <h4 style={{ fontSize: '1rem', fontWeight: '700', color: '#0f172a' }}>Smartphone</h4>
-                        <p style={{ fontSize: '0.75rem', color: '#94a3b8' }}>IMEI: 4343</p>
+                        <h4 style={{ fontSize: '1rem', fontWeight: '700', color: '#0f172a' }}>{osDevice.type} {osDevice.brand} {osDevice.model}</h4>
+                        <p style={{ fontSize: '0.75rem', color: '#94a3b8' }}>{osDevice.imei ? `IMEI: ${osDevice.imei}` : 'Sem IMEI'}</p>
+                      </div>
+                    </div>
+                    
+                    <div style={{ padding: '24px', backgroundColor: '#f8fafc', borderBottom: '1px solid var(--color-border)' }}>
+                      <div style={{ fontSize: '0.65rem', fontWeight: '700', color: '#94a3b8', textTransform: 'uppercase', marginBottom: '8px' }}>Problema Relatado / Serviço</div>
+                      <div style={{ fontSize: '0.85rem', color: '#0f172a', fontStyle: defect ? 'normal' : 'italic' }}>
+                        {defect || 'Nenhum problema relatado.'}
                       </div>
                     </div>
                     
@@ -1055,7 +1090,11 @@ export default function OSClient({ serviceOrders, customers, services = [] }: { 
                     
                     <div style={{ padding: '24px', backgroundColor: '#f8fafc' }}>
                       <div style={{ fontSize: '0.65rem', fontWeight: '700', color: '#94a3b8', textTransform: 'uppercase', marginBottom: '12px' }}>Estado Físico</div>
-                      <span style={{ fontSize: '0.7rem', fontWeight: '700', color: '#ef4444', backgroundColor: '#fef2f2', border: '1px solid #fecaca', padding: '4px 8px', borderRadius: '4px' }}>CARCAÇA AMASSADA</span>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                        {physicalChecklist.length > 0 ? physicalChecklist.map(st => (
+                          <span key={st} style={{ fontSize: '0.7rem', fontWeight: '700', color: '#ef4444', backgroundColor: '#fef2f2', border: '1px solid #fecaca', padding: '4px 8px', borderRadius: '4px' }}>{st}</span>
+                        )) : <span style={{ fontSize: '0.8rem', color: '#64748b' }}>Não especificado</span>}
+                      </div>
                       
                       <div style={{ marginTop: '24px' }}>
                         <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.75rem', fontWeight: '700', color: '#0f172a', marginBottom: '8px' }}>

@@ -48,9 +48,24 @@ export async function createServiceOrder(formData: FormData) {
 
   try {
     const notes = JSON.stringify({ password, physicalCondition, paymentStatus })
+    
+    const itemsJson = formData.get('items') as string
+    let parsedItems = []
+    try {
+      if (itemsJson) parsedItems = JSON.parse(itemsJson)
+    } catch(e) {}
 
     const created = await prisma.serviceOrder.create({
-      data: { customerId, device, brand, model, imei, defect, price, status, notes },
+      data: { 
+        customerId, device, brand, model, imei, defect, price, status, notes,
+        items: {
+          create: parsedItems.map((item: any) => ({
+            name: item.name,
+            quantity: item.quantity,
+            price: item.price
+          }))
+        }
+      },
       include: { customer: true }
     })
 
