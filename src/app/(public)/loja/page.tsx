@@ -9,17 +9,21 @@ export const dynamic = 'force-dynamic';
 export default async function LojaPage() {
   const settings = await prisma.settings.findFirst();
   
-  // Note: we fetch products so we can pass them to the client
   const products = await prisma.product.findMany({
     where: { active: true, showOnVitrine: true },
     include: { category: true }
+  });
+
+  const categories = await prisma.category.findMany({
+    orderBy: { name: 'asc' }
   });
 
   return (
     <CartProvider>
       <LojaClient 
         initialProducts={products} 
-        initialSettings={settings} 
+        initialSettings={settings}
+        initialCategories={categories}
       />
       <CartSidebar />
     </CartProvider>

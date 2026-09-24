@@ -5,7 +5,7 @@ import { Search, MoreVertical, ShoppingBag, Plus, Minus, ArrowLeft, LayoutDashbo
 import Link from 'next/link';
 import { useCart } from '@/components/loja/CartContext';
 
-export default function LojaClient({ initialProducts, initialSettings }: { initialProducts: any[], initialSettings: any }) {
+export default function LojaClient({ initialProducts, initialSettings, initialCategories }: { initialProducts: any[], initialSettings: any, initialCategories?: any[] }) {
   const { addItem, items, setSidebarOpen } = useCart();
   const [activeCategory, setActiveCategory] = useState('Todos');
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
@@ -13,7 +13,8 @@ export default function LojaClient({ initialProducts, initialSettings }: { initi
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearching, setIsSearching] = useState(false);
 
-  const CATEGORIAS = ['Todos', 'Barbeadores', 'Carregador Powerbank', 'Cabo Auxiliar'];
+  const dbCategories = (initialCategories || []).map((c: any) => c.name);
+  const CATEGORIAS = ['Todos', ...dbCategories];
   const CNPJ = "58.645.937/0001-02";
   const WHATSAPP = "5519995885715";
 
@@ -49,8 +50,8 @@ export default function LojaClient({ initialProducts, initialSettings }: { initi
     const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
                           (p.description && p.description.toLowerCase().includes(searchQuery.toLowerCase()));
     
-    // Se o produto tiver categoria, filtra. Se não tiver, ignora o filtro de categoria por enquanto
-    const matchesCategory = activeCategory === 'Todos' || !p.category || p.category === activeCategory;
+    const productCategoryName = p.category?.name || p.category || null;
+    const matchesCategory = activeCategory === 'Todos' || productCategoryName === activeCategory;
     
     return matchesSearch && matchesCategory;
   });
