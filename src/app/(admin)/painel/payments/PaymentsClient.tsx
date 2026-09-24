@@ -7,6 +7,7 @@ import { createTransaction, deleteTransaction, updateTransaction } from '@/actio
 export default function PaymentsClient({ transactions, categories, customers = [] }: { transactions: any[], categories: any[], customers?: any[] }) {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [selectedTransaction, setSelectedTransaction] = useState<any>(null)
+  const [deletingTxId, setDeletingTxId] = useState<string | null>(null)
   const [isEditing, setIsEditing] = useState(false)
   const [transactionType, setTransactionType] = useState<'RECEITA' | 'DESPESA'>('RECEITA')
   const [paymentMethod, setPaymentMethod] = useState('PIX')
@@ -95,9 +96,14 @@ export default function PaymentsClient({ transactions, categories, customers = [
   }
 
   async function handleDelete(id: string) {
-    if (confirm('Tem certeza que deseja excluir esta transação? Esta ação não pode ser desfeita.')) {
-      await deleteTransaction(id)
+    setDeletingTxId(id)
+  }
+
+  async function confirmDelete() {
+    if (deletingTxId) {
+      await deleteTransaction(deletingTxId)
       setSelectedTransaction(null)
+      setDeletingTxId(null)
     }
   }
 
@@ -604,6 +610,32 @@ export default function PaymentsClient({ transactions, categories, customers = [
                   <p style={{ fontWeight: '500', whiteSpace: 'pre-wrap' }}>{selectedTransaction.notes}</p>
                 </div>
               )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Confirm Delete Modal ── */}
+      {deletingTxId && (
+        <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 60 }}>
+          <div style={{ backgroundColor: 'white', borderRadius: '12px', padding: '24px', width: '100%', maxWidth: '360px', boxShadow: '0 10px 25px rgba(0,0,0,0.2)' }}>
+            <h3 style={{ fontSize: '1.2rem', fontWeight: '700', marginBottom: '12px', color: '#0f172a' }}>Confirmar Exclusão</h3>
+            <p style={{ color: '#475569', fontSize: '0.95rem', marginBottom: '24px', lineHeight: '1.5' }}>
+              Tem certeza que deseja excluir esta transação? Essa ação não poderá ser desfeita.
+            </p>
+            <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
+              <button 
+                onClick={() => setDeletingTxId(null)}
+                style={{ padding: '10px 16px', borderRadius: '8px', border: '1px solid #cbd5e1', backgroundColor: 'white', color: '#475569', fontWeight: '600', cursor: 'pointer' }}
+              >
+                Cancelar
+              </button>
+              <button 
+                onClick={confirmDelete}
+                style={{ padding: '10px 16px', borderRadius: '8px', border: 'none', backgroundColor: '#ef4444', color: 'white', fontWeight: '600', cursor: 'pointer' }}
+              >
+                Sim, Excluir
+              </button>
             </div>
           </div>
         </div>

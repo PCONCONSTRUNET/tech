@@ -36,6 +36,7 @@ export default function FinanceClient({ transactions, categories, customers = []
   const [modalType, setModalType]   = useState<'RECEITA'|'DESPESA'|null>(null)
   const [editingTx, setEditingTx]   = useState<any>(null)
   const [detailTx, setDetailTx]     = useState<any>(null)
+  const [deletingTxId, setDeletingTxId] = useState<string | null>(null)
 
   // form
   const [title, setTitle]           = useState('')
@@ -237,7 +238,15 @@ export default function FinanceClient({ transactions, categories, customers = []
   }
 
   async function handleDelete(id: string) {
-    if (confirm('Excluir esta transação?')) { await deleteTransaction(id); setDetailTx(null) }
+    setDeletingTxId(id)
+  }
+
+  async function confirmDelete() {
+    if (deletingTxId) {
+      await deleteTransaction(deletingTxId)
+      setDetailTx(null)
+      setDeletingTxId(null)
+    }
   }
 
   /* ── sub-tab content ── */
@@ -844,6 +853,32 @@ export default function FinanceClient({ transactions, categories, customers = []
               ))}
             </div>
             <button onClick={() => setDetailTx(null)} className="btn btn-outline" style={{ width: '100%', marginTop: '20px', backgroundColor: 'white' }}>Fechar</button>
+          </div>
+        </div>
+      )}
+
+      {/* ── Confirm Delete Modal ── */}
+      {deletingTxId && (
+        <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 60 }}>
+          <div style={{ backgroundColor: 'white', borderRadius: '12px', padding: '24px', width: '100%', maxWidth: '360px', boxShadow: '0 10px 25px rgba(0,0,0,0.2)' }}>
+            <h3 style={{ fontSize: '1.2rem', fontWeight: '700', marginBottom: '12px', color: '#0f172a' }}>Confirmar Exclusão</h3>
+            <p style={{ color: '#475569', fontSize: '0.95rem', marginBottom: '24px', lineHeight: '1.5' }}>
+              Tem certeza que deseja excluir esta transação? Essa ação não poderá ser desfeita.
+            </p>
+            <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
+              <button 
+                onClick={() => setDeletingTxId(null)}
+                style={{ padding: '10px 16px', borderRadius: '8px', border: '1px solid #cbd5e1', backgroundColor: 'white', color: '#475569', fontWeight: '600', cursor: 'pointer' }}
+              >
+                Cancelar
+              </button>
+              <button 
+                onClick={confirmDelete}
+                style={{ padding: '10px 16px', borderRadius: '8px', border: 'none', backgroundColor: '#ef4444', color: 'white', fontWeight: '600', cursor: 'pointer' }}
+              >
+                Sim, Excluir
+              </button>
+            </div>
           </div>
         </div>
       )}
