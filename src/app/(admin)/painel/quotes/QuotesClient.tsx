@@ -171,6 +171,7 @@ export default function QuotesClient({ quotes, customers, products }: { quotes: 
   const [isAddingCustomService, setIsAddingCustomService] = useState(false)
   const [customServiceName, setCustomServiceName] = useState('')
   const [customServicePrice, setCustomServicePrice] = useState('')
+  const [createdQuote, setCreatedQuote] = useState<any>(null)
 
   const totalServicesPrice = selectedServiceIds.reduce((sum, id) => {
     const srv = servicesList.find(s => s.id === id)
@@ -288,12 +289,13 @@ export default function QuotesClient({ quotes, customers, products }: { quotes: 
       price: totalAmount
     }];
 
-    await createQuote({
+    const res = await createQuote({
       customerId,
       totalAmount,
       items,
       device, brand, model, imei, defect, diagnostic, password, accessories, physicalCondition
     });
+    if (res.quote) setCreatedQuote(res.quote);
     setModalStep(7);
   }
   function handleDelete(id: string) {
@@ -1105,55 +1107,17 @@ export default function QuotesClient({ quotes, customers, products }: { quotes: 
                     <h3 style={{ fontSize: '1.8rem', fontWeight: '800', color: '#0f172a', marginBottom: '8px' }}>Orçamento Criado com Sucesso!</h3>
                     <p style={{ color: '#64748b', fontSize: '0.95rem', marginBottom: '32px' }}>A orçamento foi registrado.</p>
                     
-                    <div style={{ backgroundColor: 'white', padding: '12px 24px', borderRadius: '8px', border: '1px solid var(--color-border)', display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px', width: '100%', maxWidth: '400px', justifyContent: 'space-between' }}>
-                      <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem', fontWeight: '600', color: '#334155', cursor: 'pointer' }}>
-                        <input type="checkbox" defaultChecked style={{ accentColor: '#2563eb', width: '16px', height: '16px' }} />
-                        Incluir fotos anexadas no PDF (A4)
-                      </label>
-                      <span style={{ fontSize: '0.75rem', fontWeight: '600', color: '#2563eb', backgroundColor: '#eff6ff', padding: '4px 8px', borderRadius: '12px' }}>0 fotos</span>
-                    </div>
-                    
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px', width: '100%', maxWidth: '600px', marginBottom: '24px' }}>
-                      <button type="button" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '24px', backgroundColor: 'white', border: '1px solid var(--color-border)', borderRadius: '12px', cursor: 'pointer', gap: '12px', transition: 'all 0.2s' }} className="hover-shadow">
-                        <div style={{ width: '48px', height: '48px', borderRadius: '50%', backgroundColor: '#eff6ff', color: '#2563eb', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                          <FileText size={24} />
+                    <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '24px' }}>
+                      <button type="button" onClick={() => createdQuote && window.open(`/api/quotes/${createdQuote.id}/pdf`, '_blank')} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '28px 48px', backgroundColor: 'white', border: '2px solid #6366f1', borderRadius: '16px', cursor: 'pointer', gap: '12px', transition: 'all 0.2s', minWidth: '220px' }} className="hover-shadow">
+                        <div style={{ width: '56px', height: '56px', borderRadius: '50%', backgroundColor: '#eff6ff', color: '#2563eb', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <FileText size={28} />
                         </div>
                         <div style={{ textAlign: 'center' }}>
-                          <div style={{ fontSize: '0.9rem', fontWeight: '700', color: '#0f172a' }}>Padrão A4</div>
-                          <div style={{ fontSize: '0.7rem', color: '#64748b', marginTop: '4px' }}>PDF completo (ideal para arquivo/email)</div>
-                        </div>
-                      </button>
-                      
-                      <button type="button" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '24px', backgroundColor: 'white', border: '1px solid var(--color-border)', borderRadius: '12px', cursor: 'pointer', gap: '12px', transition: 'all 0.2s' }} className="hover-shadow">
-                        <div style={{ width: '48px', height: '48px', borderRadius: '50%', backgroundColor: '#faf5ff', color: '#a855f7', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                          <FileText size={24} />
-                        </div>
-                        <div style={{ textAlign: 'center' }}>
-                          <div style={{ fontSize: '0.9rem', fontWeight: '700', color: '#0f172a' }}>Cupom Térmico</div>
-                          <div style={{ fontSize: '0.7rem', color: '#64748b', marginTop: '4px' }}>Comprovante para o cliente (80mm)</div>
-                        </div>
-                      </button>
-                      
-                      <button type="button" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '24px', backgroundColor: 'white', border: '1px solid var(--color-border)', borderRadius: '12px', cursor: 'pointer', gap: '12px', transition: 'all 0.2s' }} className="hover-shadow">
-                        <div style={{ width: '48px', height: '48px', borderRadius: '50%', backgroundColor: '#fef3c7', color: '#d97706', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                          <FileText size={24} />
-                        </div>
-                        <div style={{ textAlign: 'center' }}>
-                          <div style={{ fontSize: '0.9rem', fontWeight: '700', color: '#0f172a' }}>Etiqueta Adesiva</div>
-                          <div style={{ fontSize: '0.7rem', color: '#64748b', marginTop: '4px' }}>Para colar no aparelho</div>
+                          <div style={{ fontSize: '1rem', fontWeight: '700', color: '#0f172a' }}>Baixar Orçamento em PDF</div>
+                          <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '4px' }}>Abre o documento para imprimir ou enviar</div>
                         </div>
                       </button>
                     </div>
-                    
-                    <button type="button" onClick={() => window.open('https://api.whatsapp.com/send?text=Ol%C3%A1', '_blank')} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '20px', backgroundColor: 'white', border: '1px solid var(--color-border)', borderRadius: '12px', cursor: 'pointer', gap: '12px', transition: 'all 0.2s', width: '200px', marginBottom: '32px' }} className="hover-shadow">
-                      <div style={{ width: '48px', height: '48px', borderRadius: '50%', backgroundColor: '#dcfce7', color: '#16a34a', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <Smartphone size={24} />
-                      </div>
-                      <div style={{ textAlign: 'center' }}>
-                        <div style={{ fontSize: '0.9rem', fontWeight: '700', color: '#0f172a' }}>Enviar pelo WhatsApp</div>
-                        <div style={{ fontSize: '0.7rem', color: '#64748b', marginTop: '4px' }}>API de WhatsApp Desbloqueada</div>
-                      </div>
-                    </button>
                     
                     <div style={{ display: 'flex', gap: '16px' }}>
                       <button type="button" onClick={() => setModalStep(1)} style={{ padding: '10px 24px', fontSize: '0.9rem', fontWeight: '700', color: '#2563eb', background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
