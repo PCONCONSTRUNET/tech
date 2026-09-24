@@ -285,74 +285,86 @@ export default function ProductClient({
         <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50 }}>
           <div className="modal-content">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-              <h2 style={{ fontSize: '1.25rem', fontWeight: '600' }}>Novo Produto / Peça</h2>
+              <h2 style={{ fontSize: '1.25rem', fontWeight: '600' }}>{type === 'SERVICE' ? 'Novo Serviço' : 'Novo Produto / Peça'}</h2>
               <button onClick={() => setIsModalOpen(false)} style={{ background: 'none', border: 'none', cursor: 'pointer' }}><X size={20} /></button>
             </div>
             
             <form action={handleAdd} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               <input type="hidden" name="type" value={type} />
               
-              <div>
-                <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.875rem', fontWeight: '500' }}>Fotos do Produto</label>
-                <ImageUploader onChange={() => {}} />
-              </div>
+              {type !== 'SERVICE' && (
+                <div>
+                  <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.875rem', fontWeight: '500' }}>Fotos do Produto</label>
+                  <ImageUploader onChange={() => {}} />
+                </div>
+              )}
 
               <div className="grid-responsive-2">
                 <div>
-                  <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.875rem', fontWeight: '500' }}>Nome do Produto *</label>
-                  <input name="name" type="text" className="input" required placeholder="Ex: Tela iPhone 11 Original" />
+                  <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.875rem', fontWeight: '500' }}>{type === 'SERVICE' ? 'Nome do Serviço *' : 'Nome do Produto *'}</label>
+                  <input name="name" type="text" className="input" required placeholder={type === 'SERVICE' ? "Ex: Troca de Tela" : "Ex: Tela iPhone 11 Original"} />
                 </div>
-                <div>
-                  <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.875rem', fontWeight: '500' }}>Categoria</label>
-                  <input name="category" type="text" className="input" list="category-list" placeholder="Ex: Telas, Capinhas..." />
-                  <datalist id="category-list">
-                    {safeCategories.map(c => (
-                      <option key={c.id} value={c.name} />
-                    ))}
-                  </datalist>
-                </div>
+                {type !== 'SERVICE' && (
+                  <div>
+                    <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.875rem', fontWeight: '500' }}>Categoria</label>
+                    <input name="category" type="text" className="input" list="category-list" placeholder="Ex: Telas, Capinhas..." />
+                    <datalist id="category-list">
+                      {safeCategories.map(c => (
+                        <option key={c.id} value={c.name} />
+                      ))}
+                    </datalist>
+                  </div>
+                )}
               </div>
               
-              <div>
-                <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.875rem', fontWeight: '500' }}>Descrição do Produto</label>
-                <textarea name="description" className="input" rows={3} placeholder="Descreva os detalhes do produto, como cor, tamanho, armazenamento..." style={{ resize: 'vertical' }}></textarea>
-              </div>
+              {type !== 'SERVICE' && (
+                <div>
+                  <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.875rem', fontWeight: '500' }}>Descrição do Produto</label>
+                  <textarea name="description" className="input" rows={3} placeholder="Descreva os detalhes do produto, como cor, tamanho, armazenamento..." style={{ resize: 'vertical' }}></textarea>
+                </div>
+              )}
               
-              <div className="grid-responsive-3">
-                <div>
-                  <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.875rem', fontWeight: '500' }}>Código / SKU</label>
-                  <input name="sku" type="text" className="input" placeholder="Opcional" />
+              {type !== 'SERVICE' && (
+                <div className="grid-responsive-3">
+                  <div>
+                    <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.875rem', fontWeight: '500' }}>Código / SKU</label>
+                    <input name="sku" type="text" className="input" placeholder="Opcional" />
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.875rem', fontWeight: '500' }}>NCM</label>
+                    <input name="ncm" type="text" className="input" placeholder="Ex: 85177010" />
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.875rem', fontWeight: '500' }}>Estoque Inicial</label>
+                    <input name="stock" type="number" className="input" defaultValue="0" min="0" />
+                  </div>
                 </div>
-                <div>
-                  <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.875rem', fontWeight: '500' }}>NCM</label>
-                  <input name="ncm" type="text" className="input" placeholder="Ex: 85177010" />
-                </div>
-                <div>
-                  <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.875rem', fontWeight: '500' }}>Estoque Inicial</label>
-                  <input name="stock" type="number" className="input" defaultValue="0" min="0" />
-                </div>
-              </div>
+              )}
 
-              <div className="grid-responsive-2">
+              <div className={type === 'SERVICE' ? "" : "grid-responsive-2"}>
+                {type !== 'SERVICE' && (
+                  <div>
+                    <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.875rem', fontWeight: '500' }}>Custo (R$)</label>
+                    <input name="costPrice" type="number" step="0.01" className="input" defaultValue="0.00" />
+                  </div>
+                )}
                 <div>
-                  <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.875rem', fontWeight: '500' }}>Custo (R$)</label>
-                  <input name="costPrice" type="number" step="0.01" className="input" defaultValue="0.00" />
-                </div>
-                <div>
-                  <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.875rem', fontWeight: '500' }}>Preço de Venda (R$)</label>
+                  <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.875rem', fontWeight: '500' }}>{type === 'SERVICE' ? 'Valor (R$)' : 'Preço de Venda (R$)'}</label>
                   <input name="salePrice" type="number" step="0.01" className="input" defaultValue="0.00" />
                 </div>
               </div>
 
-              <div style={{ backgroundColor: 'var(--color-bg)', padding: '16px', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <input type="checkbox" name="showOnVitrine" id="showOnVitrine" value="true" defaultChecked style={{ width: '18px', height: '18px', accentColor: 'var(--color-primary)' }} />
-                <div>
-                  <label htmlFor="showOnVitrine" style={{ fontWeight: '600', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}><Store size={16} /> Exibir na Vitrine Online</label>
-                  <span style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>O produto ficará visível e disponível para compra na loja pública.</span>
+              {type !== 'SERVICE' && (
+                <div style={{ backgroundColor: 'var(--color-bg)', padding: '16px', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <input type="checkbox" name="showOnVitrine" id="showOnVitrine" value="true" defaultChecked style={{ width: '18px', height: '18px', accentColor: 'var(--color-primary)' }} />
+                  <div>
+                    <label htmlFor="showOnVitrine" style={{ fontWeight: '600', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}><Store size={16} /> Exibir na Vitrine Online</label>
+                    <span style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>O produto ficará visível e disponível para compra na loja pública.</span>
+                  </div>
                 </div>
-              </div>
+              )}
 
-              <button type="submit" className="btn btn-primary" style={{ marginTop: '16px', padding: '12px' }}>Salvar Produto</button>
+              <button type="submit" className="btn btn-primary" style={{ marginTop: '16px', padding: '12px' }}>{type === 'SERVICE' ? 'Salvar Serviço' : 'Salvar Produto'}</button>
             </form>
           </div>
         </div>
@@ -363,7 +375,7 @@ export default function ProductClient({
         <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50 }}>
           <div className="modal-content">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-              <h2 style={{ fontSize: '1.25rem', fontWeight: '600' }}>Editar Produto</h2>
+              <h2 style={{ fontSize: '1.25rem', fontWeight: '600' }}>{type === 'SERVICE' ? 'Editar Serviço' : 'Editar Produto'}</h2>
               <button onClick={() => setEditingProduct(null)} style={{ background: 'none', border: 'none', cursor: 'pointer' }}><X size={20} /></button>
             </div>
 
@@ -371,70 +383,82 @@ export default function ProductClient({
               <input type="hidden" name="id" value={editingProduct.id} />
               <input type="hidden" name="type" value={editingProduct.type} />
 
-              <div>
-                <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.875rem', fontWeight: '500' }}>Fotos do Produto</label>
-                <ImageUploader
-                  initialPhotos={(() => {
-                    try { return JSON.parse(editingProduct.photos || '[]') } catch { return [] }
-                  })()}
-                  onChange={() => {}}
-                />
-              </div>
+              {type !== 'SERVICE' && (
+                <div>
+                  <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.875rem', fontWeight: '500' }}>Fotos do Produto</label>
+                  <ImageUploader
+                    initialPhotos={(() => {
+                      try { return JSON.parse(editingProduct.photos || '[]') } catch { return [] }
+                    })()}
+                    onChange={() => {}}
+                  />
+                </div>
+              )}
 
               <div className="grid-responsive-2">
                 <div>
-                  <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.875rem', fontWeight: '500' }}>Nome do Produto *</label>
+                  <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.875rem', fontWeight: '500' }}>{type === 'SERVICE' ? 'Nome do Serviço *' : 'Nome do Produto *'}</label>
                   <input name="name" type="text" className="input" required defaultValue={editingProduct.name} />
                 </div>
-                <div>
-                  <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.875rem', fontWeight: '500' }}>Categoria</label>
-                  <input name="category" type="text" className="input" list="edit-category-list" defaultValue={editingProduct.category?.name || ''} />
-                  <datalist id="edit-category-list">
-                    {safeCategories.map(c => (
-                      <option key={c.id} value={c.name} />
-                    ))}
-                  </datalist>
-                </div>
+                {type !== 'SERVICE' && (
+                  <div>
+                    <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.875rem', fontWeight: '500' }}>Categoria</label>
+                    <input name="category" type="text" className="input" list="edit-category-list" defaultValue={editingProduct.category?.name || ''} />
+                    <datalist id="edit-category-list">
+                      {safeCategories.map(c => (
+                        <option key={c.id} value={c.name} />
+                      ))}
+                    </datalist>
+                  </div>
+                )}
               </div>
 
-              <div>
-                <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.875rem', fontWeight: '500' }}>Descrição</label>
-                <textarea name="description" className="input" rows={3} defaultValue={editingProduct.description || ''} style={{ resize: 'vertical' }}></textarea>
-              </div>
+              {type !== 'SERVICE' && (
+                <div>
+                  <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.875rem', fontWeight: '500' }}>Descrição</label>
+                  <textarea name="description" className="input" rows={3} defaultValue={editingProduct.description || ''} style={{ resize: 'vertical' }}></textarea>
+                </div>
+              )}
 
-              <div className="grid-responsive-3">
-                <div>
-                  <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.875rem', fontWeight: '500' }}>Código / SKU</label>
-                  <input name="sku" type="text" className="input" defaultValue={editingProduct.sku || ''} />
+              {type !== 'SERVICE' && (
+                <div className="grid-responsive-3">
+                  <div>
+                    <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.875rem', fontWeight: '500' }}>Código / SKU</label>
+                    <input name="sku" type="text" className="input" defaultValue={editingProduct.sku || ''} />
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.875rem', fontWeight: '500' }}>NCM</label>
+                    <input name="ncm" type="text" className="input" defaultValue={editingProduct.ncm || ''} />
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.875rem', fontWeight: '500' }}>Estoque atual</label>
+                    <input type="text" className="input" value={`${editingProduct.stock} un`} disabled style={{ opacity: 0.6 }} />
+                  </div>
                 </div>
-                <div>
-                  <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.875rem', fontWeight: '500' }}>NCM</label>
-                  <input name="ncm" type="text" className="input" defaultValue={editingProduct.ncm || ''} />
-                </div>
-                <div>
-                  <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.875rem', fontWeight: '500' }}>Estoque atual</label>
-                  <input type="text" className="input" value={`${editingProduct.stock} un`} disabled style={{ opacity: 0.6 }} />
-                </div>
-              </div>
+              )}
 
-              <div className="grid-responsive-2">
+              <div className={type === 'SERVICE' ? "" : "grid-responsive-2"}>
+                {type !== 'SERVICE' && (
+                  <div>
+                    <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.875rem', fontWeight: '500' }}>Custo (R$)</label>
+                    <input name="costPrice" type="number" step="0.01" className="input" defaultValue={editingProduct.costPrice} />
+                  </div>
+                )}
                 <div>
-                  <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.875rem', fontWeight: '500' }}>Custo (R$)</label>
-                  <input name="costPrice" type="number" step="0.01" className="input" defaultValue={editingProduct.costPrice} />
-                </div>
-                <div>
-                  <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.875rem', fontWeight: '500' }}>Preço de Venda (R$)</label>
+                  <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.875rem', fontWeight: '500' }}>{type === 'SERVICE' ? 'Valor (R$)' : 'Preço de Venda (R$)'}</label>
                   <input name="salePrice" type="number" step="0.01" className="input" defaultValue={editingProduct.salePrice} />
                 </div>
               </div>
 
-              <div style={{ backgroundColor: 'var(--color-bg)', padding: '16px', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <input type="checkbox" name="showOnVitrine" id="editShowOnVitrine" value="true" defaultChecked={editingProduct.showOnVitrine} style={{ width: '18px', height: '18px', accentColor: 'var(--color-primary)' }} />
-                <div>
-                  <label htmlFor="editShowOnVitrine" style={{ fontWeight: '600', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}><Store size={16} /> Exibir na Vitrine Online</label>
-                  <span style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>O produto ficará visível e disponível para compra na loja pública.</span>
+              {type !== 'SERVICE' && (
+                <div style={{ backgroundColor: 'var(--color-bg)', padding: '16px', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <input type="checkbox" name="showOnVitrine" id="editShowOnVitrine" value="true" defaultChecked={editingProduct.showOnVitrine} style={{ width: '18px', height: '18px', accentColor: 'var(--color-primary)' }} />
+                  <div>
+                    <label htmlFor="editShowOnVitrine" style={{ fontWeight: '600', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}><Store size={16} /> Exibir na Vitrine Online</label>
+                    <span style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>O produto ficará visível e disponível para compra na loja pública.</span>
+                  </div>
                 </div>
-              </div>
+              )}
 
               <button type="submit" className="btn btn-primary" style={{ marginTop: '16px', padding: '12px' }}>Salvar Alterações</button>
             </form>
