@@ -136,6 +136,7 @@ export default function OSClient({ serviceOrders, customers, services = [] }: { 
   const [page, setPage] = useState(1)
 
   const [selectedOS, setSelectedOS] = useState<any>(null)
+  const [deletingOsId, setDeletingOsId] = useState<string | null>(null)
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false)
   const [filters, setFilters] = useState<any>({})
 
@@ -315,8 +316,15 @@ export default function OSClient({ serviceOrders, customers, services = [] }: { 
     }
     setModalStep(7)
   }
-  async function handleDelete(id: string) {
-    if (confirm('Excluir esta OS?')) await deleteServiceOrder(id)
+  function handleDelete(id: string) {
+    setDeletingOsId(id)
+  }
+
+  async function confirmDelete() {
+    if (deletingOsId) {
+      await deleteServiceOrder(deletingOsId)
+      setDeletingOsId(null)
+    }
   }
 
   /* ── number helper ── */
@@ -536,18 +544,18 @@ export default function OSClient({ serviceOrders, customers, services = [] }: { 
                     </td>
                     <td style={{ padding: '16px 24px' }}>
                       <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
-                        <button onClick={() => setSelectedOS(os)} style={{ background: 'none', border: 'none', color: '#cbd5e1', cursor: 'pointer' }} title="Ver Detalhes">
+                        <button onClick={() => setSelectedOS(os)} style={{ background: 'none', border: 'none', color: '#3b82f6', cursor: 'pointer', padding: '6px' }} title="Ver Detalhes">
                           <Eye size={18} />
                         </button>
-                        <button style={{ background: 'none', border: 'none', color: '#cbd5e1', cursor: 'pointer' }} title="Contato">
+                        <button style={{ background: 'none', border: 'none', color: '#10b981', cursor: 'pointer', padding: '6px' }} title="Contato">
                           <Phone size={18} />
                         </button>
-                        <button onClick={() => window.open(`/painel/os/${os.id}`, '_blank')} style={{ background: 'none', border: 'none', color: '#cbd5e1', cursor: 'pointer' }} title="Imprimir">
+                        <button onClick={() => window.open(`/painel/os/${os.id}`, '_blank')} style={{ background: 'none', border: 'none', color: '#475569', cursor: 'pointer', padding: '6px' }} title="Imprimir">
                           <Printer size={18} />
                         </button>
                         <button
                           onClick={() => handleDelete(os.id)}
-                          style={{ background: 'none', border: 'none', color: '#cbd5e1', cursor: 'pointer' }}
+                          style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', padding: '6px' }}
                           title="Excluir"
                         >
                           <Trash2 size={18} />
@@ -611,7 +619,7 @@ export default function OSClient({ serviceOrders, customers, services = [] }: { 
                       <StatusDropdown osId={os.id} currentStatus={os.status} />
                     </div>
                     <div style={{ display: 'flex', gap: '6px' }}>
-                      <button onClick={() => setSelectedOS(os)} style={{ background: '#f1f5f9', border: 'none', borderRadius: '6px', width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#475569', cursor: 'pointer' }}>
+                      <button onClick={() => setSelectedOS(os)} style={{ background: '#eff6ff', border: 'none', borderRadius: '6px', width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#3b82f6', cursor: 'pointer' }}>
                         <Eye size={16} />
                       </button>
                       <button onClick={() => window.open(`/painel/os/${os.id}`, '_blank')} style={{ background: '#f1f5f9', border: 'none', borderRadius: '6px', width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#475569', cursor: 'pointer' }}>
@@ -1388,6 +1396,35 @@ export default function OSClient({ serviceOrders, customers, services = [] }: { 
               </button>
             </div>
             
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {deletingOsId && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 99999 }}>
+          <div style={{ backgroundColor: 'white', borderRadius: '16px', padding: '32px', width: '90%', maxWidth: '400px', boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)', textAlign: 'center' }}>
+            <div style={{ width: '64px', height: '64px', borderRadius: '50%', backgroundColor: '#fef2f2', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
+              <AlertCircle size={32} style={{ color: '#ef4444' }} />
+            </div>
+            <h3 style={{ fontSize: '1.25rem', fontWeight: '800', color: '#0f172a', marginBottom: '8px' }}>Excluir OS</h3>
+            <p style={{ color: '#64748b', fontSize: '0.9rem', marginBottom: '24px' }}>
+              Tem certeza que deseja excluir esta Ordem de Serviço? Esta ação não pode ser desfeita.
+            </p>
+            <div style={{ display: 'flex', gap: '12px' }}>
+              <button 
+                onClick={() => setDeletingOsId(null)}
+                style={{ flex: 1, padding: '12px', borderRadius: '8px', border: '1px solid #e2e8f0', backgroundColor: 'white', color: '#475569', fontWeight: '600', cursor: 'pointer' }}
+              >
+                Cancelar
+              </button>
+              <button 
+                onClick={confirmDelete}
+                style={{ flex: 1, padding: '12px', borderRadius: '8px', border: 'none', backgroundColor: '#ef4444', color: 'white', fontWeight: '600', cursor: 'pointer' }}
+              >
+                Sim, excluir
+              </button>
+            </div>
           </div>
         </div>
       )}
