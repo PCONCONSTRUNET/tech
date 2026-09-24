@@ -11,18 +11,25 @@ export default function ProductClient({
   title = "Produtos",
   type = "PRODUCT"
 }: { 
-  products: any[]; 
-  categories: any[];
+  products?: any[]; 
+  categories?: any[];
   title?: string;
   type?: string;
 }) {
+  const safeProducts = products || [];
+  const safeCategories = categories || [];
+
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [search, setSearch] = useState('')
-
-  const filtered = products.filter(p => 
-    p.name.toLowerCase().includes(search.toLowerCase()) || 
-    (p.sku && p.sku.toLowerCase().includes(search.toLowerCase()))
-  )
+  
+  const filtered = safeProducts.filter(p => {
+    const nameStr = p?.name || '';
+    const skuStr = p?.sku || '';
+    const searchStr = search || '';
+    
+    return nameStr.toLowerCase().includes(searchStr.toLowerCase()) || 
+           skuStr.toLowerCase().includes(searchStr.toLowerCase());
+  })
 
   async function handleAdd(formData: FormData) {
     await createProduct(formData)
@@ -103,13 +110,21 @@ export default function ProductClient({
               </tr>
             </thead>
             <tbody>
-              {filtered.map(p => (
+              {filtered.map(p => {
+                let displayPhoto = p.photoUrl;
+                if (!displayPhoto && p.photos) {
+                  try {
+                    const arr = JSON.parse(p.photos);
+                    if (Array.isArray(arr) && arr.length > 0) displayPhoto = arr[0];
+                  } catch(e) {}
+                }
+                return (
                 <tr key={p.id}>
                   <td>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                       <div style={{ width: '40px', height: '40px', backgroundColor: 'var(--color-bg)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-primary)', overflow: 'hidden', flexShrink: 0 }}>
-                        {p.photoUrl ? (
-                          <img src={p.photoUrl} alt={p.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        {displayPhoto ? (
+                          <img src={displayPhoto} alt={p.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                         ) : (
                           <Package size={20} />
                         )}
@@ -161,7 +176,7 @@ export default function ProductClient({
                     </div>
                   </td>
                 </tr>
-              ))}
+              )})}
               {filtered.length === 0 && (
                 <tr>
                   <td colSpan={8} style={{ textAlign: 'center', padding: '24px', color: 'var(--color-text-muted)' }}>
@@ -175,12 +190,20 @@ export default function ProductClient({
 
         {/* Mobile View */}
         <div className="mobile-cards" style={{ padding: '0 16px' }}>
-          {filtered.map(p => (
+          {filtered.map(p => {
+            let displayPhoto = p.photoUrl;
+            if (!displayPhoto && p.photos) {
+              try {
+                const arr = JSON.parse(p.photos);
+                if (Array.isArray(arr) && arr.length > 0) displayPhoto = arr[0];
+              } catch(e) {}
+            }
+            return (
             <div key={p.id} style={{ border: '1px solid var(--color-border)', borderRadius: '12px', padding: '16px', backgroundColor: 'var(--color-surface)', display: 'flex', flexDirection: 'column', gap: '12px' }}>
               <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
                 <div style={{ width: '48px', height: '48px', backgroundColor: 'var(--color-bg)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-primary)', overflow: 'hidden', flexShrink: 0 }}>
-                  {p.photoUrl ? (
-                    <img src={p.photoUrl} alt={p.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  {displayPhoto ? (
+                    <img src={displayPhoto} alt={p.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                   ) : (
                     <Package size={24} />
                   )}
@@ -236,7 +259,7 @@ export default function ProductClient({
                 </label>
               </div>
             </div>
-          ))}
+          )})}
           {filtered.length === 0 && (
             <div style={{ textAlign: 'center', padding: '32px', color: 'var(--color-text-muted)', fontSize: '0.875rem' }}>
               Nenhum produto encontrado.
@@ -271,7 +294,7 @@ export default function ProductClient({
                   <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.875rem', fontWeight: '500' }}>Categoria</label>
                   <input name="category" type="text" className="input" list="category-list" placeholder="Ex: Telas, Capinhas..." />
                   <datalist id="category-list">
-                    {categories.map(c => (
+                    {safeCategories.map(c => (
                       <option key={c.id} value={c.name} />
                     ))}
                   </datalist>
