@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Search, MoreVertical, ShoppingBag, Plus, Minus, ArrowLeft, LayoutDashboard } from 'lucide-react';
+import { Search, ShoppingBag, LayoutGrid, LayoutList, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { useCart } from '@/components/loja/CartContext';
 
@@ -12,6 +12,7 @@ export default function LojaClient({ initialProducts, initialSettings, initialCa
   const [quantity, setQuantity] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearching, setIsSearching] = useState(false);
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
   const dbCategories = (initialCategories || []).map((c: any) => c.name);
   const CATEGORIAS = ['Todos', ...dbCategories];
@@ -78,9 +79,13 @@ export default function LojaClient({ initialProducts, initialSettings, initialCa
           </div>
         </div>
         <div style={{ display: 'flex', gap: 16, paddingBottom: 12 }}>
-          <Link href="/painel" title="Painel Administrativo" style={{ color: '#ccc', display: 'flex', alignItems: 'center' }}>
-            <LayoutDashboard size={22} />
-          </Link>
+          <div 
+            onClick={() => setViewMode(v => v === 'grid' ? 'list' : 'grid')} 
+            title={viewMode === 'grid' ? 'Visualização em lista' : 'Visualização em grade'}
+            style={{ color: '#ccc', display: 'flex', alignItems: 'center', cursor: 'pointer' }}
+          >
+            {viewMode === 'grid' ? <LayoutList size={22} /> : <LayoutGrid size={22} />}
+          </div>
           <div onClick={() => setIsSearching(!isSearching)} style={{ cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
             <Search size={22} color={isSearching ? "#fff" : "#ccc"} />
           </div>
@@ -286,15 +291,34 @@ export default function LojaClient({ initialProducts, initialSettings, initialCa
             <h2 style={{ fontSize: '1rem', fontWeight: 'bold', margin: '0 0 16px 0' }}>Produtos</h2>
             
             {displayProducts.length > 0 ? (
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))', gap: '24px 16px' }}>
+              <div style={{ 
+                display: viewMode === 'grid' ? 'grid' : 'flex',
+                flexDirection: viewMode === 'list' ? 'column' : undefined,
+                gridTemplateColumns: viewMode === 'grid' ? 'repeat(auto-fill, minmax(130px, 1fr))' : undefined,
+                gap: viewMode === 'grid' ? '24px 16px' : '12px'
+              }}>
                 {displayProducts.map((p) => (
                   <div 
                     key={p.id} 
                     onClick={() => { setSelectedProduct(p); setQuantity(1); window.scrollTo(0,0); }}
-                    style={{ cursor: 'pointer' }}
+                    style={{ 
+                      cursor: 'pointer',
+                      display: viewMode === 'list' ? 'flex' : 'block',
+                      gap: viewMode === 'list' ? '16px' : undefined,
+                      alignItems: viewMode === 'list' ? 'center' : undefined,
+                      backgroundColor: viewMode === 'list' ? '#1e1e1e' : 'transparent',
+                      borderRadius: viewMode === 'list' ? 12 : undefined,
+                      padding: viewMode === 'list' ? '12px' : undefined,
+                    }}
                   >
-                    <div style={{ aspectRatio: '1/1', backgroundColor: '#222', position: 'relative', borderRadius: 12, overflow: 'hidden', marginBottom: 12 }}>
-                      {p.discount && (
+                    <div style={{ 
+                      aspectRatio: viewMode === 'grid' ? '1/1' : undefined,
+                      width: viewMode === 'list' ? '64px' : undefined,
+                      height: viewMode === 'list' ? '64px' : undefined,
+                      flexShrink: viewMode === 'list' ? 0 : undefined,
+                      backgroundColor: '#222', position: 'relative', borderRadius: 12, overflow: 'hidden', marginBottom: viewMode === 'grid' ? 12 : 0 
+                    }}>
+                      {p.discount && viewMode === 'grid' && (
                         <div style={{ position: 'absolute', top: 8, left: 8, backgroundColor: '#2a1b3d', color: '#b388ff', fontSize: '0.65rem', fontWeight: 'bold', padding: '2px 6px', borderRadius: 4, zIndex: 2 }}>
                           {p.discount}
                         </div>
@@ -303,11 +327,11 @@ export default function LojaClient({ initialProducts, initialSettings, initialCa
                         <img src={parsePhoto(p.photos, p.photoUrl)} alt={p.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                       ) : (
                         <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                          <ShoppingBag color="#555" size={32} />
+                          <ShoppingBag color="#555" size={viewMode === 'list' ? 20 : 32} />
                         </div>
                       )}
                     </div>
-                    <div>
+                    <div style={{ flex: viewMode === 'list' ? 1 : undefined }}>
                       <h3 style={{ fontSize: '0.85rem', color: '#ccc', margin: '0 0 6px 0', lineHeight: 1.3, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', fontWeight: 'normal' }}>
                         {p.name}
                       </h3>
