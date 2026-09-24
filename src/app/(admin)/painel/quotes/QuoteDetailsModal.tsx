@@ -111,28 +111,7 @@ export default function QuoteDetailsModal({ quote, quoteNumber, onClose, isQuote
             <div style={{ fontSize: '0.7rem', fontWeight: '800', letterSpacing: '0.05em', color: '#64748b', textTransform: 'uppercase', marginBottom: '4px' }}>VALOR TOTAL</div>
             <div style={{ fontSize: '2.2rem', fontWeight: '800', color: '#0f172a', marginBottom: '16px' }}>{totalPrice ? fmt(totalPrice) : 'R$ 0,00'}</div>
             
-            {totalPrice > 0 && (
-              <div style={{ backgroundColor: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '12px', padding: '16px', marginBottom: '16px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.75rem', fontWeight: '800', color: '#16a34a', letterSpacing: '0.05em', textTransform: 'uppercase', marginBottom: '12px' }}>
-                  <CheckCircle size={16} /> ENTRADA RECEBIDA
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', color: '#16a34a', marginBottom: '8px', borderBottom: '1px solid #dcfce7', paddingBottom: '8px' }}>
-                  <span>Pix</span>
-                  <span>{fmt(totalPrice)}</span>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem', color: '#16a34a', marginBottom: '4px' }}>
-                  <span>Já recebido:</span>
-                  <span style={{ fontWeight: '800' }}>{fmt(totalPrice)}</span>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem', color: '#16a34a' }}>
-                  <span>Falta receber:</span>
-                  <span style={{ fontWeight: '800' }}>R$ 0,00</span>
-                </div>
-                <div style={{ textAlign: 'right', fontSize: '0.65rem', color: '#16a34a', marginTop: '4px', opacity: 0.8 }}>
-                  Pago em {new Date(quote.createdAt).toLocaleDateString('pt-BR')}
-                </div>
-              </div>
-            )}
+
             
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem', color: '#64748b', marginBottom: '16px' }}>
               <div style={{ width: '16px', height: '16px', border: '1px solid #cbd5e1', borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>

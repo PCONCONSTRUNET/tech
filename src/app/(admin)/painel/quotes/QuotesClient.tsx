@@ -272,7 +272,6 @@ export default function QuotesClient({ quotes, customers, products }: { quotes: 
   function handleTabChange(t: Tab) { setTab(t); setPage(1) }
 
   async function handleAdd(formData: FormData) {
-    const totalAmount = parseFloat(formData.get('price')?.toString() || '0');
     const device = formData.get('device')?.toString() || '';
     const brand = formData.get('brand')?.toString() || '';
     const model = formData.get('model')?.toString() || '';
@@ -284,12 +283,28 @@ export default function QuotesClient({ quotes, customers, products }: { quotes: 
     const customerId = formData.get('customerId')?.toString() || null;
     const physicalCondition = formData.get('physicalCondition')?.toString() || '';
     const warranty = formData.get('warranty')?.toString() || '90 dias';
+
+    let items = selectedServiceIds.map(id => {
+      const srv = servicesList.find(s => s.id === id);
+      return {
+        name: srv ? srv.name : 'Serviço',
+        quantity: 1,
+        price: srv ? srv.price : 0
+      };
+    });
     
-    const items = [{
-      name: defect || 'Orçamento de Reparo',
-      quantity: 1,
-      price: totalAmount
-    }];
+    const manualPrice = parseFloat(formData.get('price')?.toString() || '0');
+    let totalAmount = items.length > 0 
+      ? items.reduce((acc, item) => acc + item.price, 0)
+      : manualPrice;
+
+    if (items.length === 0) {
+      items.push({
+        name: defect || 'Orçamento de Reparo',
+        quantity: 1,
+        price: totalAmount
+      });
+    }
 
     const res = await createQuote({
       customerId,
@@ -525,13 +540,8 @@ export default function QuotesClient({ quotes, customers, products }: { quotes: 
                     <td style={{ padding: '16px 24px' }}>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                         <div style={{ fontWeight: '800', fontSize: '0.9rem', color: '#0f172a' }}>
-                          {os.price ? fmt(os.price) : 'R$ 0,00'}
+                          {os.totalAmount ? fmt(os.totalAmount) : 'R$ 0,00'}
                         </div>
-                        {os.price && (
-                          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '0.65rem', fontWeight: '700', color: '#16a34a', backgroundColor: '#dcfce7', padding: '2px 8px', borderRadius: '12px', width: 'fit-content' }}>
-                            <CheckCircle size={10} /> Entrada Paga
-                          </div>
-                        )}
                         <div style={{ fontSize: '0.65rem', color: '#94a3b8', marginTop: '2px' }}>
                           {new Date(os.createdAt).toLocaleDateString('pt-BR')}
                         </div>
@@ -596,13 +606,8 @@ export default function QuotesClient({ quotes, customers, products }: { quotes: 
                     </div>
                     <div style={{ textAlign: 'right' }}>
                       <div style={{ fontWeight: '800', fontSize: '1.1rem', color: '#0f172a' }}>
-                        {os.price ? fmt(os.price) : 'R$ 0,00'}
+                        {os.totalAmount ? fmt(os.totalAmount) : 'R$ 0,00'}
                       </div>
-                      {os.price && (
-                        <div style={{ fontSize: '0.65rem', fontWeight: '700', color: '#16a34a', marginTop: '2px' }}>
-                          <CheckCircle size={10} style={{ display: 'inline', verticalAlign: 'middle' }} /> Entrada Paga
-                        </div>
-                      )}
                     </div>
                   </div>
 
