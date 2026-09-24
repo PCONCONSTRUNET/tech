@@ -1060,12 +1060,12 @@ export default function QuotesClient({ quotes, customers, products }: { quotes: 
                   <div className="card" style={{ padding: '0', overflow: 'hidden', borderTop: '4px solid #a855f7' }}>
                     <div style={{ padding: '24px', display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--color-border)' }}>
                       <div>
-                        <h4 style={{ fontSize: '1.2rem', fontWeight: '800', color: '#0f172a' }}>Cliente Teste</h4>
-                        <p style={{ fontSize: '0.85rem', color: '#64748b' }}>(48) 99619-5303</p>
+                        <h4 style={{ fontSize: '1.2rem', fontWeight: '800', color: '#0f172a' }}>{localCustomers.find(c => c.id === selectedCustomer)?.name || 'Cliente não selecionado'}</h4>
+                        <p style={{ fontSize: '0.85rem', color: '#64748b' }}>{localCustomers.find(c => c.id === selectedCustomer)?.phone || ''}</p>
                       </div>
                       <div style={{ textAlign: 'right' }}>
-                        <h4 style={{ fontSize: '1rem', fontWeight: '700', color: '#0f172a' }}>Smartphone</h4>
-                        <p style={{ fontSize: '0.75rem', color: '#94a3b8' }}>IMEI: 4343</p>
+                        <h4 style={{ fontSize: '1rem', fontWeight: '700', color: '#0f172a' }}>{osDevice.type} {osDevice.brand} {osDevice.model}</h4>
+                        <p style={{ fontSize: '0.75rem', color: '#94a3b8' }}>{osDevice.imei ? `IMEI: ${osDevice.imei}` : 'Sem IMEI'}</p>
                       </div>
                     </div>
                     
@@ -1093,7 +1093,11 @@ export default function QuotesClient({ quotes, customers, products }: { quotes: 
                     
                     <div style={{ padding: '24px', backgroundColor: '#f8fafc' }}>
                       <div style={{ fontSize: '0.65rem', fontWeight: '700', color: '#94a3b8', textTransform: 'uppercase', marginBottom: '12px' }}>Estado Físico</div>
-                      <span style={{ fontSize: '0.7rem', fontWeight: '700', color: '#ef4444', backgroundColor: '#fef2f2', border: '1px solid #fecaca', padding: '4px 8px', borderRadius: '4px' }}>CARCAÇA AMASSADA</span>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                        {physicalChecklist.length > 0 ? physicalChecklist.map(st => (
+                          <span key={st} style={{ fontSize: '0.7rem', fontWeight: '700', color: '#ef4444', backgroundColor: '#fef2f2', border: '1px solid #fecaca', padding: '4px 8px', borderRadius: '4px' }}>{st}</span>
+                        )) : <span style={{ fontSize: '0.8rem', color: '#64748b' }}>Não especificado</span>}
+                      </div>
                       
                       <div style={{ marginTop: '24px' }}>
                         <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.75rem', fontWeight: '700', color: '#0f172a', marginBottom: '8px' }}>
