@@ -1183,7 +1183,7 @@ export default function QuotesClient({ quotes, customers, products }: { quotes: 
                     <span style={{ fontSize: '0.7rem', color: '#d97706', display: 'flex', gap: '4px', marginTop: '6px', fontWeight: '500' }}>Sem telefone, não será possível enviar mensagens via WhatsApp.</span>
                   </div>
 
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '12px' }}>
                     <div>
                       <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: '700', color: '#64748b', textTransform: 'uppercase', marginBottom: '8px' }}>CPF / CNPJ</label>
                       <input type="text" className="input" value={newCustomerData.document} onChange={e => setNewCustomerData({ ...newCustomerData, document: e.target.value })} placeholder="000.000.000-00" style={{ height: '48px', backgroundColor: '#f8fafc' }} />
@@ -1209,7 +1209,7 @@ export default function QuotesClient({ quotes, customers, products }: { quotes: 
                     <span style={{ fontSize: '0.85rem', fontWeight: '700', color: '#2563eb', textTransform: 'uppercase' }}>Endereço</span>
                   </div>
                   
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '12px', marginBottom: '12px' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '12px', marginBottom: '12px' }}>
                     <div>
                       <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: '700', color: '#64748b', textTransform: 'uppercase', marginBottom: '4px' }}>CEP</label>
                       <input type="text" className="input" value={newCustomerData.cep} onChange={e => setNewCustomerData({ ...newCustomerData, cep: e.target.value })} placeholder="00000-000" style={{ height: '40px', backgroundColor: '#f8fafc' }} />
@@ -1220,7 +1220,7 @@ export default function QuotesClient({ quotes, customers, products }: { quotes: 
                     </div>
                   </div>
                   
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '12px', marginBottom: '12px' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '12px', marginBottom: '12px' }}>
                     <div>
                       <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: '700', color: '#64748b', textTransform: 'uppercase', marginBottom: '4px' }}>Número</label>
                       <input type="text" className="input" value={newCustomerData.number} onChange={e => setNewCustomerData({ ...newCustomerData, number: e.target.value })} placeholder="123" style={{ height: '40px', backgroundColor: '#f8fafc' }} />
@@ -1231,7 +1231,7 @@ export default function QuotesClient({ quotes, customers, products }: { quotes: 
                     </div>
                   </div>
                   
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '12px' }}>
                     <div>
                       <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: '700', color: '#64748b', textTransform: 'uppercase', marginBottom: '4px' }}>Bairro</label>
                       <input type="text" className="input" value={newCustomerData.neighborhood} onChange={e => setNewCustomerData({ ...newCustomerData, neighborhood: e.target.value })} placeholder="Bairro" style={{ height: '40px', backgroundColor: '#f8fafc' }} />

@@ -402,7 +402,7 @@ export default function CustomerClient({ customers }: { customers: any[] }) {
                       <input required className="input" style={{ paddingLeft: '34px' }} placeholder="Nome Completo" value={name} onChange={e => setName(e.target.value)} />
                     </div>
                   </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '12px' }}>
                     <div>
                       <Label>CPF / CNPJ</Label>
                       <input className="input" placeholder="000.000.000-00" value={document}
@@ -453,7 +453,7 @@ export default function CustomerClient({ customers }: { customers: any[] }) {
 
                 {/* ── Endereço ── */}
                 <Section icon={<MapPin size={16} />} iconBg="rgba(59,130,246,0.1)" iconColor="#3b82f6" title="Endereço Principal">
-                  <div style={{ display: 'grid', gridTemplateColumns: '160px 1fr', gap: '12px' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '12px' }}>
                     <div>
                       <Label>CEP</Label>
                       <input className="input" placeholder="00000-000" value={cep}
@@ -465,7 +465,7 @@ export default function CustomerClient({ customers }: { customers: any[] }) {
                       <input className="input" placeholder="Rua, Avenida..." value={street} onChange={e => setStreet(e.target.value)} />
                     </div>
                   </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: '120px 1fr', gap: '12px' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '12px' }}>
                     <div>
                       <Label>NÚMERO</Label>
                       <input className="input" placeholder="123" value={addrNumber} onChange={e => setAddrNumber(e.target.value)} />
