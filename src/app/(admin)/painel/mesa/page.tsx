@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import prisma from '@/lib/prisma';
 import MesaBoard from './MesaBoard';
 
@@ -62,3 +63,4 @@ async function MesaData() {
 
   return <MesaBoard cards={cards} />;
 }
+

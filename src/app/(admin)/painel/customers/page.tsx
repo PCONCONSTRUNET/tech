@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import CustomerClient from './CustomerClient'
 import { getCustomers } from '@/actions/customer'
 
@@ -8,3 +9,4 @@ export default async function CustomersPage() {
   
   return <CustomerClient customers={customers} />
 }
+

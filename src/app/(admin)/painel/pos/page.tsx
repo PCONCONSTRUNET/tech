@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import POSClient from './POSClient'
 import { getProducts } from '@/actions/product'
 
@@ -8,3 +9,4 @@ export default async function POSPage() {
   
   return <POSClient products={products} />
 }
+

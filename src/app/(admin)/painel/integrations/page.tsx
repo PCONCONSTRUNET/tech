@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { getSettings } from '@/actions/settings'
 import { getTemplates } from '@/actions/whatsapp-templates'
 import { getGateways } from '@/actions/gateways'
@@ -14,3 +15,4 @@ export default async function IntegrationsPage() {
   
   return <IntegrationsClient initialSettings={settings} initialTemplates={templates} initialGateways={gateways} />
 }
+

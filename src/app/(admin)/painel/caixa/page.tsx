@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { getOpenSession, getClosedSessions } from '@/actions/caixa'
 import CaixaClient from './CaixaClient'
 
@@ -8,3 +9,4 @@ export default async function CaixaPage() {
   ])
   return <CaixaClient openSession={openSession} closedSessions={closedSessions} />
 }
+

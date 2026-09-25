@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { getSuppliers } from '@/actions/supplier'
 import SupplierClient from './SupplierClient'
 
@@ -8,3 +9,4 @@ export default async function SuppliersPage() {
 
   return <SupplierClient suppliers={suppliers} />
 }
+

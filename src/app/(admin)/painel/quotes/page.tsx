@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { getQuotes } from '@/actions/quote'
 import prisma from '@/lib/prisma'
 import QuotesClient from './QuotesClient'
@@ -14,3 +15,4 @@ export default async function QuotesPage() {
 
   return <QuotesClient quotes={quotes} customers={customers} products={products} />
 }
+

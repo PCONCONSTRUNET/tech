@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import CouponClient from './CouponClient'
 import { getCoupons } from '@/actions/coupon'
 
@@ -8,3 +9,4 @@ export default async function CouponsPage() {
   
   return <CouponClient coupons={coupons} />
 }
+

@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import OSClient from './OSClient'
 import { getServiceOrders } from '@/actions/os'
 import { getCustomers } from '@/actions/customer'
@@ -12,3 +13,4 @@ export default async function OSPage() {
   
   return <OSClient serviceOrders={serviceOrders} customers={customers} services={services} />
 }
+
