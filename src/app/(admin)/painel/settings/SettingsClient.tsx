@@ -1,7 +1,7 @@
 
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Save, Copy, Check } from 'lucide-react'
 import { maskCPFOrCNPJ, maskCEP, maskPhone } from '@/lib/masks'
 import { updateSettings } from '@/actions/settings'
@@ -24,6 +24,24 @@ export default function SettingsClient({ initialSettings }: { initialSettings: a
     warrantyTerm: initialSettings?.warrantyTerm || 'Garantia de 90 dias para serviços executados...',
     hours: initialSettings?.hours || ''
   })
+
+  useEffect(() => {
+    if (initialSettings) {
+      setFormData({
+        storeName: initialSettings.storeName || 'Digital Tech',
+        fiscalData: initialSettings.fiscalData || '',
+        whatsapp: initialSettings.whatsapp || '',
+        cep: initialSettings.cep || '',
+        neighborhood: initialSettings.neighborhood || '',
+        street: initialSettings.street || '',
+        number: initialSettings.number || '',
+        city: initialSettings.city || '',
+        state: initialSettings.state || '',
+        warrantyTerm: initialSettings.warrantyTerm || 'Garantia de 90 dias para serviços executados...',
+        hours: initialSettings.hours || ''
+      })
+    }
+  }, [initialSettings])
 
   function handleChange(field: string, value: string) {
     setFormData(prev => ({ ...prev, [field]: value }))
