@@ -172,11 +172,23 @@ export default function QuotesClient({ quotes, customers, products }: { quotes: 
   const [isAddingCustomService, setIsAddingCustomService] = useState(false)
   const [customServiceName, setCustomServiceName] = useState('')
   const [customServicePrice, setCustomServicePrice] = useState('')
+
+  const [isAddingCustomPart, setIsAddingCustomPart] = useState(false)
+  const [customPartName, setCustomPartName] = useState('')
+  const [customPartCostPrice, setCustomPartCostPrice] = useState('')
+  const [customPartSalePrice, setCustomPartSalePrice] = useState('')
+  const [customPartSupplier, setCustomPartSupplier] = useState('')
+  const [customPartMargin, setCustomPartMargin] = useState('50')
   const [createdQuote, setCreatedQuote] = useState<any>(null)
 
   const totalServicesPrice = selectedServiceIds.reduce((sum, id) => {
     const srv = servicesList.find(s => s.id === id)
     return sum + (srv ? srv.price : 0)
+  }, 0)
+
+  const totalPartsCost = selectedServiceIds.reduce((sum, id) => {
+    const srv = servicesList.find(s => s.id === id)
+    return sum + (srv?.type === 'PART' ? (srv.costPrice || 0) : 0)
   }, 0)
 
   console.log("QuotesClient rendered, lockType:", lockType, "physicalChecklist:", physicalChecklist)
@@ -298,7 +310,10 @@ export default function QuotesClient({ quotes, customers, products }: { quotes: 
       return {
         name: srv ? srv.name : 'Serviço',
         quantity: 1,
-        price: srv ? srv.price : 0
+        price: srv ? srv.price : 0,
+        costPrice: srv?.costPrice || null,
+        type: srv?.type || 'SERVICE',
+        supplierName: srv?.supplierName || null
       };
     });
     
@@ -976,7 +991,12 @@ export default function QuotesClient({ quotes, customers, products }: { quotes: 
                             }}>
                               <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                                 <input type="checkbox" checked={isSelected} readOnly style={{ width: '16px', height: '16px', accentColor: '#2563eb', pointerEvents: 'none' }} />
-                                <span style={{ fontSize: '0.85rem', fontWeight: '500', color: '#334155' }}>{srv.name}</span>
+                                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                  <span style={{ fontSize: '0.85rem', fontWeight: '500', color: '#334155' }}>{srv.name}</span>
+                                  {srv.type === 'PART' && srv.supplierName && (
+                                    <span style={{ fontSize: '0.65rem', color: '#64748b' }}>Fornecedor: {srv.supplierName} (Custo: {fmt(srv.costPrice || 0)})</span>
+                                  )}
+                                </div>
                               </div>
                               <span style={{ fontSize: '0.85rem', fontWeight: '700', color: '#0f172a' }}>{fmt(srv.price)}</span>
                             </div>
@@ -1005,6 +1025,61 @@ export default function QuotesClient({ quotes, customers, products }: { quotes: 
                             <Plus size={16} /> Adicionar Serviço Personalizado
                           </button>
                         )}
+                        
+                        {isAddingCustomPart ? (
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', padding: '12px', border: '1px solid #cbd5e1', borderRadius: '8px', backgroundColor: '#f8fafc', marginTop: '8px' }}>
+                            <div style={{ fontSize: '0.75rem', fontWeight: '700', color: '#64748b', textTransform: 'uppercase' }}>Nova Peça Avulsa</div>
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                              <input type="text" placeholder="Nome da Peça (ex: Tela iPhone 11)" className="input" value={customPartName} onChange={e => setCustomPartName(e.target.value)} style={{ height: '36px' }} />
+                              <input type="text" placeholder="Fornecedor" className="input" value={customPartSupplier} onChange={e => setCustomPartSupplier(e.target.value)} style={{ height: '36px' }} />
+                            </div>
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px', alignItems: 'center' }}>
+                              <div>
+                                <label style={{ fontSize: '0.65rem', fontWeight: '700', color: '#94a3b8', textTransform: 'uppercase' }}>Custo (R$)</label>
+                                <input type="number" placeholder="Custo" className="input" value={customPartCostPrice} onChange={e => {
+                                  setCustomPartCostPrice(e.target.value);
+                                  const cost = Number(e.target.value.replace(',', '.')) || 0;
+                                  const margin = Number(customPartMargin) || 0;
+                                  setCustomPartSalePrice((cost + (cost * margin / 100)).toFixed(2));
+                                }} style={{ height: '36px', width: '100%' }} />
+                              </div>
+                              <div>
+                                <label style={{ fontSize: '0.65rem', fontWeight: '700', color: '#94a3b8', textTransform: 'uppercase' }}>Margem (%)</label>
+                                <input type="number" placeholder="%" className="input" value={customPartMargin} onChange={e => {
+                                  setCustomPartMargin(e.target.value);
+                                  const cost = Number(customPartCostPrice.replace(',', '.')) || 0;
+                                  const margin = Number(e.target.value) || 0;
+                                  setCustomPartSalePrice((cost + (cost * margin / 100)).toFixed(2));
+                                }} style={{ height: '36px', width: '100%' }} />
+                              </div>
+                              <div>
+                                <label style={{ fontSize: '0.65rem', fontWeight: '700', color: '#94a3b8', textTransform: 'uppercase' }}>Venda (R$)</label>
+                                <input type="number" placeholder="Venda" className="input" value={customPartSalePrice} onChange={e => setCustomPartSalePrice(e.target.value)} style={{ height: '36px', width: '100%' }} />
+                              </div>
+                            </div>
+                            <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end', marginTop: '4px' }}>
+                              <button type="button" onClick={() => setIsAddingCustomPart(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748b', fontSize: '0.8rem', fontWeight: '600' }}>Cancelar</button>
+                              <button type="button" onClick={() => {
+                                if (customPartName && customPartSalePrice) {
+                                  const newId = Math.random().toString(36).substr(2, 9);
+                                  const priceVal = Number(customPartSalePrice.replace(',', '.')) || 0;
+                                  const costVal = Number(customPartCostPrice.replace(',', '.')) || 0;
+                                  setServicesList(prev => [...prev, { id: newId, name: customPartName, price: priceVal, costPrice: costVal, supplierName: customPartSupplier, type: 'PART' }]);
+                                  setSelectedServiceIds(prev => [...prev, newId]);
+                                  setCustomPartName('');
+                                  setCustomPartCostPrice('');
+                                  setCustomPartSalePrice('');
+                                  setCustomPartSupplier('');
+                                  setIsAddingCustomPart(false);
+                                }
+                              }} style={{ padding: '6px 16px', backgroundColor: '#10b981', color: 'white', border: 'none', borderRadius: '6px', fontWeight: '600', cursor: 'pointer', fontSize: '0.8rem' }}>Adicionar Peça</button>
+                            </div>
+                          </div>
+                        ) : (
+                          <button type="button" onClick={() => setIsAddingCustomPart(true)} style={{ padding: '12px', border: '1px dashed #cbd5e1', borderRadius: '8px', backgroundColor: 'transparent', color: '#10b981', fontSize: '0.8rem', fontWeight: '600', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', marginTop: '8px' }}>
+                            <Plus size={16} /> Adicionar Peça Avulsa
+                          </button>
+                        )}
                       </div>
                     </div>
                     
@@ -1012,7 +1087,7 @@ export default function QuotesClient({ quotes, customers, products }: { quotes: 
                       <div className="card" style={{ padding: '20px', backgroundColor: '#ecfdf5', borderColor: '#a7f3d0' }}>
                         <div style={{ fontSize: '0.7rem', fontWeight: '700', color: '#64748b', textTransform: 'uppercase', marginBottom: '8px' }}>TOTAL PREVISTO</div>
                         <div style={{ fontSize: '1.6rem', fontWeight: '900', color: '#0f172a' }}>{fmt(totalServicesPrice)}</div>
-                        <div style={{ fontSize: '0.75rem', fontWeight: '700', color: '#059669', marginTop: '8px' }}>Lucro Estimado: {fmt(totalServicesPrice)}</div>
+                        <div style={{ fontSize: '0.75rem', fontWeight: '700', color: '#059669', marginTop: '8px' }}>Lucro Estimado: {fmt(totalServicesPrice - totalPartsCost)}</div>
                       </div>
 
                       <div className="card" style={{ padding: '16px' }}>
@@ -1115,11 +1190,11 @@ export default function QuotesClient({ quotes, customers, products }: { quotes: 
                     </div>
                     <div>
                       <div style={{ fontSize: '0.65rem', fontWeight: '700', color: '#94a3b8', textTransform: 'uppercase', marginBottom: '4px' }}>Custo Peças</div>
-                      <div style={{ fontSize: '1.4rem', fontWeight: '900', color: '#ef4444' }}>R$ 0,00</div>
+                      <div style={{ fontSize: '1.4rem', fontWeight: '900', color: '#ef4444' }}>{fmt(totalPartsCost)}</div>
                     </div>
                     <div>
                       <div style={{ fontSize: '0.65rem', fontWeight: '700', color: '#94a3b8', textTransform: 'uppercase', marginBottom: '4px' }}>Lucro Estimado</div>
-                      <div style={{ fontSize: '1.4rem', fontWeight: '900', color: '#10b981' }}>{fmt(totalServicesPrice)}</div>
+                      <div style={{ fontSize: '1.4rem', fontWeight: '900', color: '#10b981' }}>{fmt(totalServicesPrice - totalPartsCost)}</div>
                     </div>
                   </div>
                   

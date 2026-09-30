@@ -208,7 +208,10 @@ model QuoteItem {
   product   Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
   name      String
   quantity  Int
-  price     Float
+  price        Float
+  costPrice    Float?   // Custo da peça na cotação
+  type         String   @default("PRODUCT") // PRODUCT, SERVICE, PART
+  supplierName String?
 }
 
 model Coupon {
@@ -289,7 +292,10 @@ model ServiceOrderItem {
   product        Product?     @relation(fields: [productId], references: [id], onDelete: SetNull)
   name           String       @default("Serviço")
   quantity       Int
-  price          Float        // Preço na hora da OS
+  price          Float        // Preço de venda na hora da OS
+  costPrice      Float?       // Preço de custo (para calcular lucro/margem)
+  type           String       @default("SERVICE") // SERVICE, PART
+  supplierName   String?      // Fornecedor para peças avulsas
 }
 
 model StockMovement {
