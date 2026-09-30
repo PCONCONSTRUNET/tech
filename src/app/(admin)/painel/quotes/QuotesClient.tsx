@@ -326,7 +326,10 @@ export default function QuotesClient({ quotes, customers, products }: { quotes: 
       items.push({
         name: 'Orçamento de Reparo',
         quantity: 1,
-        price: totalAmount
+        price: totalAmount,
+        costPrice: null,
+        type: 'SERVICE',
+        supplierName: null
       });
     }
 
