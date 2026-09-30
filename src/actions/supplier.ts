@@ -54,3 +54,39 @@ export async function deleteSupplier(id: string) {
     return { error: 'Erro ao excluir fornecedor (pode estar vinculado a produtos)' }
   }
 }
+
+export async function updateSupplier(id: string, formData: FormData) {
+  const name = formData.get('name') as string
+  const document = formData.get('document') as string
+  const phone = formData.get('phone') as string
+  const cep = formData.get('cep') as string
+  const street = formData.get('street') as string
+  const number = formData.get('number') as string
+  const neighborhood = formData.get('neighborhood') as string
+  const city = formData.get('city') as string
+  const state = formData.get('state') as string
+
+  if (!name) return { error: 'Nome é obrigatório' }
+
+  try {
+    await prisma.supplier.update({
+      where: { id },
+      data: {
+        name,
+        document,
+        phone,
+        cep,
+        street,
+        number,
+        neighborhood,
+        city,
+        state
+      }
+    })
+    revalidatePath('/painel', 'layout')
+    return { success: true }
+  } catch (error) {
+    return { error: 'Erro ao atualizar fornecedor' }
+  }
+}
+
