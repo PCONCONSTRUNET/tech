@@ -13,6 +13,7 @@ export default async function QuotesPage() {
     orderBy: { name: 'asc' } 
   })
 
-  return <QuotesClient quotes={quotes} customers={customers} products={products} />
+  const suppliers = await prisma.supplier.findMany({ orderBy: { name: 'asc' } })
+  return <QuotesClient quotes={quotes} customers={customers} products={products} suppliers={suppliers} />
 }
 

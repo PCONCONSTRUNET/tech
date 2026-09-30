@@ -126,7 +126,7 @@ const PAGE_SIZE = 15
 
 type Tab = 'todas' | 'andamento' | 'finalizadas' | 'interrompidas'
 
-export default function QuotesClient({ quotes, customers, products }: { quotes: any[]; customers: any[]; products: any[] }) {
+export default function QuotesClient({ quotes, customers, products, suppliers = [] }: { quotes: any[]; customers: any[]; products: any[]; suppliers?: any[] }) {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [modalStep, setModalStep] = useState(1)
   const [search, setSearch] = useState('')
@@ -1034,7 +1034,14 @@ export default function QuotesClient({ quotes, customers, products }: { quotes: 
                             <div style={{ fontSize: '0.75rem', fontWeight: '700', color: '#64748b', textTransform: 'uppercase' }}>Nova Peça Avulsa</div>
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
                               <input type="text" placeholder="Nome da Peça (ex: Tela iPhone 11)" className="input" value={customPartName} onChange={e => setCustomPartName(e.target.value)} style={{ height: '36px' }} />
-                              <input type="text" placeholder="Fornecedor" className="input" value={customPartSupplier} onChange={e => setCustomPartSupplier(e.target.value)} style={{ height: '36px' }} />
+                              <div>
+                                <input type="text" placeholder="Fornecedor (digite ou selecione)" className="input" value={customPartSupplier} onChange={e => setCustomPartSupplier(e.target.value)} style={{ height: '36px', width: '100%' }} list="suppliers-list" />
+                                <datalist id="suppliers-list">
+                                  {suppliers.map((s: any) => (
+                                    <option key={s.id} value={s.name} />
+                                  ))}
+                                </datalist>
+                              </div>
                             </div>
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px', alignItems: 'center' }}>
                               <div>
