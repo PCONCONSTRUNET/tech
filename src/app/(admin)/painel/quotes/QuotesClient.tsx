@@ -156,13 +156,13 @@ export default function QuotesClient({ quotes, customers, products }: { quotes: 
 
   // Services State
   const dbServices = products.filter((p: any) => p.type === 'SERVICE')
-  const [servicesList, setServicesList] = useState(
+  const [servicesList, setServicesList] = useState<any[]>(
     dbServices.length > 0 
-      ? dbServices.map((s: any) => ({ id: s.id, name: s.name, price: Number(s.salePrice) || 0 }))
+      ? dbServices.map((s: any) => ({ id: s.id, name: s.name, price: Number(s.salePrice) || 0, type: s.type || 'SERVICE', costPrice: Number(s.costPrice) || 0, supplierName: s.supplier?.name || null }))
       : [
-          { id: '1', name: 'Troca de Tela', price: 150 },
-          { id: '2', name: 'Troca de Bateria', price: 80 },
-          { id: '3', name: 'Reparo de Placa', price: 200 }
+          { id: '1', name: 'Troca de Tela', price: 150, type: 'SERVICE' },
+          { id: '2', name: 'Troca de Bateria', price: 80, type: 'SERVICE' },
+          { id: '3', name: 'Reparo de Placa', price: 200, type: 'SERVICE' }
         ]
   )
   const [selectedServiceIds, setSelectedServiceIds] = useState<string[]>([])
