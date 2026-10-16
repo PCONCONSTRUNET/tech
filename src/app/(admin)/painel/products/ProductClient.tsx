@@ -435,7 +435,7 @@ export default function ProductClient({
                   </div>
                   <div>
                     <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.875rem', fontWeight: '500' }}>Estoque atual</label>
-                    <input type="text" className="input" value={`${editingProduct.stock} un`} disabled style={{ opacity: 0.6 }} />
+                    <input name="stock" type="number" min="0" className="input" defaultValue={editingProduct.stock} />
                   </div>
                 </div>
               )}

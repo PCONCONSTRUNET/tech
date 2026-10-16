@@ -142,6 +142,7 @@ export async function updateProduct(formData: FormData) {
   const categoryName = formData.get('category') as string
   const showOnVitrine = formData.get('showOnVitrine') === 'true'
   const photos = formData.get('photos') as string || null
+  const stock = parseInt(formData.get('stock') as string || '0', 10)
 
   if (!id) return { error: 'ID do produto inválido' }
   if (!name) return { error: 'O nome é obrigatório' }
@@ -158,7 +159,7 @@ export async function updateProduct(formData: FormData) {
 
     await prisma.product.update({
       where: { id },
-      data: { name, sku, salePrice, costPrice, ncm, description, categoryId, showOnVitrine, photos }
+      data: { name, sku, salePrice, costPrice, ncm, description, categoryId, showOnVitrine, photos, stock }
     })
 
     revalidatePath('/painel', 'layout')
