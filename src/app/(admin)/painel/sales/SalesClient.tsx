@@ -4,8 +4,9 @@ import { useState } from 'react'
 import { ShoppingBag, Search, Eye, Filter, Store, MonitorSmartphone, Truck, CheckCircle, Clock, XCircle } from 'lucide-react'
 import { updateSaleStatus } from '@/actions/sale'
 import SaleActionsMenu from './SaleActionsMenu'
+import type { StoreInfo } from '@/lib/print-sale'
 
-export default function SalesClient({ sales }: { sales: any[] }) {
+export default function SalesClient({ sales, store }: { sales: any[], store?: StoreInfo }) {
   const [search, setSearch] = useState('')
   const [filter, setFilter] = useState('ALL') // ALL, LOJA_VIRTUAL, PDV
 
@@ -141,7 +142,7 @@ export default function SalesClient({ sales }: { sales: any[] }) {
                         <option value="CONCLUIDO">Concluído</option>
                         <option value="CANCELADO">Cancelado</option>
                       </select>
-                      <SaleActionsMenu sale={sale} />
+                      <SaleActionsMenu sale={sale} store={store} />
                     </div>
                   </td>
                 </tr>
@@ -207,7 +208,7 @@ export default function SalesClient({ sales }: { sales: any[] }) {
                   <option value="CONCLUIDO">Mudar para Concluído</option>
                   <option value="CANCELADO">Mudar para Cancelado</option>
                 </select>
-                <SaleActionsMenu sale={sale} />
+                <SaleActionsMenu sale={sale} store={store} />
               </div>
             </div>
           ))}

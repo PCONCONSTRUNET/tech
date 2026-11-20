@@ -26,7 +26,10 @@ const PAYMENT_LABELS: Record<string, string> = {
   PIX: 'PIX', CREDIT: 'Cartão de Crédito', DEBIT: 'Cartão de Débito', CASH: 'Dinheiro'
 }
 
-export function printSaleReceipt(sale: PrintSale, storeName = 'TechFix') {
+export type StoreInfo = { name?: string | null; whatsapp?: string | null; fiscalData?: string | null }
+
+export function printSaleReceipt(sale: PrintSale, store: StoreInfo = {}) {
+  const storeName = store.name || "Digitech Mobile's & Digital Security's"
   const subtotal = sale.items.reduce((acc, i) => acc + i.price * i.quantity, 0)
 
   const items = sale.items.map(i => {
@@ -57,6 +60,8 @@ export function printSaleReceipt(sale: PrintSale, storeName = 'TechFix') {
 <body>
   <div class="title">${esc(storeName)}</div>
   <div class="sub">RECIBO DE VENDA</div>
+  ${store.fiscalData ? `<div class="sub">${esc(store.fiscalData)}</div>` : ''}
+  ${store.whatsapp ? `<div class="sub">Tel: ${esc(store.whatsapp)}</div>` : ''}
   <hr class="divider">
   <div class="row"><span class="bold">Pedido:</span><span class="bold">#${sale.id.slice(-6).toUpperCase()}</span></div>
   <div>${fmtDate(sale.createdAt)}</div>
