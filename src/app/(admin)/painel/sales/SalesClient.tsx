@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { ShoppingBag, Search, Eye, Filter, Store, MonitorSmartphone, Truck, CheckCircle, Clock, XCircle } from 'lucide-react'
 import { updateSaleStatus } from '@/actions/sale'
+import SaleActionsMenu from './SaleActionsMenu'
 
 export default function SalesClient({ sales }: { sales: any[] }) {
   const [search, setSearch] = useState('')
@@ -140,6 +141,7 @@ export default function SalesClient({ sales }: { sales: any[] }) {
                         <option value="CONCLUIDO">Concluído</option>
                         <option value="CANCELADO">Cancelado</option>
                       </select>
+                      <SaleActionsMenu sale={sale} />
                     </div>
                   </td>
                 </tr>
@@ -205,6 +207,7 @@ export default function SalesClient({ sales }: { sales: any[] }) {
                   <option value="CONCLUIDO">Mudar para Concluído</option>
                   <option value="CANCELADO">Mudar para Cancelado</option>
                 </select>
+                <SaleActionsMenu sale={sale} />
               </div>
             </div>
           ))}
