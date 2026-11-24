@@ -67,6 +67,7 @@ export default function OSDetailsModal({ os, osNumber, onClose, isQuote = false 
         else {
           alert('Excluído com sucesso!');
           onClose();
+          router.refresh();
         }
       })
     }

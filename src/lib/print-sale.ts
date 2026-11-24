@@ -1,4 +1,4 @@
-/* print-sale.ts – Recibo de venda para impressora térmica 58 mm (POS-5890U) */
+/* print-sale.ts – Recibo de venda para impressora térmica 48 mm (bobina 58 mm / POS-5890U) */
 
 export type PrintSale = {
   id: string
@@ -23,7 +23,11 @@ const fmtDate = (d: string | Date) =>
   })
 
 const PAYMENT_LABELS: Record<string, string> = {
-  PIX: 'PIX', CREDIT: 'Cartão de Crédito', DEBIT: 'Cartão de Débito', CASH: 'Dinheiro'
+  PIX: 'PIX',
+  CREDIT: 'Cartão de Crédito',
+  DEBIT: 'Cartão de Débito',
+  CASH: 'Dinheiro',
+  A_COMBINAR: 'A Combinar',
 }
 
 export type StoreInfo = { name?: string | null; whatsapp?: string | null; fiscalData?: string | null }
@@ -45,16 +49,18 @@ export function printSaleReceipt(sale: PrintSale, store: StoreInfo = {}) {
 <title>Recibo #${sale.id.slice(-6).toUpperCase()}</title>
 <style>
   *{margin:0;padding:0;box-sizing:border-box}
-  body{font-family:'Courier New',monospace;font-size:11px;width:58mm;margin:0 auto;padding:2mm;background:#fff;color:#000}
-  @media print{@page{margin:0;size:58mm auto}body{padding:2mm}}
+  body{font-family:'Courier New',monospace;font-size:10px;line-height:1.3;width:48mm;max-width:48mm;margin:0 auto;padding:1.5mm 1mm;background:#fff;color:#000;overflow-wrap:anywhere;word-break:break-word}
+  @media print{@page{margin:0;size:48mm auto}html,body{width:48mm;max-width:48mm;margin:0;padding:1.5mm 1mm}}
   .center{text-align:center}
   .bold{font-weight:bold}
-  .title{font-size:14px;font-weight:bold;text-align:center;margin-bottom:2px}
-  .sub{font-size:10px;text-align:center}
-  .divider{border:none;border-top:1px dashed #000;margin:5px 0}
-  .row{display:flex;justify-content:space-between;gap:4px;margin:2px 0}
+  .title{font-size:12px;font-weight:bold;text-align:center;margin-bottom:2px}
+  .sub{font-size:9px;text-align:center}
+  .divider{border:none;border-top:1px dashed #000;margin:4px 0}
+  .row{display:flex;justify-content:space-between;align-items:baseline;gap:4px;margin:2px 0;flex-wrap:wrap}
+  .row span:last-child{white-space:nowrap;text-align:right;margin-left:auto}
   .item{margin-top:3px;word-break:break-word}
-  .total{display:flex;justify-content:space-between;font-size:13px;font-weight:bold;margin:4px 0}
+  .total{display:flex;justify-content:space-between;align-items:baseline;gap:4px;font-size:11px;font-weight:bold;margin:4px 0}
+  .total span:last-child{white-space:nowrap;text-align:right;margin-left:auto}
 </style>
 </head>
 <body>
@@ -76,11 +82,11 @@ export function printSaleReceipt(sale: PrintSale, store: StoreInfo = {}) {
   <div class="row"><span>Pagamento</span><span>${esc(PAYMENT_LABELS[sale.paymentMethod] || sale.paymentMethod)}</span></div>
   <hr class="divider">
   <div class="sub">Obrigado pela preferência!</div>
-  <div style="height:12mm"></div>
+  <div style="height:10mm"></div>
 </body>
 </html>`
 
-  const win = window.open('', '_blank', 'width=400,height=700')
+  const win = window.open('', '_blank', 'width=360,height=700')
   if (!win) { alert('Permita pop-ups para imprimir'); return }
   win.document.write(html)
   win.document.close()

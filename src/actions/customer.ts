@@ -57,7 +57,10 @@ export async function deleteCustomer(id: string) {
     await prisma.customer.delete({ where: { id } })
     revalidatePath('/painel', 'layout')
     return { success: true }
-  } catch (error) {
+  } catch (error: any) {
+    if (error?.code === 'P2003') {
+      return { error: 'Este cliente possui ordens de serviço ou registros vinculados e não pode ser excluído.' }
+    }
     return { error: 'Erro ao excluir cliente' }
   }
 }

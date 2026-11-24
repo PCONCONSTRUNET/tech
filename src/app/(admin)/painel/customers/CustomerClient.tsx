@@ -164,7 +164,10 @@ export default function CustomerClient({ customers }: { customers: any[] }) {
   }
 
   async function handleDelete(id: string) {
-    if (confirm('Excluir este cliente?')) await deleteCustomer(id)
+    if (confirm('Excluir este cliente?')) {
+      const res = await deleteCustomer(id)
+      if (res?.error) alert(res.error)
+    }
   }
 
   return (

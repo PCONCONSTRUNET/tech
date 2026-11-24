@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useMemo, useRef } from 'react'
+import { useRouter } from 'next/navigation'
 import { Plus, Search, Trash2, X, FileText, SlidersHorizontal, Clock, AlertCircle, Eye, EyeOff, Wrench, Smartphone, CheckCircle, Phone, ChevronDown, Mail, Printer, Users } from 'lucide-react'
 import { createServiceOrder, deleteServiceOrder, updateServiceOrderStatus, sendOsPdfWhatsApp } from '@/actions/os'
 import { createCustomer } from '@/actions/customer'
@@ -129,6 +130,7 @@ const PAGE_SIZE = 15
 type Tab = 'todas' | 'andamento' | 'finalizadas' | 'interrompidas'
 
 export default function OSClient({ serviceOrders, customers, services = [] }: { serviceOrders: any[]; customers: any[]; services?: any[] }) {
+  const router = useRouter()
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [modalStep, setModalStep] = useState(1)
   const [search, setSearch] = useState('')
@@ -348,8 +350,13 @@ export default function OSClient({ serviceOrders, customers, services = [] }: { 
 
   async function confirmDelete() {
     if (deletingOsId) {
-      await deleteServiceOrder(deletingOsId)
+      const res = await deleteServiceOrder(deletingOsId)
       setDeletingOsId(null)
+      if (res?.error) {
+        alert(res.error)
+      } else {
+        router.refresh()
+      }
     }
   }
 

@@ -31,7 +31,10 @@ export default function ProductClient({
 
   async function handleDelete(id: string) {
     if (confirm('Tem certeza que deseja excluir este produto?')) {
-      await deleteProduct(id)
+      const res = await deleteProduct(id)
+      if (res && res.error) {
+        alert(res.error)
+      }
     }
   }
 

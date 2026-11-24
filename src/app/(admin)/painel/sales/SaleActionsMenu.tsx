@@ -1,10 +1,18 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { MoreVertical, Receipt } from 'lucide-react'
+import { MoreVertical, Receipt, Trash2 } from 'lucide-react'
 import { printSaleReceipt, type PrintSale, type StoreInfo } from '@/lib/print-sale'
 
-export default function SaleActionsMenu({ sale, store }: { sale: PrintSale, store?: StoreInfo }) {
+export default function SaleActionsMenu({
+  sale,
+  store,
+  onDelete
+}: {
+  sale: PrintSale
+  store?: StoreInfo
+  onDelete?: () => void
+}) {
   const [open, setOpen] = useState(false)
   const [pos, setPos] = useState({ top: 0, left: 0 })
   const btnRef = useRef<HTMLButtonElement>(null)
@@ -52,6 +60,17 @@ export default function SaleActionsMenu({ sale, store }: { sale: PrintSale, stor
           >
             <Receipt size={16} /> Emitir recibo
           </button>
+          {onDelete && (
+            <>
+              <div style={{ height: '1px', background: 'var(--color-border)', margin: '4px 0' }} />
+              <button
+                onClick={() => { setOpen(false); onDelete() }}
+                style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 12px', background: 'none', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '0.85rem', color: '#ef4444', textAlign: 'left', fontWeight: 500 }}
+              >
+                <Trash2 size={16} /> Excluir venda
+              </button>
+            </>
+          )}
         </div>
       )}
     </>

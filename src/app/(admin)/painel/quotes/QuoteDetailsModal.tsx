@@ -1,6 +1,12 @@
+'use client'
+
+import { useState, useTransition } from 'react'
+import { useRouter } from 'next/navigation'
 import { X, Edit2, CheckCircle, Calendar, Shield, Trash2, Phone, Printer, User, Smartphone, Lock, Package, Check, Mail, FileText, Wrench, AlertCircle, Clock, ChevronDown, Plus, Search, Copy } from 'lucide-react'
 import WhatsappIcon from '@/components/WhatsappIcon'
+import ConfirmModal from '@/components/ConfirmModal'
 import { sendOsPdfWhatsApp } from '@/actions/os'
+import { deleteQuote } from '@/actions/quote'
 
 const STATUS_LABEL: Record<string, string> = {
   RECEBIDO: 'Recebido',
@@ -27,7 +33,22 @@ const STATUS_COLOR: Record<string, { bg: string; color: string; border: string }
 const fmt = (val: number) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val)
 
 export default function QuoteDetailsModal({ quote, quoteNumber, onClose, isQuote = false }: { quote: any; quoteNumber: number; onClose: () => void; isQuote?: boolean }) {
+  const router = useRouter()
+  const [isPending, startTransition] = useTransition()
+  const [confirmOpen, setConfirmOpen] = useState(false)
   if (!quote) return null;
+
+  const handleDelete = () => {
+    startTransition(async () => {
+      const res = await deleteQuote(quote.id)
+      if (res?.error) {
+        alert(res.error)
+      } else {
+        onClose()
+        router.refresh()
+      }
+    })
+  }
 
   let parsedNotes: any = {};
   if (quote.notes) {
@@ -264,8 +285,8 @@ export default function QuoteDetailsModal({ quote, quoteNumber, onClose, isQuote
 
         {/* Footer Actions */}
         <div style={{ padding: '16px 24px', borderTop: '1px solid var(--color-border)', display: 'flex', gap: '12px', justifyContent: 'space-between', backgroundColor: '#f8fafc' }}>
-          <button onClick={() => { if(confirm('Excluir?')) {} }} style={{ padding: '10px 16px', backgroundColor: '#fef2f2', border: '1px solid #fecaca', borderRadius: '8px', color: '#ef4444', fontWeight: '600', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}>
-            <Trash2 size={16} /> Excluir
+          <button onClick={() => setConfirmOpen(true)} disabled={isPending} style={{ padding: '10px 16px', backgroundColor: '#fef2f2', border: '1px solid #fecaca', borderRadius: '8px', color: '#ef4444', fontWeight: '600', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '6px', cursor: isPending ? 'wait' : 'pointer', opacity: isPending ? 0.5 : 1 }}>
+            <Trash2 size={16} /> {isPending ? 'Excluindo...' : 'Excluir'}
           </button>
           
           <div style={{ display: 'flex', gap: '12px' }}>
@@ -306,6 +327,15 @@ export default function QuoteDetailsModal({ quote, quoteNumber, onClose, isQuote
         </div>
 
       </div>
+      <ConfirmModal
+        isOpen={confirmOpen}
+        onClose={() => setConfirmOpen(false)}
+        onConfirm={handleDelete}
+        title="Excluir Orçamento"
+        message={`Tem certeza que deseja excluir o orçamento #${quoteNumber}? Esta ação não pode ser desfeita.`}
+        confirmText="Sim, excluir"
+        isDestructive
+      />
     </div>
   )
 }

@@ -95,9 +95,10 @@ export default function SupplierClient({ suppliers }: { suppliers: any[] }) {
                         <Edit size={18} />
                       </button>
                       <button 
-                        onClick={() => {
+                        onClick={async () => {
                           if (confirm('Deseja excluir este fornecedor?')) {
-                            deleteSupplier(supplier.id)
+                            const res = await deleteSupplier(supplier.id)
+                            if (res?.error) alert(res.error)
                           }
                         }}
                         style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-error)' }}

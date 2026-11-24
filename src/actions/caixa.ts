@@ -2,6 +2,7 @@
 
 import prisma from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
+import { requireAuth } from '@/lib/auth-check'
 
 export async function getOpenSession() {
   try {
@@ -54,4 +55,29 @@ export async function addMovement(sessionId: string, type: string, amount: numbe
     revalidatePath('/painel', 'layout')
     return { success: true }
   } catch { return { error: 'Erro ao registrar movimentação' } }
+}
+
+export async function deleteCashMovement(id: string) {
+  try {
+    await requireAuth()
+    await prisma.cashMovement.delete({ where: { id } })
+    revalidatePath('/painel', 'layout')
+    return { success: true }
+  } catch (e: any) {
+    return { error: e?.message || 'Erro ao excluir movimentação' }
+  }
+}
+
+export async function deleteCashSession(id: string) {
+  try {
+    await requireAuth()
+    await prisma.$transaction(async (tx) => {
+      await tx.cashMovement.deleteMany({ where: { sessionId: id } })
+      await tx.cashSession.delete({ where: { id } })
+    })
+    revalidatePath('/painel', 'layout')
+    return { success: true }
+  } catch (e: any) {
+    return { error: e?.message || 'Erro ao excluir sessão de caixa' }
+  }
 }

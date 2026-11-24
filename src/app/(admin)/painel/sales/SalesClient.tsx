@@ -1,14 +1,20 @@
 'use client'
 
-import { useState } from 'react'
-import { ShoppingBag, Search, Eye, Filter, Store, MonitorSmartphone, Truck, CheckCircle, Clock, XCircle } from 'lucide-react'
-import { updateSaleStatus } from '@/actions/sale'
+import { useState, useTransition } from 'react'
+import { useRouter } from 'next/navigation'
+import { ShoppingBag, Search, Eye, Filter, Store, MonitorSmartphone, Truck, CheckCircle, Clock, XCircle, Trash2 } from 'lucide-react'
+import { deleteSale, updateSaleStatus } from '@/actions/sale'
+import ConfirmModal from '@/components/ConfirmModal'
 import SaleActionsMenu from './SaleActionsMenu'
 import type { StoreInfo } from '@/lib/print-sale'
 
 export default function SalesClient({ sales, store }: { sales: any[], store?: StoreInfo }) {
+  const router = useRouter()
+  const [isPending, startTransition] = useTransition()
   const [search, setSearch] = useState('')
   const [filter, setFilter] = useState('ALL') // ALL, LOJA_VIRTUAL, PDV
+  const [deletingSale, setDeletingSale] = useState<any>(null)
+  const [errorMsg, setErrorMsg] = useState<string | null>(null)
 
   const filteredSales = sales.filter(s => {
     const matchesSearch = s.id.toLowerCase().includes(search.toLowerCase()) || 
@@ -32,6 +38,20 @@ export default function SalesClient({ sales, store }: { sales: any[], store?: St
 
   const handleStatusChange = async (id: string, newStatus: string) => {
     await updateSaleStatus(id, newStatus)
+    router.refresh()
+  }
+
+  const handleConfirmDelete = () => {
+    if (!deletingSale) return
+    const saleId = deletingSale.id
+    startTransition(async () => {
+      const res = await deleteSale(saleId)
+      if (!res?.success) {
+        setErrorMsg(res?.error || 'Erro ao excluir venda')
+      } else {
+        router.refresh()
+      }
+    })
   }
 
   return (
@@ -142,7 +162,16 @@ export default function SalesClient({ sales, store }: { sales: any[], store?: St
                         <option value="CONCLUIDO">Concluído</option>
                         <option value="CANCELADO">Cancelado</option>
                       </select>
-                      <SaleActionsMenu sale={sale} store={store} />
+                      <button
+                        onClick={() => setDeletingSale(sale)}
+                        disabled={isPending}
+                        aria-label="Excluir venda"
+                        title="Excluir venda"
+                        style={{ background: 'none', border: '1px solid var(--color-border)', borderRadius: '8px', padding: '6px', cursor: isPending ? 'wait' : 'pointer', color: '#ef4444', display: 'flex', opacity: isPending ? 0.5 : 1 }}
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                      <SaleActionsMenu sale={sale} store={store} onDelete={() => setDeletingSale(sale)} />
                     </div>
                   </td>
                 </tr>
@@ -194,11 +223,11 @@ export default function SalesClient({ sales, store }: { sales: any[], store?: St
                 </span>
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                 <div>{getStatusBadge(sale.status)}</div>
                 <select 
                   className="input" 
-                  style={{ padding: '6px 8px', fontSize: '0.75rem', height: 'auto', flex: 1 }}
+                  style={{ padding: '6px 8px', fontSize: '0.75rem', height: 'auto', flex: 1, minWidth: '120px' }}
                   value={sale.status}
                   onChange={(e) => handleStatusChange(sale.id, e.target.value)}
                 >
@@ -208,7 +237,18 @@ export default function SalesClient({ sales, store }: { sales: any[], store?: St
                   <option value="CONCLUIDO">Mudar para Concluído</option>
                   <option value="CANCELADO">Mudar para Cancelado</option>
                 </select>
-                <SaleActionsMenu sale={sale} store={store} />
+                <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+                  <button
+                    onClick={() => setDeletingSale(sale)}
+                    disabled={isPending}
+                    aria-label="Excluir venda"
+                    title="Excluir venda"
+                    style={{ background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '8px', padding: '6px', cursor: isPending ? 'wait' : 'pointer', color: '#ef4444', display: 'flex', opacity: isPending ? 0.5 : 1 }}
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                  <SaleActionsMenu sale={sale} store={store} onDelete={() => setDeletingSale(sale)} />
+                </div>
               </div>
             </div>
           ))}
@@ -219,6 +259,25 @@ export default function SalesClient({ sales, store }: { sales: any[], store?: St
           )}
         </div>
       </div>
+
+      <ConfirmModal
+        isOpen={!!deletingSale}
+        onClose={() => setDeletingSale(null)}
+        onConfirm={handleConfirmDelete}
+        title="Excluir Venda"
+        message={deletingSale ? `Tem certeza que deseja excluir a venda #${deletingSale.id.slice(-6).toUpperCase()}? Esta ação não pode ser desfeita.` : ''}
+        confirmText="Sim, excluir"
+        isDestructive
+      />
+
+      <ConfirmModal
+        isOpen={!!errorMsg}
+        onClose={() => setErrorMsg(null)}
+        title="Erro ao excluir"
+        message={errorMsg || ''}
+        isDestructive
+        isAlert
+      />
     </div>
   )
 }

@@ -1,8 +1,10 @@
 'use client'
 
-import { useState } from 'react'
-import { Landmark, X, Plus, Minus, Clock, RefreshCw, ChevronRight } from 'lucide-react'
-import { openCashSession, closeCashSession, addMovement } from '@/actions/caixa'
+import { useState, useTransition } from 'react'
+import { useRouter } from 'next/navigation'
+import { Landmark, X, Plus, Minus, Clock, RefreshCw, ChevronRight, Trash2 } from 'lucide-react'
+import { openCashSession, closeCashSession, addMovement, deleteCashMovement, deleteCashSession } from '@/actions/caixa'
+import ConfirmModal from '@/components/ConfirmModal'
 
 const fmt = (v: number) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v)
 const fmtDate = (d: any) => new Date(d).toLocaleDateString('pt-BR', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' })
@@ -11,12 +13,30 @@ type Tab = 'atual' | 'historico'
 type Modal = 'suprimento' | 'sangria' | null
 
 export default function CaixaClient({ openSession, closedSessions }: { openSession: any; closedSessions: any[] }) {
+  const router = useRouter()
+  const [isPending, startTransition] = useTransition()
   const [tab, setTab]               = useState<Tab>('atual')
   const [modal, setModal]           = useState<Modal>(null)
   const [movValue, setMovValue]     = useState('')
   const [movDesc, setMovDesc]       = useState('')
   const [operator, setOperator]     = useState('Operador')
   const [initialAmt, setInitialAmt] = useState('')
+  const [deletingTarget, setDeletingTarget] = useState<{ kind: 'movement' | 'session'; id: string; title: string; message: string } | null>(null)
+
+  const handleConfirmDelete = () => {
+    if (!deletingTarget) return
+    const target = deletingTarget
+    startTransition(async () => {
+      const res = target.kind === 'movement'
+        ? await deleteCashMovement(target.id)
+        : await deleteCashSession(target.id)
+      if (res?.error) {
+        alert(res.error)
+      } else {
+        router.refresh()
+      }
+    })
+  }
 
   /* ── compute totals ── */
   const movements = openSession?.movements || []
@@ -217,7 +237,7 @@ export default function CaixaClient({ openSession, closedSessions }: { openSessi
                 ) : (
                   <table className="table">
                     <thead><tr style={{ backgroundColor: 'var(--color-bg)' }}>
-                      {['HORA','TIPO','MÉTODO','DESCRIÇÃO','VALOR'].map(h => (
+                      {['HORA','TIPO','MÉTODO','DESCRIÇÃO','VALOR','AÇÕES'].map(h => (
                         <th key={h} style={{ fontSize: '0.68rem', fontWeight: '700', letterSpacing: '0.07em' }}>{h}</th>
                       ))}
                     </tr></thead>
@@ -235,6 +255,21 @@ export default function CaixaClient({ openSession, closedSessions }: { openSessi
                             <td style={{ fontSize: '0.8rem' }}>{m.method || '—'}</td>
                             <td style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)' }}>{m.description || '—'}</td>
                             <td style={{ fontWeight: '700', color: isIn ? '#10b981' : '#ef4444' }}>{isIn ? '+' : '-'}{fmt(m.amount)}</td>
+                            <td>
+                              <button
+                                onClick={() => setDeletingTarget({
+                                  kind: 'movement',
+                                  id: m.id,
+                                  title: 'Excluir Movimentação',
+                                  message: `Tem certeza que deseja excluir esta movimentação (${m.type} de ${fmt(m.amount)})?`
+                                })}
+                                disabled={isPending}
+                                title="Excluir movimentação"
+                                style={{ background: 'none', border: 'none', cursor: isPending ? 'wait' : 'pointer', color: '#ef4444', padding: '4px', display: 'flex' }}
+                              >
+                                <Trash2 size={15} />
+                              </button>
+                            </td>
                           </tr>
                         )
                       })}
@@ -307,7 +342,7 @@ export default function CaixaClient({ openSession, closedSessions }: { openSessi
           ) : (
             <table className="table">
               <thead><tr style={{ backgroundColor: 'var(--color-bg)' }}>
-                {['ABERTURA','FECHAMENTO','OPERADOR','VALOR INICIAL','ENTRADAS','SAÍDAS','SALDO',''].map(h => (
+                {['ABERTURA','FECHAMENTO','OPERADOR','VALOR INICIAL','ENTRADAS','SAÍDAS','SALDO','STATUS','AÇÕES'].map(h => (
                   <th key={h} style={{ fontSize: '0.7rem', fontWeight: '700', letterSpacing: '0.06em' }}>{h}</th>
                 ))}
               </tr></thead>
@@ -317,7 +352,7 @@ export default function CaixaClient({ openSession, closedSessions }: { openSessi
                   const outs = s.movements.filter((m: any) => m.type === 'SANGRIA' || m.type === 'SAIDA').reduce((acc: number, m: any) => acc + m.amount, 0)
                   return (
                     <tr key={s.id}>
-                      <td style={{ fontSize: '0.78rem' }}>{fmtDate(s.openedAt)}</td>
+                      <td style={{ fontSize: '0.78rem' }}>{fmtDate(s.openedAt || s.createdAt)}</td>
                       <td style={{ fontSize: '0.78rem' }}>{s.closedAt ? fmtDate(s.closedAt) : '—'}</td>
                       <td style={{ fontWeight: '600', fontSize: '0.85rem' }}>{s.operatorName}</td>
                       <td>{fmt(s.initialAmount)}</td>
@@ -326,6 +361,21 @@ export default function CaixaClient({ openSession, closedSessions }: { openSessi
                       <td style={{ fontWeight: '800' }}>{fmt(s.initialAmount + ins - outs)}</td>
                       <td>
                         <span style={{ fontSize: '0.7rem', fontWeight: '700', backgroundColor: 'rgba(100,116,139,0.1)', color: '#64748b', padding: '3px 10px', borderRadius: '9999px' }}>Fechado</span>
+                      </td>
+                      <td>
+                        <button
+                          onClick={() => setDeletingTarget({
+                            kind: 'session',
+                            id: s.id,
+                            title: 'Excluir Caixa',
+                            message: `Tem certeza que deseja excluir este registro de caixa (${s.operatorName})?`
+                          })}
+                          disabled={isPending}
+                          title="Excluir sessão de caixa"
+                          style={{ background: 'none', border: 'none', cursor: isPending ? 'wait' : 'pointer', color: '#ef4444', padding: '4px', display: 'flex' }}
+                        >
+                          <Trash2 size={15} />
+                        </button>
                       </td>
                     </tr>
                   )
@@ -379,6 +429,15 @@ export default function CaixaClient({ openSession, closedSessions }: { openSessi
           </div>
         </div>
       )}
+      <ConfirmModal
+        isOpen={!!deletingTarget}
+        onClose={() => setDeletingTarget(null)}
+        onConfirm={handleConfirmDelete}
+        title={deletingTarget?.title || 'Confirmar Exclusão'}
+        message={deletingTarget?.message || ''}
+        confirmText="Sim, excluir"
+        isDestructive
+      />
     </>
   )
 }
